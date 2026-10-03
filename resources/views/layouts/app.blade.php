@@ -20,7 +20,7 @@
 
             <!-- Page Heading -->
             @isset($header)
-                <header class="bg-gradient-to-r from-white via-white to-secondary-100 border-b border-primary-100 shadow-sm">
+                <header class="bg-gradient-to-r from-white via-white to-secondary-100">
                     <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                         {{ $header }}
                     </div>

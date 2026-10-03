@@ -1,17 +1,17 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <h2 class="font-bold text-xl text-primary-900 leading-tight">
+        <div class="flex flex-row justify-between items-center w-full gap-2">
+            <h2 class="font-bold text-lg sm:text-xl text-primary-900 leading-tight truncate">
                 {{ __('Kelola Agenda Kegiatan') }}
             </h2>
-            <button x-data x-on:click.prevent="$dispatch('open-modal', 'create-activity')" class="inline-flex items-center px-4 py-2 bg-secondary-500 hover:bg-secondary-600 border border-transparent rounded-full font-bold text-xs text-primary-900 uppercase tracking-widest shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            <a href="{{ route('activities.create', ['date' => $dateFilter ?? '']) }}" class="shrink-0 inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 bg-secondary-500 hover:bg-secondary-600 border border-transparent rounded-full font-bold text-[10px] sm:text-xs text-primary-900 uppercase tracking-widest shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                 Tambah Agenda
-            </button>
+            </a>
         </div>
     </x-slot>
 
-    <div class="py-8" x-data="{ viewMode: 'list' }">
+    <div class="py-8" x-data="{ viewMode: '{{ request('view', 'list') }}' }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
             @if(session('success'))
@@ -23,6 +23,7 @@
             <!-- Filters -->
             <div class="mb-6 bg-white p-4 rounded-xl shadow-sm border border-primary-100 flex flex-col sm:flex-row gap-4 items-center justify-between">
                 <form action="{{ route('activities.index') }}" method="GET" class="w-full sm:w-auto flex flex-col sm:flex-row gap-2">
+                    <input type="hidden" name="view" id="view_input" value="{{ request('view', 'list') }}">
                     <input type="date" name="date" value="{{ $dateFilter }}" onchange="this.form.submit()" class="border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm">
                     <div class="relative w-full sm:w-64">
                         <input type="text" name="search" value="{{ $search }}" placeholder="Cari kegiatan..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm">
@@ -32,16 +33,23 @@
                             </svg>
                         </div>
                     </div>
+                    <select name="leader" onchange="this.form.submit()" class="border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500">
+                        <option value="">Semua Pimpinan</option>
+                        <option value="Bupati" {{ $leaderFilter == 'Bupati' ? 'selected' : '' }}>Bupati</option>
+                        <option value="Wakil Bupati" {{ $leaderFilter == 'Wakil Bupati' ? 'selected' : '' }}>Wakil Bupati</option>
+                        <option value="Sekda" {{ $leaderFilter == 'Sekda' ? 'selected' : '' }}>Sekda</option>
+                    </select>
                     <select name="status" onchange="this.form.submit()" class="border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500">
                         <option value="">Semua Status</option>
                         <option value="draft" {{ $statusFilter == 'draft' ? 'selected' : '' }}>Draft</option>
                         <option value="submitted" {{ $statusFilter == 'submitted' ? 'selected' : '' }}>Submitted</option>
                         <option value="revision" {{ $statusFilter == 'revision' ? 'selected' : '' }}>Revision</option>
                         <option value="approved" {{ $statusFilter == 'approved' ? 'selected' : '' }}>Approved</option>
+                        <option value="rejected" {{ $statusFilter == 'rejected' ? 'selected' : '' }}>Rejected</option>
                         <option value="cancelled" {{ $statusFilter == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
                     </select>
                     <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-md text-sm font-medium hover:bg-primary-700">Cari</button>
-                    @if($search || $statusFilter)
+                    @if($search || $leaderFilter || $statusFilter)
                         <a href="{{ route('activities.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50">Reset</a>
                     @endif
                 </form>
@@ -50,11 +58,11 @@
             <!-- View Mode Toggle -->
             <div class="mb-4 flex justify-end">
                 <div class="bg-gray-100 p-1 rounded-lg inline-flex shadow-inner">
-                    <button @click="viewMode = 'list'" :class="{'bg-white shadow text-primary-700': viewMode === 'list', 'text-gray-500 hover:text-gray-700': viewMode !== 'list'}" class="px-4 py-1.5 rounded-md text-sm font-bold transition-all flex items-center gap-2">
+                    <button @click="viewMode = 'list'; document.getElementById('view_input').value = 'list'; const u = new URL(window.location); u.searchParams.set('view', 'list'); window.history.replaceState({}, '', u);" :class="{'bg-white shadow text-primary-700': viewMode === 'list', 'text-gray-500 hover:text-gray-700': viewMode !== 'list'}" class="px-4 py-1.5 rounded-md text-sm font-bold transition-all flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
                         Grid View
                     </button>
-                    <button @click="viewMode = 'timeline'" :class="{'bg-white shadow text-primary-700': viewMode === 'timeline', 'text-gray-500 hover:text-gray-700': viewMode !== 'timeline'}" class="px-4 py-1.5 rounded-md text-sm font-bold transition-all flex items-center gap-2">
+                    <button @click="viewMode = 'timeline'; document.getElementById('view_input').value = 'timeline'; const u = new URL(window.location); u.searchParams.set('view', 'timeline'); window.history.replaceState({}, '', u);" :class="{'bg-white shadow text-primary-700': viewMode === 'timeline', 'text-gray-500 hover:text-gray-700': viewMode !== 'timeline'}" class="px-4 py-1.5 rounded-md text-sm font-bold transition-all flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H4a2 2 0 00-2 2v6a2 2 0 002 2h3a2 2 0 002-2zm0 0V9a2 2 0 012-2h3a2 2 0 012 2v10m-2 0h2a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4h4m-4 0v4m0-4v-4m0 0H9m1 0h4"></path></svg>
                         Timeline View
                     </button>
@@ -65,244 +73,173 @@
             <div x-show="viewMode === 'list'">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" x-data>
                 @forelse($activities as $activity)
-                    <div class="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-sm border border-primary-100 hover:shadow-md transition-all duration-300 overflow-hidden flex flex-col relative">
-                        <!-- Status Badge -->
-                        <div class="absolute top-0 right-0 m-3">
-                            @php
-                                $statusColors = [
-                                    'draft' => 'bg-gray-200 text-gray-800',
-                                    'submitted' => 'bg-blue-100 text-blue-800',
-                                    'revision' => 'bg-red-100 text-red-800',
-                                    'approved' => 'bg-primary-100 text-primary-800',
-                                    'cancelled' => 'bg-gray-800 text-white',
-                                ];
-                            @endphp
-                            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold {{ $statusColors[$activity->status] ?? 'bg-gray-100 text-gray-800' }}">
-                                {{ strtoupper($activity->status) }}
-                            </span>
-                        </div>
+                    <div class="bg-gradient-to-br from-teal-100 via-white to-yellow-100 rounded-2xl shadow-sm border border-teal-100 hover:shadow-xl hover:shadow-teal-500/20 hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col relative group">
+                        <!-- Top decorative bar -->
+                        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-400 to-secondary-500 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out z-20"></div>
 
-                        <div class="p-5 flex-grow">
-                            <div class="text-xs text-primary-600 font-bold mb-1">
-                                {{ \Carbon\Carbon::parse($activity->activity_date)->translatedFormat('l, d M Y') }} | {{ \Carbon\Carbon::parse($activity->start_time)->format('H:i') }} - {{ $activity->end_time ? \Carbon\Carbon::parse($activity->end_time)->format('H:i') : 'Selesai' }}
-                            </div>
-                            <h3 class="text-md font-bold text-gray-900 leading-tight mb-2 pr-16 line-clamp-2">{{ $activity->title }}</h3>
-                            
-                            <div class="space-y-1.5 mt-3">
-                                <div class="flex items-start text-xs text-gray-600">
-                                    <svg class="w-3.5 h-3.5 mr-1.5 mt-0.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                                    <span class="line-clamp-1">{{ $activity->location_text ?: 'Lokasi tidak diset' }}</span>
+
+                        <div class="p-6 flex-grow">
+                            <!-- Role & Date Info -->
+                            <div class="flex flex-wrap items-center gap-2 mb-3">
+                                @if($leaderFilter)
+                                    @php
+                                        $isUtama = false;
+                                        if ($activity->leader) {
+                                            $isUtama = (strtolower($activity->leader->position) === strtolower($leaderFilter));
+                                        }
+                                    @endphp
+                                    @if($isUtama)
+                                        <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-gradient-to-r from-teal-600 to-emerald-500 text-white text-[10px] font-extrabold uppercase tracking-wider shadow-md shadow-teal-500/40 border border-teal-400/50">
+                                            <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                            Utama
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center px-2 py-1 rounded bg-yellow-100 text-yellow-800 text-[10px] font-bold uppercase tracking-wider shadow-sm border border-yellow-200">
+                                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                            Pendamping
+                                        </span>
+                                    @endif
+                                @endif
+                                <div class="flex items-center gap-2 text-xs text-primary-600 font-bold bg-primary-50 inline-flex px-3 py-1 rounded-full">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    <span>{{ \Carbon\Carbon::parse($activity->activity_date)->translatedFormat('l, d M') }}</span>
+                                    <span class="text-primary-300">•</span>
+                                    <span>{{ \Carbon\Carbon::parse($activity->start_time)->format('H:i') }} - {{ $activity->end_time ? \Carbon\Carbon::parse($activity->end_time)->format('H:i') : 'Selesai' }}</span>
                                 </div>
-                                <div class="flex items-start text-xs text-gray-600">
-                                    <svg class="w-3.5 h-3.5 mr-1.5 mt-0.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                                    <span class="line-clamp-1">PIC: {{ $activity->protocolOfficer?->name ?: '-' }}</span>
+                            </div>
+                            <a href="{{ route('activities.show', $activity->id) }}" class="block mt-4 mb-2">
+                                <h3 class="text-lg font-extrabold text-gray-900 leading-snug group-hover:text-primary-600 transition-colors pr-12 line-clamp-2">{{ $activity->title }}</h3>
+                            </a>
+                            
+                            <div class="flex items-center gap-2 mb-3">
+                                @if($activity->leader)
+                                    @php
+                                        $position = strtolower($activity->leader->position);
+                                        if (str_contains($position, 'wakil bupati')) {
+                                            $badgeClass = 'bg-purple-100 text-purple-800 border-purple-200';
+                                        } elseif (str_contains($position, 'bupati')) {
+                                            $badgeClass = 'bg-primary-100 text-primary-800 border-primary-200';
+                                        } elseif (str_contains($position, 'sekda') || str_contains($position, 'sekretaris daerah')) {
+                                            $badgeClass = 'bg-emerald-100 text-emerald-800 border-emerald-200';
+                                        } else {
+                                            $badgeClass = 'bg-slate-100 text-slate-800 border-slate-200';
+                                        }
+                                    @endphp
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border {{ $badgeClass }}">
+                                        {{ $activity->leader->position }}
+                                    </span>
+                                    <span class="text-sm font-bold text-gray-800">{{ $activity->leader->name }}</span>
+                                @endif
+
+                                @php
+                                    $dispositionStatus = null;
+                                    if ($activity->leader_id && $activity->relationLoaded('dispositions')) {
+                                        $leaderDisposition = $activity->dispositions->firstWhere('from_leader_id', $activity->leader_id);
+                                        if ($leaderDisposition) {
+                                            $dispositionStatus = $leaderDisposition->status;
+                                        }
+                                    }
+                                @endphp
+
+                                @if($dispositionStatus)
+                                    <span class="ml-auto inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border {{ $dispositionStatus === 'hadir' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : ($dispositionStatus === 'skip' ? 'bg-red-100 text-red-800 border-red-200' : 'bg-indigo-100 text-indigo-800 border-indigo-200') }}">
+                                        {{ $dispositionStatus }}
+                                    </span>
+                                @endif
+                            </div>
+                            
+                            <div class="space-y-3 mt-4 bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-teal-100/50">
+                                <!-- Lokasi -->
+                                <div class="flex items-start text-xs text-gray-700">
+                                    <div class="bg-white p-1.5 rounded-md shadow-sm border border-teal-50 mr-3 shrink-0">
+                                        <svg class="w-4 h-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                    </div>
+                                    <div class="flex-1 mt-0.5">
+                                        <div class="font-bold text-teal-800 mb-0.5">Lokasi</div>
+                                        <div class="line-clamp-2 leading-relaxed">{{ $activity->location_id ? $activity->location?->name : ($activity->location_text ?: '-') }}</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-3 border-t border-teal-100/50 pt-3">
+                                    <!-- Penyelenggara -->
+                                    <div class="text-xs">
+                                        <div class="font-bold text-teal-800 mb-0.5">Penyelenggara</div>
+                                        <div class="text-gray-700 truncate" title="{{ $activity->organization_id ? $activity->organization?->name : ($activity->organizer_text ?: '-') }}">{{ $activity->organization_id ? $activity->organization?->name : ($activity->organizer_text ?: '-') }}</div>
+                                    </div>
+                                    <!-- Pendamping -->
+                                    <div class="text-xs">
+                                        <div class="font-bold text-teal-800 mb-0.5">Pendamping</div>
+                                        <div class="text-gray-700 truncate" title="{{ $activity->companions->count() > 0 ? $activity->companions->pluck('name')->join(', ') : '-' }}">
+                                            @if($activity->companions->count() > 0)
+                                                {{ $activity->companions->pluck('name')->join(', ') }}
+                                            @else
+                                                -
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3 border-t border-teal-100/50 pt-3">
+                                    <!-- Narahubung -->
+                                    <div class="text-xs">
+                                        <div class="font-bold text-teal-800 mb-0.5">Narahubung</div>
+                                        <div class="text-gray-700 truncate">{{ $activity->contact_person_name ?: '-' }}</div>
+                                        @if($activity->contact_person_phone)
+                                            <div class="text-teal-600 font-medium mt-0.5"><a href="tel:{{ $activity->contact_person_phone }}" class="hover:underline">📞 {{ $activity->contact_person_phone }}</a></div>
+                                        @endif
+                                    </div>
+                                    <!-- Protokol -->
+                                    <div class="text-xs">
+                                        <div class="font-bold text-teal-800 mb-0.5">PIC Protokol</div>
+                                        <div class="text-gray-700 truncate">{{ $activity->protocolOfficer?->name ?: '-' }}</div>
+                                        @if($activity->protocolOfficer?->phone)
+                                            <div class="text-teal-600 font-medium mt-0.5"><a href="tel:{{ $activity->protocolOfficer->phone }}" class="hover:underline">📞 {{ $activity->protocolOfficer->phone }}</a></div>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         
                         @if($activity->status === 'revision' && !empty($activity->revision_notes))
-                            <div class="mx-5 mb-3 p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-800 shadow-sm relative">
-                                <span class="font-bold block mb-1 uppercase tracking-wide flex items-center gap-1">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                                    Catatan Revisi dari Kabag
+                            <div class="mx-6 mb-4 p-3 bg-red-50 border border-red-100 rounded-xl text-xs text-red-700 relative overflow-hidden">
+                                <div class="absolute top-0 left-0 w-1 h-full bg-red-400"></div>
+                                <span class="font-bold block mb-1 uppercase tracking-wide flex items-center gap-1.5 text-red-800">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                    Catatan Revisi
                                 </span>
-                                {{ $activity->revision_notes }}
+                                <p class="pl-6">{{ $activity->revision_notes }}</p>
                             </div>
                         @endif
                         
-                        <div class="px-5 py-3 bg-gray-50 border-t border-gray-100 flex justify-between items-center">
-                            <div>
-                                <button x-on:click.prevent="$dispatch('open-modal', 'status-activity-{{ $activity->id }}')" class="text-xs font-semibold text-primary-600 hover:text-primary-800">Ubah Status</button>
-                            </div>
-                            <div class="flex gap-3">
-                                <button x-on:click.prevent="$dispatch('open-modal', 'edit-activity-{{ $activity->id }}')" class="text-primary-600 hover:text-primary-800 font-medium text-xs">Edit</button>
+                        <div class="px-5 py-3.5 bg-white/50 backdrop-blur-sm border-t border-teal-100/50 flex flex-row justify-between items-center gap-2 group-hover:bg-white/70 transition-colors">
+                            <div class="flex flex-wrap items-center gap-2">
+                                @php
+                                    $statusStyles = [
+                                        'draft' => 'bg-gray-50 text-gray-700 ring-1 ring-inset ring-gray-600/10',
+                                        'submitted' => 'bg-yellow-50 text-yellow-700 ring-1 ring-inset ring-yellow-600/20',
+                                        'revision' => 'bg-orange-50 text-orange-700 ring-1 ring-inset ring-orange-600/20',
+                                        'approved' => 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20',
+                                        'rejected' => 'bg-red-50 text-red-700 ring-1 ring-inset ring-red-600/10',
+                                        'cancelled' => 'bg-slate-800 text-white ring-1 ring-inset ring-slate-900/10',
+                                    ];
+                                @endphp
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold shadow-sm {{ $statusStyles[$activity->status] ?? 'bg-gray-50 text-gray-700 ring-1 ring-inset ring-gray-600/10' }}">
+                                    {{ ucfirst($activity->status) }}
+                                </span>
+                            </div>                            <div class="flex items-center gap-3">
+                                <a href="{{ route('activities.edit', $activity->id) }}" class="p-1.5 inline-flex text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all" title="Edit">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                </a>
                                 <form action="{{ route('activities.destroy', $activity->id) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus agenda ini?');">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="text-red-500 hover:text-red-700 font-medium text-xs">Hapus</button>
+                                    <button type="submit" class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all" title="Hapus">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </button>
                                 </form>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Status Modal -->
-                    <x-modal name="status-activity-{{ $activity->id }}" focusable>
-                        <form method="post" action="{{ route('activities.update-status', $activity->id) }}" class="p-6" x-data="{ status: '{{ $activity->status }}' }">
-                            @csrf
-                            @method('PATCH')
-                            <h2 class="text-lg font-bold text-primary-900 mb-4 border-b pb-2">Ubah Status Agenda</h2>
-                            <div class="space-y-4">
-                                <div>
-                                    <x-input-label for="status_{{ $activity->id }}" value="Status" />
-                                    <select x-model="status" id="status_{{ $activity->id }}" name="status" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 font-medium">
-                                        <option value="draft">Draft (Petugas Input)</option>
-                                        <option value="submitted">Submitted (Kirim ke Kabag)</option>
-                                        <option value="revision">Revision (Revisi/Kembalikan)</option>
-                                        <option value="approved">Approved (Setujui)</option>
-                                        <option value="cancelled">Cancelled (Batalkan)</option>
-                                    </select>
-                                </div>
-                                <div x-show="status === 'revision' || status === 'cancelled'" x-transition>
-                                    <x-input-label for="revision_notes_{{ $activity->id }}" value="Catatan / Alasan" />
-                                    <textarea id="revision_notes_{{ $activity->id }}" name="revision_notes" rows="3" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500" placeholder="Mohon sertakan alasan spesifik...">{{ $activity->revision_notes }}</textarea>
-                                </div>
-                            </div>
-                            <div class="mt-6 flex justify-end gap-3">
-                                <button type="button" x-on:click="$dispatch('close')" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md font-semibold text-xs uppercase hover:bg-gray-300">Batal</button>
-                                <button type="submit" class="px-4 py-2 bg-secondary-500 text-primary-900 rounded-md font-bold text-xs uppercase hover:bg-secondary-600">Simpan Status</button>
-                            </div>
-                        </form>
-                    </x-modal>
-                    
-                    <!-- Edit Modal (Simplified for brevity, we will expand it) -->
-                    <x-modal name="edit-activity-{{ $activity->id }}" focusable maxWidth="2xl">
-                        <form method="post" action="{{ route('activities.update', $activity->id) }}" class="p-6">
-                            @csrf
-                            @method('PUT')
-                            <h2 class="text-lg font-bold text-primary-900 mb-4 border-b pb-2">Edit Agenda</h2>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="col-span-full">
-                                    <x-input-label value="Nama Kegiatan" />
-                                    <textarea name="title" rows="3" class="mt-1 block w-full border-gray-300 focus:border-primary-500 focus:ring-primary-500 rounded-md shadow-sm" required>{{ old('title', $activity->title) }}</textarea>
-                                </div>
-                                <div>
-                                    <x-input-label value="Tanggal" />
-                                    <x-text-input name="activity_date" type="date" class="mt-1 block w-full" :value="old('activity_date', $activity->activity_date?->format('Y-m-d'))" required />
-                                </div>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <div>
-                                        <x-input-label value="Mulai" />
-                                        <x-text-input name="start_time" type="time" class="mt-1 block w-full" :value="old('start_time', $activity->start_time?->format('H:i'))" required />
-                                    </div>
-                                    <div>
-                                        <x-input-label value="Selesai" />
-                                        <x-text-input name="end_time" type="time" class="mt-1 block w-full" :value="old('end_time', $activity->end_time?->format('H:i'))" />
-                                    </div>
-                                </div>
-                                <div class="col-span-full">
-                                    <x-input-label value="Penyelenggara" />
-                                    <x-text-input name="organizer_input" list="organizers_list" type="text" class="mt-1 block w-full" :value="old('organizer_input', $activity->organization_id ? $activity->organization?->name : $activity->organizer_text)" placeholder="Ketik nama penyelenggara..." />
-                                </div>
-                                <div class="col-span-full">
-                                    <x-input-label value="Lokasi" />
-                                    <x-text-input name="location_input" list="locations_list" type="text" class="mt-1 block w-full" :value="old('location_input', $activity->location_id ? $activity->location?->name : $activity->location_text)" placeholder="Ketik nama lokasi..." />
-                                </div>
-                                <div>
-                                    <x-input-label value="Pimpinan (Utama)" />
-                                    <select name="leader_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
-                                        <option value="">-- Pilih --</option>
-                                        @foreach($leaders as $ld)
-                                            <option value="{{ $ld->id }}" {{ old('leader_id', $activity->leader_id) == $ld->id ? 'selected' : '' }}>{{ $ld->name }} ({{ $ld->position }})</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div>
-                                    <x-input-label value="Pendamping" />
-                                    <div x-data="{
-                                        options: [
-                                            @foreach($leaders as $ld)
-                                                { value: '{{ $ld->id }}', text: '{{ addslashes($ld->name) }} ({{ addslashes($ld->position) }})' },
-                                            @endforeach
-                                        ],
-                                        selected: {{ json_encode(array_map('strval', old('companion_ids', $activity->companions->pluck('id')->toArray()))) }},
-                                        open: false,
-                                        search: '',
-                                        get filteredOptions() {
-                                            if (this.search === '') return this.options;
-                                            return this.options.filter(o => o.text.toLowerCase().includes(this.search.toLowerCase()));
-                                        },
-                                        isSelected(val) { return this.selected.includes(val.toString()); },
-                                        toggle(val) {
-                                            val = val.toString();
-                                            if (this.isSelected(val)) {
-                                                this.selected = this.selected.filter(i => i !== val);
-                                            } else {
-                                                this.selected.push(val);
-                                                this.search = '';
-                                            }
-                                        },
-                                        remove(val) {
-                                            this.selected = this.selected.filter(i => i !== val.toString());
-                                        },
-                                        getOptionText(val) {
-                                            let opt = this.options.find(o => o.value === val.toString());
-                                            return opt ? opt.text : '';
-                                        }
-                                    }" class="relative mt-1">
-                                        <!-- Hidden inputs for form submission -->
-                                        <template x-for="val in selected" :key="val">
-                                            <input type="hidden" name="companion_ids[]" :value="val">
-                                        </template>
-                                        
-                                        <!-- Display Box -->
-                                        <div @click="open = !open; $refs.searchInput.focus()" @click.away="open = false" class="min-h-[42px] p-1.5 w-full border border-gray-300 rounded-md shadow-sm bg-white cursor-text flex flex-col justify-center focus-within:ring-1 focus-within:ring-primary-500 focus-within:border-primary-500 transition-all duration-200">
-                                            
-                                            <!-- Selected Badges -->
-                                            <div x-show="selected.length > 0" class="flex flex-wrap gap-1 mb-1.5">
-                                                <template x-for="(val, index) in selected" :key="index">
-                                                    <span class="inline-flex items-center px-2 py-1 rounded bg-secondary-100 text-primary-900 text-xs font-bold border border-secondary-200 shadow-sm">
-                                                        <span x-text="getOptionText(val)"></span>
-                                                        <button type="button" @click.stop="remove(val)" class="ml-1.5 text-secondary-600 hover:text-red-500 focus:outline-none transition-colors">
-                                                            <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                                                        </button>
-                                                    </span>
-                                                </template>
-                                            </div>
-                                            
-                                            <!-- Input & Arrow -->
-                                            <div class="flex items-center w-full">
-                                                <input x-ref="searchInput" x-model="search" type="text" class="flex-1 w-full outline-none border-none focus:ring-0 text-sm p-0" placeholder="Cari pendamping...">
-                                                <div class="text-gray-400 px-1 cursor-pointer">
-                                                    <svg class="w-4 h-4 transition-transform duration-200" :class="open ? 'transform rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <!-- Dropdown List -->
-                                        <div x-show="open" x-transition.opacity.duration.200ms class="absolute z-50 w-full mt-1 bg-white rounded-md shadow-xl border border-gray-200 max-h-60 overflow-y-auto" style="display: none;">
-                                            <template x-for="option in filteredOptions" :key="option.value">
-                                                <div @click="toggle(option.value)" class="px-3 py-2 cursor-pointer text-sm transition-colors flex justify-between items-center border-b border-gray-50 last:border-0" :class="isSelected(option.value) ? 'bg-primary-50 text-primary-900' : 'hover:bg-gray-50 text-gray-700'">
-                                                    <span x-text="option.text" :class="isSelected(option.value) ? 'font-bold' : ''"></span>
-                                                    <svg x-show="isSelected(option.value)" class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                                </div>
-                                            </template>
-                                            <div x-show="filteredOptions.length === 0" class="px-4 py-3 text-sm text-gray-500 italic">Pimpinan tidak ditemukan...</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <x-input-label value="Narahubung (Nama)" />
-                                    <x-text-input name="contact_person_name" type="text" class="mt-1 block w-full" :value="old('contact_person_name', $activity->contact_person_name)" />
-                                </div>
-                                <div>
-                                    <x-input-label value="Narahubung (No. HP)" />
-                                    <x-text-input name="contact_person_phone" type="text" class="mt-1 block w-full" :value="old('contact_person_phone', $activity->contact_person_phone)" />
-                                </div>
-                                <div>
-                                    <x-input-label value="PIC Protokol" />
-                                    <select name="protocol_officer_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
-                                        <option value="">-- Pilih --</option>
-                                        @foreach($protocolOfficers as $po)
-                                            <option value="{{ $po->id }}" {{ old('protocol_officer_id', $activity->protocol_officer_id) == $po->id ? 'selected' : '' }}>{{ $po->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div>
-                                    <x-input-label value="Ajudan (ADC)" />
-                                    <x-text-input name="adc" type="text" class="mt-1 block w-full" :value="old('adc', $activity->adc)" />
-                                </div>
-                                <div>
-                                    <x-input-label value="Pakaian" />
-                                    <x-text-input name="dress_code" type="text" class="mt-1 block w-full" :value="old('dress_code', $activity->dress_code)" placeholder="Contoh: PSL, Batik" />
-                                </div>
-                            </div>
-                            <div class="mt-6 flex justify-end gap-3">
-                                <button type="button" x-on:click="$dispatch('close')" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md font-semibold text-xs uppercase hover:bg-gray-300">Batal</button>
-                                <button type="submit" class="px-4 py-2 bg-secondary-500 text-primary-900 rounded-md font-bold text-xs uppercase hover:bg-secondary-600">Simpan Perubahan</button>
-                            </div>
-                        </form>
-                    </x-modal>
-
                 @empty
                     <div class="col-span-full bg-white rounded-xl shadow p-8 text-center border border-primary-100">
                         <div class="text-primary-300 mb-4">
@@ -319,7 +256,7 @@
             </div>
             
             <!-- Timeline View -->
-            <div x-show="viewMode === 'timeline'" style="display: none;" class="bg-white rounded-xl shadow-sm border border-primary-100 overflow-hidden overflow-x-auto">
+            <div x-show="viewMode === 'timeline'" class="bg-white rounded-xl shadow-sm border border-primary-100 overflow-hidden overflow-x-auto" x-cloak>
                 <div class="min-w-[1000px]">
                     <div class="flex border-b border-gray-200 bg-gray-50">
                         <div class="w-48 p-3 border-r border-gray-200 flex-shrink-0 bg-gray-100 sticky left-0 z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
@@ -363,7 +300,7 @@
                                 <!-- Activities Blocks -->
                                 @foreach($td['activities'] as $la)
                                     @php
-                                        $position = strtolower($td['leader']->position);
+                                        $position = strtolower($td['leader']->position ?? '');
                                         if (str_contains($position, 'wakil bupati')) {
                                             $bgClass = $la['is_primary'] ? 'bg-purple-500 border-purple-600 text-white' : 'bg-purple-100 border-purple-300 text-purple-800 border-dashed';
                                         } elseif (str_contains($position, 'bupati')) {
@@ -374,13 +311,14 @@
                                             $bgClass = $la['is_primary'] ? 'bg-slate-600 border-slate-700 text-white' : 'bg-slate-100 border-slate-300 text-slate-800 border-dashed';
                                         }
                                     @endphp
-                                    <div class="absolute rounded p-1.5 shadow-sm border cursor-pointer hover:shadow-md transition-all overflow-hidden flex flex-col justify-center {{ $bgClass }}"
-                                         style="left: {{ $la['left'] }}%; width: max({{ $la['width'] }}%, 2%); top: {{ $la['row'] * 45 + 10 }}px; height: 38px; z-index: 10;"
-                                         title="{{ $la['start_time'] }} - {{ $la['end_time'] }} | {{ $la['activity']->title }}">
+                                    <a href="{{ route('activities.show', $la['activity']->id) }}"
+                                       class="absolute rounded p-1.5 shadow-sm border cursor-pointer hover:shadow-md hover:ring-2 hover:ring-offset-1 hover:ring-primary-400 transition-all overflow-hidden flex flex-col justify-center {{ $bgClass }}"
+                                       style="left: {{ $la['left'] }}%; width: {{ max($la['width'], 2) }}%; top: {{ $la['row'] * 45 + 10 }}px; height: 38px; z-index: 10;"
+                                       title="{{ $la['start_time'] }} - {{ $la['end_time'] }} | {{ $la['activity']->title }}">
                                         <div class="text-[10px] font-bold leading-tight truncate">
                                             {{ $la['start_time'] }} - {{ $la['activity']->title }}
                                         </div>
-                                    </div>
+                                    </a>
                                 @endforeach
                             </div>
                         </div>
@@ -391,153 +329,7 @@
         </div>
     </div>
 
-    <!-- Create Modal (Simplified for brevity) -->
-    <x-modal name="create-activity" focusable maxWidth="2xl">
-        <form method="post" action="{{ route('activities.store') }}" class="p-6">
-            @csrf
-            <h2 class="text-lg font-bold text-primary-900 mb-4 border-b pb-2">Tambah Agenda Baru</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="col-span-full">
-                    <x-input-label value="Nama Kegiatan" />
-                    <textarea name="title" rows="3" class="mt-1 block w-full border-gray-300 focus:border-primary-500 focus:ring-primary-500 rounded-md shadow-sm" required>{{ old('title') }}</textarea>
-                </div>
-                <div>
-                    <x-input-label value="Tanggal" />
-                    <x-text-input name="activity_date" type="date" class="mt-1 block w-full" :value="old('activity_date', $dateFilter)" required />
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <x-input-label value="Mulai" />
-                        <x-text-input name="start_time" type="time" class="mt-1 block w-full" required />
-                    </div>
-                    <div>
-                        <x-input-label value="Selesai" />
-                        <x-text-input name="end_time" type="time" class="mt-1 block w-full" />
-                    </div>
-                </div>
-                <div class="col-span-full">
-                    <x-input-label value="Penyelenggara" />
-                    <x-text-input name="organizer_input" list="organizers_list" type="text" class="mt-1 block w-full" placeholder="Ketik nama penyelenggara..." />
-                </div>
-                <div class="col-span-full">
-                    <x-input-label value="Lokasi" />
-                    <x-text-input name="location_input" list="locations_list" type="text" class="mt-1 block w-full" placeholder="Ketik nama lokasi..." />
-                </div>
-                <div>
-                    <x-input-label value="Pimpinan (Utama)" />
-                    <select name="leader_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
-                        <option value="">-- Pilih --</option>
-                        @foreach($leaders as $ld)
-                            <option value="{{ $ld->id }}">{{ $ld->name }} ({{ $ld->position }})</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <x-input-label value="Pendamping" />
-                    <div x-data="{
-                        options: [
-                            @foreach($leaders as $ld)
-                                { value: '{{ $ld->id }}', text: '{{ addslashes($ld->name) }} ({{ addslashes($ld->position) }})' },
-                            @endforeach
-                        ],
-                        selected: {{ json_encode(array_map('strval', old('companion_ids', []))) }},
-                        open: false,
-                        search: '',
-                        get filteredOptions() {
-                            if (this.search === '') return this.options;
-                            return this.options.filter(o => o.text.toLowerCase().includes(this.search.toLowerCase()));
-                        },
-                        isSelected(val) { return this.selected.includes(val.toString()); },
-                        toggle(val) {
-                            val = val.toString();
-                            if (this.isSelected(val)) {
-                                this.selected = this.selected.filter(i => i !== val);
-                            } else {
-                                this.selected.push(val);
-                                this.search = '';
-                            }
-                        },
-                        remove(val) {
-                            this.selected = this.selected.filter(i => i !== val.toString());
-                        },
-                        getOptionText(val) {
-                            let opt = this.options.find(o => o.value === val.toString());
-                            return opt ? opt.text : '';
-                        }
-                    }" class="relative mt-1">
-                        <!-- Hidden inputs for form submission -->
-                        <template x-for="val in selected" :key="val">
-                            <input type="hidden" name="companion_ids[]" :value="val">
-                        </template>
-                        
-                        <!-- Display Box -->
-                        <div @click="open = !open; $refs.searchInput.focus()" @click.away="open = false" class="min-h-[42px] p-1.5 w-full border border-gray-300 rounded-md shadow-sm bg-white cursor-text flex flex-col justify-center focus-within:ring-1 focus-within:ring-primary-500 focus-within:border-primary-500 transition-all duration-200">
-                            
-                            <!-- Selected Badges -->
-                            <div x-show="selected.length > 0" class="flex flex-wrap gap-1 mb-1.5">
-                                <template x-for="(val, index) in selected" :key="index">
-                                    <span class="inline-flex items-center px-2 py-1 rounded bg-secondary-100 text-primary-900 text-xs font-bold border border-secondary-200 shadow-sm">
-                                        <span x-text="getOptionText(val)"></span>
-                                        <button type="button" @click.stop="remove(val)" class="ml-1.5 text-secondary-600 hover:text-red-500 focus:outline-none transition-colors">
-                                            <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                                        </button>
-                                    </span>
-                                </template>
-                            </div>
-                            
-                            <!-- Input & Arrow -->
-                            <div class="flex items-center w-full">
-                                <input x-ref="searchInput" x-model="search" type="text" class="flex-1 w-full outline-none border-none focus:ring-0 text-sm p-0" placeholder="Cari pendamping...">
-                                <div class="text-gray-400 px-1 cursor-pointer">
-                                    <svg class="w-4 h-4 transition-transform duration-200" :class="open ? 'transform rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Dropdown List -->
-                        <div x-show="open" x-transition.opacity.duration.200ms class="absolute z-50 w-full mt-1 bg-white rounded-md shadow-xl border border-gray-200 max-h-60 overflow-y-auto" style="display: none;">
-                            <template x-for="option in filteredOptions" :key="option.value">
-                                <div @click="toggle(option.value)" class="px-3 py-2 cursor-pointer text-sm transition-colors flex justify-between items-center border-b border-gray-50 last:border-0" :class="isSelected(option.value) ? 'bg-primary-50 text-primary-900' : 'hover:bg-gray-50 text-gray-700'">
-                                    <span x-text="option.text" :class="isSelected(option.value) ? 'font-bold' : ''"></span>
-                                    <svg x-show="isSelected(option.value)" class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                </div>
-                            </template>
-                            <div x-show="filteredOptions.length === 0" class="px-4 py-3 text-sm text-gray-500 italic">Pimpinan tidak ditemukan...</div>
-                        </div>
-                    </div>
-                </div>
-                <div>
-                    <x-input-label value="Narahubung (Nama)" />
-                    <x-text-input name="contact_person_name" type="text" class="mt-1 block w-full" />
-                </div>
-                <div>
-                    <x-input-label value="Narahubung (No. HP)" />
-                    <x-text-input name="contact_person_phone" type="text" class="mt-1 block w-full" />
-                </div>
-                <div>
-                    <x-input-label value="PIC Protokol" />
-                    <select name="protocol_officer_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
-                        <option value="">-- Pilih --</option>
-                        @foreach($protocolOfficers as $po)
-                            <option value="{{ $po->id }}">{{ $po->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <x-input-label value="Ajudan (ADC)" />
-                    <x-text-input name="adc" type="text" class="mt-1 block w-full" />
-                </div>
-                <div>
-                    <x-input-label value="Pakaian" />
-                    <x-text-input name="dress_code" type="text" class="mt-1 block w-full" placeholder="Contoh: PSL, Batik" />
-                </div>
-            </div>
-            <div class="mt-6 flex justify-end gap-3">
-                <button type="button" x-on:click="$dispatch('close')" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md font-semibold text-xs uppercase hover:bg-gray-300">Batal</button>
-                <button type="submit" class="px-4 py-2 bg-secondary-500 text-primary-900 rounded-md font-bold text-xs uppercase hover:bg-secondary-600">Simpan Draf</button>
-            </div>
-        </form>
-    </x-modal>
+
 
     <!-- Datalists for Autocomplete -->
     <datalist id="locations_list">

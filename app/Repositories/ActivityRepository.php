@@ -14,6 +14,7 @@ class ActivityRepository
     public function create(array $data): Activity
     {
         $data['created_by'] = auth()->id();
+
         return $this->model->create($data);
     }
 

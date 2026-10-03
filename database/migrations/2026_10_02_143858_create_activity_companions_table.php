@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('leader_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
-        
+
         // Remove the companions text column from activities table
         Schema::table('activities', function (Blueprint $table) {
             $table->dropColumn('companions');

@@ -4,9 +4,11 @@
             <h2 class="font-bold text-xl text-primary-800 leading-tight">
                 {{ __('Kelola Pimpinan') }}
             </h2>
+            @role('admin')
             <button x-on:click.prevent="$dispatch('open-modal', 'create-leader')" class="inline-flex items-center px-4 py-2 bg-secondary-500 border border-transparent rounded-full font-semibold text-xs text-primary-900 uppercase tracking-widest hover:bg-secondary-600 focus:bg-secondary-600 active:bg-secondary-700 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2 transition ease-in-out duration-150 shadow-md">
                 + Tambah Pimpinan
             </button>
+            @endrole
         </div>
     </x-slot>
 
@@ -66,6 +68,7 @@
                             @endif
                         </div>
                         
+                        @role('admin')
                         <div class="px-4 py-2.5 bg-white border-t border-primary-100 flex justify-end gap-4 items-center">
                             <button x-on:click.prevent="$dispatch('open-modal', 'edit-leader-{{ $leader->id }}')" class="text-primary-600 hover:text-primary-800 font-medium text-xs transition-colors">
                                 Edit
@@ -78,6 +81,7 @@
                                 </button>
                             </form>
                         </div>
+                        @endrole
                     </div>
                     
                     <!-- Edit Modal for this Leader -->
@@ -134,11 +138,13 @@
                         </div>
                         <h3 class="mt-2 text-sm font-medium text-gray-900">Belum ada data pimpinan</h3>
                         <p class="mt-1 text-sm text-gray-500">Mulai dengan menambahkan data pimpinan baru.</p>
+                        @role('admin')
                         <div class="mt-6">
                             <button x-on:click.prevent="$dispatch('open-modal', 'create-leader')" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-full text-primary-900 bg-secondary-500 hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition">
                                 + Tambah Pimpinan
                             </button>
                         </div>
+                        @endrole
                     </div>
                 @endforelse
             </div>

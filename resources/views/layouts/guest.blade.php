@@ -1,30 +1,57 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <title>{{ config('app.name', 'PAK BUPATI') }} - Login</title>
 
-        <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
-            <div>
-                <a href="/">
-                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
-                </a>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
+
+    <!-- Scripts -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
+
+<body class="font-sans text-gray-900 antialiased selection:bg-primary-500 selection:text-white">
+    <div
+        class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-50 relative overflow-hidden">
+        <!-- Background decoration -->
+        <div class="absolute inset-0 z-0 pointer-events-none">
+            <div
+                class="absolute -top-[30%] -left-[10%] w-[70%] h-[70%] rounded-full bg-gradient-to-br from-primary-200/40 to-primary-100/10 blur-3xl">
             </div>
-
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
-                {{ $slot }}
+            <div
+                class="absolute -bottom-[20%] -right-[10%] w-[60%] h-[60%] rounded-full bg-gradient-to-tr from-secondary-200/40 to-secondary-100/10 blur-3xl">
             </div>
         </div>
-    </body>
+
+        <div class="relative z-10 mb-8 flex flex-col items-center text-center">
+            <a href="/" class="flex items-center gap-3 group">
+                <div
+                    class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-primary-500/30 group-hover:scale-105 transition-transform duration-300">
+                    PB
+                </div>
+                <span class="font-bold text-3xl tracking-tight text-gray-800">PAK <span
+                        class="text-primary-600">BUPATI</span></span>
+            </a>
+            
+            <h2 class="mt-3 text-lg font-semibold text-gray-700">Sistem Pengelolaan Agenda Kegiatan Bupati</h2>
+            <p class="mt-1 text-sm text-gray-500">Masuk untuk mengelola agenda</p>
+        </div>
+
+        <div
+            class="relative z-10 w-full sm:max-w-md px-8 py-10 bg-white/80 backdrop-blur-xl shadow-2xl shadow-gray-200/50 overflow-hidden sm:rounded-3xl border border-white">
+            {{ $slot }}
+        </div>
+
+        <div class="relative z-10 mt-10 text-center text-sm text-gray-500 font-medium">
+            &copy; {{ date('Y') }} PAK BUPATI
+        </div>
+    </div>
+</body>
+
 </html>

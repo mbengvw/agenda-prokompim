@@ -14,14 +14,16 @@ class ActivityService
 
     public function createActivity(array $data): Activity
     {
-        $data['status'] = 'draft'; // default to draft initially
-        
+        if (! isset($data['status'])) {
+            $data['status'] = 'draft';
+        }
+
         $companionIds = $data['companion_ids'] ?? [];
         unset($data['companion_ids']);
 
         $activity = $this->repository->create($data);
-        
-        if (!empty($companionIds)) {
+
+        if (! empty($companionIds)) {
             $activity->companions()->sync($companionIds);
         }
 
@@ -34,7 +36,7 @@ class ActivityService
         unset($data['companion_ids']);
 
         $updated = $this->repository->update($activity, $data);
-        
+
         $activity->companions()->sync($companionIds);
 
         return $updated;
@@ -46,6 +48,7 @@ class ActivityService
         if ($revisionNotes !== null) {
             $data['revision_notes'] = $revisionNotes;
         }
+
         return $this->repository->update($activity, $data);
     }
 

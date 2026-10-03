@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Organization;
-use Illuminate\Http\Request;
 use App\Http\Requests\StoreOrganizationRequest;
 use App\Http\Requests\UpdateOrganizationRequest;
+use App\Models\Organization;
 use App\QueryServices\OrganizationQueryService;
 use App\Services\OrganizationService;
+use Illuminate\Http\Request;
 
 class OrganizationController extends Controller
 {
@@ -23,7 +23,7 @@ class OrganizationController extends Controller
     {
         $search = $request->input('search');
         $organizations = $this->queryService->getPaginatedOrganizations(10, $search);
-        
+
         $orgTypes = [
             'OPD' => 'Organisasi Perangkat Daerah',
             'GOVERNMENT' => 'Instansi Pemerintah',
@@ -43,7 +43,16 @@ class OrganizationController extends Controller
      */
     public function store(StoreOrganizationRequest $request)
     {
-        $this->service->createOrganization($request->validated());
+        $organization = $this->service->createOrganization($request->validated());
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Data organisasi berhasil ditambahkan.',
+                'data' => $organization,
+            ]);
+        }
+
         return redirect()->route('organizations.index')->with('success', 'Data organisasi berhasil ditambahkan.');
     }
 
@@ -53,6 +62,7 @@ class OrganizationController extends Controller
     public function update(UpdateOrganizationRequest $request, Organization $organization)
     {
         $this->service->updateOrganization($organization, $request->validated());
+
         return redirect()->route('organizations.index')->with('success', 'Data organisasi berhasil diperbarui.');
     }
 
@@ -62,6 +72,7 @@ class OrganizationController extends Controller
     public function destroy(Organization $organization)
     {
         $this->service->deleteOrganization($organization);
+
         return redirect()->route('organizations.index')->with('success', 'Data organisasi berhasil dihapus.');
     }
 }

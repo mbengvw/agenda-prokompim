@@ -8,6 +8,7 @@ use App\Models\Leader;
 use App\QueryServices\LeaderQueryService;
 use App\Services\LeaderService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class LeaderController extends Controller
@@ -20,11 +21,11 @@ class LeaderController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(\Illuminate\Http\Request $request): View
+    public function index(Request $request): View
     {
         $search = $request->input('search');
         $leaders = $this->queryService->getPaginatedLeaders(10, $search);
-        
+
         return view('leaders.index', compact('leaders', 'search'));
     }
 
@@ -39,9 +40,18 @@ class LeaderController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreLeaderRequest $request): RedirectResponse
+    public function store(StoreLeaderRequest $request)
     {
-        $this->service->createLeader($request->validated());
+        $leader = $this->service->createLeader($request->validated());
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Leader created successfully.',
+                'data' => $leader,
+            ]);
+        }
+
         return redirect()->route('leaders.index')->with('success', 'Leader created successfully.');
     }
 
@@ -67,6 +77,7 @@ class LeaderController extends Controller
     public function update(UpdateLeaderRequest $request, Leader $leader): RedirectResponse
     {
         $this->service->updateLeader($leader, $request->validated());
+
         return redirect()->route('leaders.index')->with('success', 'Leader updated successfully.');
     }
 
@@ -76,6 +87,7 @@ class LeaderController extends Controller
     public function destroy(Leader $leader): RedirectResponse
     {
         $this->service->deleteLeader($leader);
+
         return redirect()->route('leaders.index')->with('success', 'Leader deleted successfully.');
     }
 }

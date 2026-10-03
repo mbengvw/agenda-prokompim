@@ -18,12 +18,14 @@ class LeaderService
     public function createLeader(array $data): Leader
     {
         $data['is_active'] = $data['is_active'] ?? true;
+
         return $this->repository->create($data);
     }
 
     public function updateLeader(Leader $leader, array $data): Leader
     {
         $data['is_active'] = $data['is_active'] ?? true;
+
         return $this->repository->update($leader, $data);
     }
 

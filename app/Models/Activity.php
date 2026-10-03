@@ -4,9 +4,23 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class Activity extends Model
 {
+    use LogsActivity;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
+    }
+
     protected $fillable = [
         'activity_request_id',
         'title',
@@ -54,8 +68,18 @@ class Activity extends Model
         return $this->belongsTo(Organization::class);
     }
 
-    public function companions(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function leader(): BelongsTo
+    {
+        return $this->belongsTo(Leader::class, 'leader_id');
+    }
+
+    public function companions(): BelongsToMany
     {
         return $this->belongsToMany(Leader::class, 'activity_companions', 'activity_id', 'leader_id')->withTimestamps();
+    }
+
+    public function dispositions(): HasMany
+    {
+        return $this->hasMany(ActivityDisposition::class);
     }
 }

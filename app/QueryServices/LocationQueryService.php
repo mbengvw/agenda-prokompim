@@ -23,8 +23,8 @@ class LocationQueryService
             $search = strtolower($search);
             $query->where(function ($q) use ($search) {
                 $q->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"])
-                  ->orWhereRaw('LOWER(city) LIKE ?', ["%{$search}%"])
-                  ->orWhereRaw('LOWER(address) LIKE ?', ["%{$search}%"]);
+                    ->orWhereRaw('LOWER(city) LIKE ?', ["%{$search}%"])
+                    ->orWhereRaw('LOWER(address) LIKE ?', ["%{$search}%"]);
             });
         }
 

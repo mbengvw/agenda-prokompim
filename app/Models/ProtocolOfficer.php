@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ProtocolOfficer extends Model
 {
@@ -19,7 +20,7 @@ class ProtocolOfficer extends Model
         'is_active' => 'boolean',
     ];
 
-    public function activities(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function activities(): HasMany
     {
         return $this->hasMany(Activity::class);
     }

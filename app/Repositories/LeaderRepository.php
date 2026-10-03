@@ -22,6 +22,7 @@ class LeaderRepository
     public function update(Leader $leader, array $data): Leader
     {
         $leader->update($data);
+
         return $leader;
     }
 

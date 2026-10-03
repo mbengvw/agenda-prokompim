@@ -20,8 +20,8 @@ class ProtocolOfficerQueryService
             $search = strtolower($search);
             $query->where(function ($q) use ($search) {
                 $q->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"])
-                  ->orWhereRaw('LOWER(position) LIKE ?', ["%{$search}%"])
-                  ->orWhereRaw('LOWER(employee_number) LIKE ?', ["%{$search}%"]);
+                    ->orWhereRaw('LOWER(position) LIKE ?', ["%{$search}%"])
+                    ->orWhereRaw('LOWER(employee_number) LIKE ?', ["%{$search}%"]);
             });
         }
 

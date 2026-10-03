@@ -20,9 +20,9 @@ class OrganizationQueryService
             $search = strtolower($search);
             $query->where(function ($q) use ($search) {
                 $q->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"])
-                  ->orWhereRaw('LOWER(type) LIKE ?', ["%{$search}%"])
-                  ->orWhereRaw('LOWER(contact_person) LIKE ?', ["%{$search}%"])
-                  ->orWhereRaw('LOWER(email) LIKE ?', ["%{$search}%"]);
+                    ->orWhereRaw('LOWER(type) LIKE ?', ["%{$search}%"])
+                    ->orWhereRaw('LOWER(contact_person) LIKE ?', ["%{$search}%"])
+                    ->orWhereRaw('LOWER(email) LIKE ?', ["%{$search}%"]);
             });
         }
 

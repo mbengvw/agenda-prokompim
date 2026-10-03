@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Location;
-use Illuminate\Http\Request;
 use App\Http\Requests\StoreLocationRequest;
 use App\Http\Requests\UpdateLocationRequest;
+use App\Models\Location;
 use App\QueryServices\LocationQueryService;
 use App\Services\LocationService;
+use Illuminate\Http\Request;
 
 class LocationController extends Controller
 {
@@ -23,6 +23,7 @@ class LocationController extends Controller
     {
         $search = $request->input('search');
         $locations = $this->queryService->getPaginatedLocations(10, $search);
+
         return view('locations.index', compact('locations', 'search'));
     }
 
@@ -31,7 +32,15 @@ class LocationController extends Controller
      */
     public function store(StoreLocationRequest $request)
     {
-        $this->service->createLocation($request->validated());
+        $location = $this->service->createLocation($request->validated());
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Data lokasi berhasil ditambahkan.',
+                'data' => $location,
+            ]);
+        }
 
         return redirect()->route('locations.index')->with('success', 'Data lokasi berhasil ditambahkan.');
     }
