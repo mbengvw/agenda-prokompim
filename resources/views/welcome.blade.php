@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ config('app.name', 'PAK BUPATI') }}</title>
+    <title>{{ config('app.name', 'LEAD-IT') }}</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -31,10 +31,10 @@
             <div class="flex items-center gap-3 group cursor-pointer">
                 <div
                     class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-primary-500/30 group-hover:scale-105 transition-transform duration-300">
-                    PB
+                    LI
                 </div>
-                <span class="font-bold text-xl tracking-tight text-gray-800">SiPAK <span
-                        class="text-primary-600">PIM</span></span>
+                <span class="font-bold text-xl tracking-tight text-gray-800">LEAD <span
+                        class="text-primary-600">IT</span></span>
             </div>
 
             @if (Route::has('login'))
@@ -64,7 +64,7 @@
                                 class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span>
                             <span class="relative inline-flex rounded-full h-2 w-2 bg-primary-500"></span>
                         </span>
-                        Sistem Pengelolaan Agenda Kegiatan Pimpinan
+                        Leadership Agenda & Integration Tool
                     </div>
 
                     <h1
@@ -178,7 +178,7 @@
 
         <footer
             class="relative z-10 py-8 text-center text-sm text-gray-500 border-t border-gray-100/50 bg-white/30 backdrop-blur-sm">
-            <p>&copy; {{ date('Y') }} SiPAK-PIM. All rights reserved.</p>
+            <p>&copy; {{ date('Y') }} LEAD-IT | Developed By. Code-91</p>
         </footer>
     </div>
 </body>

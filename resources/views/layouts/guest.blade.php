@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'PAK BUPATI') }} - Login</title>
+    <title>{{ config('app.name', 'LEAD-IT') }} - Login</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -18,7 +18,7 @@
 
 <body class="font-sans text-gray-900 antialiased selection:bg-primary-500 selection:text-white">
     <div
-        class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-50 relative overflow-hidden">
+        class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 px-4 sm:px-0 bg-gray-50 relative overflow-hidden">
         <!-- Background decoration -->
         <div class="absolute inset-0 z-0 pointer-events-none">
             <div
@@ -33,23 +33,23 @@
             <a href="/" class="flex items-center gap-3 group">
                 <div
                     class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-primary-500/30 group-hover:scale-105 transition-transform duration-300">
-                    PB
+                    LI
                 </div>
-                <span class="font-bold text-3xl tracking-tight text-gray-800">PAK <span
-                        class="text-primary-600">BUPATI</span></span>
+                <span class="font-bold text-3xl tracking-tight text-gray-800">LEAD <span
+                        class="text-primary-600">IT</span></span>
             </a>
-            
-            <h2 class="mt-3 text-lg font-semibold text-gray-700">Sistem Pengelolaan Agenda Kegiatan Bupati</h2>
+
+            <h2 class="mt-3 text-lg font-semibold text-gray-700">Leadership Agenda & Integration Tool</h2>
             <p class="mt-1 text-sm text-gray-500">Masuk untuk mengelola agenda</p>
         </div>
 
         <div
-            class="relative z-10 w-full sm:max-w-md px-8 py-10 bg-white/80 backdrop-blur-xl shadow-2xl shadow-gray-200/50 overflow-hidden sm:rounded-3xl border border-white">
+            class="relative z-10 w-[88%] sm:w-full sm:max-w-md px-6 sm:px-8 py-10 bg-gradient-to-br from-primary-50/90 via-white/90 to-secondary-50/90 backdrop-blur-xl shadow-2xl shadow-primary-500/10 overflow-hidden rounded-2xl sm:rounded-3xl border border-primary-100">
             {{ $slot }}
         </div>
 
         <div class="relative z-10 mt-10 text-center text-sm text-gray-500 font-medium">
-            &copy; {{ date('Y') }} PAK BUPATI
+            &copy; {{ date('Y') }} LEAD-IT | Developed By. Code-91
         </div>
     </div>
 </body>
