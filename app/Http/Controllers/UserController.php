@@ -67,4 +67,11 @@ class UserController extends Controller
         $this->userService->delete($user);
         return redirect()->route('users.index')->with('success', 'User deleted successfully.');
     }
+
+    public function toggleStatus(User $user)
+    {
+        $this->userService->toggleStatus($user);
+        $status = $user->fresh()->is_active ? 'diaktifkan' : 'dinonaktifkan';
+        return redirect()->route('users.index')->with('success', "Pengguna berhasil {$status}.");
+    }
 }

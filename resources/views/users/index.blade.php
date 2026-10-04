@@ -38,6 +38,9 @@
                                         {{ $role->name }}
                                     </span>
                                 @endforeach
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium {{ $user->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }} whitespace-nowrap mt-1">
+                                    {{ $user->is_active ? 'Aktif' : 'Nonaktif' }}
+                                </span>
                             </div>
                         </div>
                         
@@ -46,6 +49,13 @@
                                 Edit
                             </button>
                             @if($user->id !== auth()->id())
+                            <form action="{{ route('users.toggle-status', $user->id) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin {{ $user->is_active ? 'menonaktifkan' : 'mengaktifkan' }} pengguna ini?');">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit" class="text-{{ $user->is_active ? 'orange' : 'green' }}-500 hover:text-{{ $user->is_active ? 'orange' : 'green' }}-700 font-medium text-xs transition-colors">
+                                    {{ $user->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
+                                </button>
+                            </form>
                             <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus pengguna ini?');">
                                 @csrf
                                 @method('DELETE')
@@ -91,6 +101,9 @@
                                                     {{ $role->name }}
                                                 </span>
                                             @endforeach
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium {{ $user->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }} whitespace-nowrap">
+                                                {{ $user->is_active ? 'Aktif' : 'Nonaktif' }}
+                                            </span>
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -98,6 +111,13 @@
                                             Edit
                                         </button>
                                         @if($user->id !== auth()->id())
+                                        <form action="{{ route('users.toggle-status', $user->id) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin {{ $user->is_active ? 'menonaktifkan' : 'mengaktifkan' }} pengguna ini?');">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" class="text-{{ $user->is_active ? 'orange' : 'green' }}-600 hover:text-{{ $user->is_active ? 'orange' : 'green' }}-900 bg-{{ $user->is_active ? 'orange' : 'green' }}-100 hover:bg-{{ $user->is_active ? 'orange' : 'green' }}-200 px-3 py-1.5 rounded-md transition-colors mr-2">
+                                                {{ $user->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
+                                            </button>
+                                        </form>
                                         <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus pengguna ini?');">
                                             @csrf
                                             @method('DELETE')
@@ -146,15 +166,6 @@
                                 <x-input-label for="email_{{ $user->id }}" value="{{ __('Email') }}" />
                                 <x-text-input id="email_{{ $user->id }}" name="email" type="email" class="mt-1 block w-full" :value="old('email', $user->email)" required />
                                 <x-input-error :messages="$errors->get('email')" class="mt-2" />
-                            </div>
-                            <div>
-                                <x-input-label for="password_{{ $user->id }}" value="{{ __('Password Baru (Opsional)') }}" />
-                                <x-text-input id="password_{{ $user->id }}" name="password" type="password" class="mt-1 block w-full" />
-                                <x-input-error :messages="$errors->get('password')" class="mt-2" />
-                            </div>
-                            <div>
-                                <x-input-label for="password_confirmation_{{ $user->id }}" value="{{ __('Konfirmasi Password') }}" />
-                                <x-text-input id="password_confirmation_{{ $user->id }}" name="password_confirmation" type="password" class="mt-1 block w-full" />
                             </div>
                             <div>
                                 <x-input-label value="{{ __('Role') }}" class="mb-2" />

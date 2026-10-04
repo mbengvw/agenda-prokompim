@@ -48,4 +48,9 @@ class UserService
     {
         return $this->userRepository->delete($user);
     }
+
+    public function toggleStatus(User $user): bool
+    {
+        return $this->userRepository->update($user, ['is_active' => !$user->is_active]);
+    }
 }

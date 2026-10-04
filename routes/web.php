@@ -43,6 +43,7 @@ Route::middleware('auth')->group(function () {
         
         // User & Role Management
         Route::resource('users', UserController::class);
+        Route::patch('users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
         Route::resource('roles', RoleController::class);
     });
 
