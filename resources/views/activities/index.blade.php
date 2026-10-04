@@ -505,8 +505,16 @@
 
 
     <!-- Floating PDF Export Button -->
-    @if(auth()->user()->leader_id)
-        <a href="{{ route('activities.export-pdf', ['date' => $dateFilter ?? \Carbon\Carbon::today()->toDateString(), 'leader_id' => auth()->user()->leader_id]) }}" target="_blank"
+    @php
+        $exportLeaderId = auth()->user()->leader_id;
+        if (!$exportLeaderId && $leaderFilter) {
+            $exportLeader = $leaders->first(fn($l) => strtolower($l->position) === strtolower($leaderFilter));
+            $exportLeaderId = $exportLeader ? $exportLeader->id : null;
+        }
+    @endphp
+
+    @if($exportLeaderId)
+        <a href="{{ route('activities.export-pdf', ['date' => $dateFilter ?? \Carbon\Carbon::today()->toDateString(), 'leader_id' => $exportLeaderId]) }}" target="_blank"
            class="fixed bottom-6 right-6 z-50 bg-red-600 text-white p-3.5 rounded-full shadow-lg hover:bg-red-700 hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center justify-center group"
            title="Export to PDF">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -516,49 +524,6 @@
                 Cetak PDF
             </span>
         </a>
-    @else
-        <div x-data>
-            <button x-on:click.prevent="$dispatch('open-modal', 'export-pdf-modal')"
-               class="fixed bottom-6 right-6 z-50 bg-red-600 text-white p-3.5 rounded-full shadow-lg hover:bg-red-700 hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center justify-center group"
-               title="Export to PDF">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <span class="max-w-0 overflow-hidden whitespace-nowrap opacity-0 group-hover:max-w-xs group-hover:opacity-100 group-hover:ml-2 group-hover:mr-1 transition-all duration-300 ease-in-out font-bold text-sm">
-                    Cetak PDF
-                </span>
-            </button>
-
-            <!-- Export PDF Modal -->
-            <x-modal name="export-pdf-modal" focusable>
-                <form method="GET" action="{{ route('activities.export-pdf') }}" class="p-6" target="_blank">
-                    <input type="hidden" name="date" value="{{ $dateFilter ?? \Carbon\Carbon::today()->toDateString() }}">
-                    
-                    <h2 class="text-lg font-bold text-primary-900 mb-6 border-b pb-2">
-                        {{ __('Cetak Laporan PDF') }}
-                    </h2>
-
-                    <div class="mb-4">
-                        <x-input-label for="leader_id_export" value="{{ __('Pilih Pimpinan') }}" />
-                        <select id="leader_id_export" name="leader_id" class="mt-1 block w-full border-gray-300 focus:border-primary-500 focus:ring-primary-500 rounded-md shadow-sm" required>
-                            <option value="">-- Pilih Pimpinan --</option>
-                            @foreach($leaders as $leader)
-                                <option value="{{ $leader->id }}">{{ $leader->name }} ({{ $leader->position }})</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="mt-6 flex justify-end gap-3">
-                        <button type="button" x-on:click="$dispatch('close')" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md font-semibold text-xs uppercase tracking-widest hover:bg-gray-300 transition">
-                            {{ __('Batal') }}
-                        </button>
-                        <button type="submit" x-on:click="$dispatch('close')" class="px-4 py-2 bg-red-600 text-white rounded-md font-bold text-xs uppercase tracking-widest hover:bg-red-700 transition">
-                            {{ __('Download PDF') }}
-                        </button>
-                    </div>
-                </form>
-            </x-modal>
-        </div>
     @endif
 
     <!-- Datalists for Autocomplete -->
