@@ -55,6 +55,15 @@ class ActivityDispositionService
                     'is_disposition' => true,
                     'disposition_to_id' => $toLeaderId,
                 ]);
+            } else {
+                // If cancelled (e.g. changed to hadir/skip), revert to the original leader if it was disposed
+                if ($activity->is_disposition && $activity->leader_id != $fromLeaderId) {
+                    $this->activityRepository->update($activity, [
+                        'leader_id' => $fromLeaderId,
+                        'is_disposition' => false,
+                        'disposition_to_id' => null,
+                    ]);
+                }
             }
 
             // Log activity manually for spatie/laravel-activitylog

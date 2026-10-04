@@ -212,30 +212,39 @@
                             <!-- Tombol Ajudan -->
                             @php
                                 $canManageDisposition = false;
-                                $leaderPosition = strtolower($activity->leader?->position ?? '');
+                                $user = auth()->user();
                                 
-                                if ($activity->status === 'approved') {
-                                    $user = auth()->user();
-                                    if ($user->hasRole('ajudan_bupati') && str_contains($leaderPosition, 'bupati') && !str_contains($leaderPosition, 'wakil')) {
-                                        $canManageDisposition = true;
-                                    } elseif ($user->hasRole('ajudan_wabup') && str_contains($leaderPosition, 'wakil bupati')) {
-                                        $canManageDisposition = true;
-                                    } elseif ($user->hasRole('ajudan_sekda') && (str_contains($leaderPosition, 'sekda') || str_contains($leaderPosition, 'sekretaris daerah'))) {
-                                        $canManageDisposition = true;
-                                    }
+                                $userLeaderIds = [];
+                                if ($user->hasRole('ajudan_bupati')) {
+                                    $userLeaderIds = \App\Models\Leader::whereRaw('LOWER(position) LIKE ?', ['%bupati%'])->whereRaw('LOWER(position) NOT LIKE ?', ['%wakil%'])->pluck('id')->toArray();
+                                } elseif ($user->hasRole('ajudan_wabup')) {
+                                    $userLeaderIds = \App\Models\Leader::whereRaw('LOWER(position) LIKE ?', ['%wakil bupati%'])->pluck('id')->toArray();
+                                } elseif ($user->hasRole('ajudan_sekda')) {
+                                    $userLeaderIds = \App\Models\Leader::whereRaw('LOWER(position) LIKE ?', ['%sekda%'])->orWhereRaw('LOWER(position) LIKE ?', ['%sekretaris daerah%'])->pluck('id')->toArray();
                                 }
 
                                 $existingDisposition = null;
-                                if ($canManageDisposition && $activity->leader_id) {
+                                if (!empty($userLeaderIds)) {
                                     $existingDisposition = \App\Models\ActivityDisposition::where('activity_id', $activity->id)
-                                        ->where('from_leader_id', $activity->leader_id)
+                                        ->whereIn('from_leader_id', $userLeaderIds)
+                                        ->latest()
                                         ->first();
                                 }
+
+                                if (in_array($activity->status, ['submitted', 'revision', 'approved'])) {
+                                    if ($existingDisposition) {
+                                        $canManageDisposition = true;
+                                    } elseif (!empty($userLeaderIds) && in_array($activity->leader_id, $userLeaderIds)) {
+                                        $canManageDisposition = true;
+                                    }
+                                }
+                                
+                                $userLeaderId = $existingDisposition ? $existingDisposition->from_leader_id : (empty($userLeaderIds) ? $activity->leader_id : $userLeaderIds[0]);
                             @endphp
 
                             @if($canManageDisposition)
                                 @if($existingDisposition)
-                                    <div class="px-4 py-2 bg-gray-50 text-gray-700 rounded-md text-sm font-bold shadow-sm border border-gray-200 inline-flex items-center gap-2">
+                                    <div class="px-4 py-2 bg-gray-50 text-gray-700 rounded-md text-sm font-bold shadow-sm border border-gray-200 inline-flex items-center gap-2 mb-2">
                                         <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                         Terkonfirmasi: {{ strtoupper($existingDisposition->status) }}
                                         @if($existingDisposition->status === 'disposisi')
@@ -243,28 +252,30 @@
                                             ke {{ $dispoTo?->name }}
                                         @endif
                                     </div>
-                                @else
-                                    <form action="{{ route('activities.disposition', $activity->id) }}" method="POST" class="inline">
-                                        @csrf
-                                        <input type="hidden" name="status" value="hadir">
-                                        <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 text-xs font-bold shadow-sm transition-all whitespace-nowrap" onclick="return confirm('Tandai Pimpinan HADIR pada kegiatan ini?');">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                            Hadir
-                                        </button>
-                                    </form>
-                                    <form action="{{ route('activities.disposition', $activity->id) }}" method="POST" class="inline">
-                                        @csrf
-                                        <input type="hidden" name="status" value="skip">
-                                        <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-600 text-white rounded-md hover:bg-red-700 text-xs font-bold shadow-sm transition-all whitespace-nowrap" onclick="return confirm('Tandai Pimpinan SKIP (Batal Hadir) pada kegiatan ini?');">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                                            Skip
-                                        </button>
-                                    </form>
-                                    <button x-data x-on:click.prevent="$dispatch('open-modal', 'disposition-activity-{{ $activity->id }}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-xs font-bold shadow-sm transition-all whitespace-nowrap">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
-                                        Disposisikan
-                                    </button>
+                                    <div class="w-full"></div>
                                 @endif
+                                <form action="{{ route('activities.disposition', $activity->id) }}" method="POST" class="inline">
+                                    @csrf
+                                    <input type="hidden" name="status" value="hadir">
+                                    <input type="hidden" name="from_leader_id" value="{{ $userLeaderId }}">
+                                    <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 text-xs font-bold shadow-sm transition-all whitespace-nowrap" onclick="return confirm('Tandai Pimpinan HADIR pada kegiatan ini?');">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        Hadir
+                                    </button>
+                                </form>
+                                <form action="{{ route('activities.disposition', $activity->id) }}" method="POST" class="inline">
+                                    @csrf
+                                    <input type="hidden" name="status" value="skip">
+                                    <input type="hidden" name="from_leader_id" value="{{ $userLeaderId }}">
+                                    <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-600 text-white rounded-md hover:bg-red-700 text-xs font-bold shadow-sm transition-all whitespace-nowrap" onclick="return confirm('Tandai Pimpinan SKIP (Batal Hadir) pada kegiatan ini?');">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                        Skip
+                                    </button>
+                                </form>
+                                <button x-data x-on:click.prevent="$dispatch('open-modal', 'disposition-activity-{{ $activity->id }}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-xs font-bold shadow-sm transition-all whitespace-nowrap">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                                    Ubah Disposisi
+                                </button>
                             @endif
                         </div>
                     </div>
@@ -338,6 +349,7 @@
         <form method="post" action="{{ route('activities.disposition', $activity->id) }}" class="p-6">
             @csrf
             <input type="hidden" name="status" value="disposisi">
+            <input type="hidden" name="from_leader_id" value="{{ $userLeaderId ?? $activity->leader_id }}">
             <h2 class="text-lg font-bold text-indigo-700 mb-4 border-b pb-2">Disposisikan Agenda</h2>
             <div class="mb-4">
                 <x-input-label for="disposition_to_{{ $activity->id }}" value="Disposisikan Kepada" />

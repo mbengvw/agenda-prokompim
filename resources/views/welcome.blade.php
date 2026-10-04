@@ -6,6 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ config('app.name', 'LEAD-IT') }}</title>
 
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0ea5e9">
+    <link rel="apple-touch-icon" href="/images/logo.png">
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800&display=swap" rel="stylesheet" />
@@ -105,6 +110,14 @@
                                 </a>
                             @endauth
                         @endif
+                        
+                        <button id="installAppBtn" style="display: none;"
+                            class="px-8 py-3.5 w-full sm:w-auto text-base font-semibold text-primary-700 bg-white border-2 border-primary-100 rounded-full hover:bg-primary-50 transition-all shadow-md active:scale-95 text-center flex items-center justify-center gap-2 group">
+                            Install Aplikasi
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:-translate-y-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                        </button>
                     </div>
                 </div>
 
@@ -181,6 +194,40 @@
             <p>&copy; {{ date('Y') }} LEAD-IT | Developed By. Code-91</p>
         </footer>
     </div>
+    
+    <script>
+        let deferredPrompt;
+        const installBtn = document.getElementById('installAppBtn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent the mini-infobar from appearing on mobile
+            e.preventDefault();
+            // Stash the event so it can be triggered later.
+            deferredPrompt = e;
+            // Update UI notify the user they can install the PWA
+            installBtn.style.display = 'flex';
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                // Show the install prompt
+                deferredPrompt.prompt();
+                // Wait for the user to respond to the prompt
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('User accepted the install prompt');
+                }
+                // We've used the prompt, and can't use it again, throw it away
+                deferredPrompt = null;
+                installBtn.style.display = 'none';
+            }
+        });
+        
+        window.addEventListener('appinstalled', (evt) => {
+            console.log('INSTALL: Success');
+            installBtn.style.display = 'none';
+        });
+    </script>
 </body>
 
 </html>

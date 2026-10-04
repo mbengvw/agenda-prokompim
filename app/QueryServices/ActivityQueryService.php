@@ -78,10 +78,11 @@ class ActivityQueryService
             return $leader->level < 4;
         })->sortBy('level')->values();
 
-        $timelineActivities = $this->model->with(['companions', 'location', 'organization'])
+        $query = $this->model->with(['companions', 'location', 'organization', 'leader'])
             ->whereDate('activity_date', $date)
-            ->when($status, fn ($q) => $q->where('status', $status))
-            ->get();
+            ->when($status, fn ($q) => $q->where('status', $status));
+
+        $timelineActivities = $query->get();
 
         foreach ($activeLeaders as $leader) {
             $leaderActivities = [];
