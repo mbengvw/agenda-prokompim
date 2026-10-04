@@ -70,7 +70,7 @@
                                         </div>
                                         <div class="text-base font-extrabold text-gray-800 group-hover:text-red-700 transition-colors">{{ $act->title }}</div>
                                         @if($act->leader)
-                                            <div class="text-sm text-gray-600 mt-1">Pimpinan Utama: <span class="font-bold text-gray-800">{{ $act->leader->name }}</span></div>
+                                            <div class="text-sm text-gray-600 mt-1">Agenda {{ \Illuminate\Support\Str::title($act->leader->position) }}: <span class="font-bold text-gray-800">{{ $act->leader->name }}</span></div>
                                         @endif
                                     </div>
                                     <div class="text-red-600 flex items-center text-sm font-bold shrink-0 bg-red-50 px-4 py-2 rounded-lg group-hover:bg-red-600 group-hover:text-white transition-all">
