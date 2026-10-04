@@ -25,18 +25,42 @@ class ActivityController extends Controller
     public function exportPdf(Request $request)
     {
         $dateFilter = $request->input('date', Carbon::today()->toDateString());
-        
-        $activities = Activity::with(['leader', 'location', 'organization', 'protocolOfficer', 'companions'])
+        $leaderId = $request->input('leader_id');
+
+        if (!$leaderId) {
+            return redirect()->back()->withErrors('Pimpinan harus dipilih untuk mencetak PDF.');
+        }
+
+        $leader = Leader::findOrFail($leaderId);
+
+        // Dihadiri: 
+        // Kegiatan yang bola akhirnya ada di dia (dia ujung rantainya)
+        $dihadiri = Activity::with(['leader', 'location', 'organization', 'protocolOfficer', 'companions'])
             ->whereDate('activity_date', $dateFilter)
-            ->where('status', 'approved')
+            ->whereIn('status', ['approved', 'submitted'])
+            ->where('leader_id', $leaderId)
+            ->orderBy('start_time')
+            ->get();
+
+        // Didisposisi:
+        // Kegiatan yang pernah dia disposisikan ke orang lain, dan bola akhirnya BUKAN di dia
+        $didisposisi = Activity::with(['leader', 'location', 'organization', 'protocolOfficer', 'companions'])
+            ->whereDate('activity_date', $dateFilter)
+            ->whereIn('status', ['approved', 'submitted'])
+            ->where('leader_id', '!=', $leaderId)
+            ->whereHas('dispositions', function ($q) use ($leaderId) {
+                $q->where('from_leader_id', $leaderId)
+                  ->where('status', 'disposisi');
+            })
             ->orderBy('start_time')
             ->get();
 
         $dateFormatted = Carbon::parse($dateFilter)->locale('id')->translatedFormat('l, j F Y');
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('activities.pdf', compact('activities', 'dateFormatted'));
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('activities.pdf', compact('dihadiri', 'didisposisi', 'leader', 'dateFormatted'));
         
-        return $pdf->download("Agenda_Kegiatan_{$dateFilter}.pdf");
+        $fileName = "Agenda_" . str_replace(' ', '_', $leader->short_name ?: $leader->name) . "_{$dateFilter}.pdf";
+        return $pdf->download($fileName);
     }
 
     public function index(Request $request)
@@ -61,34 +85,14 @@ class ActivityController extends Controller
     {
         $date = $request->query('date', Carbon::today()->toDateString());
 
-        $leaders = Leader::where('is_active', true)->orderBy('name')->get()->map(function ($leader) {
-            $pos = strtolower($leader->position);
-            if (str_contains($pos, 'wakil bupati')) {
-                $leader->level = 2;
-            } elseif (str_contains($pos, 'bupati')) {
-                $leader->level = 1;
-            } elseif (str_contains($pos, 'sekda') || str_contains($pos, 'sekretaris daerah')) {
-                $leader->level = 3;
-            } else {
-                $leader->level = 4;
-            }
-
-            return $leader;
-        });
+        $leaders = Leader::where('is_active', true)->orderBy('hierarchy_level')->get();
 
         $user = auth()->user();
         $mainLeaders = $leaders->filter(function ($leader) use ($user) {
-            if ($user->hasRole('ajudan_bupati')) {
-                return $leader->level === 1;
+            if ($user->leader_id) {
+                return $leader->id === $user->leader_id;
             }
-            if ($user->hasRole('ajudan_wabup')) {
-                return $leader->level === 2;
-            }
-            if ($user->hasRole('ajudan_sekda')) {
-                return $leader->level === 3;
-            }
-
-            return in_array($leader->level, [1, 2, 3]);
+            return in_array($leader->hierarchy_level, [1, 2, 3]);
         });
 
         $locations = Location::orderBy('name')->get();
@@ -175,34 +179,14 @@ class ActivityController extends Controller
 
     public function edit(Activity $activity)
     {
-        $leaders = Leader::where('is_active', true)->orderBy('name')->get()->map(function ($leader) {
-            $pos = strtolower($leader->position);
-            if (str_contains($pos, 'wakil bupati')) {
-                $leader->level = 2;
-            } elseif (str_contains($pos, 'bupati')) {
-                $leader->level = 1;
-            } elseif (str_contains($pos, 'sekda') || str_contains($pos, 'sekretaris daerah')) {
-                $leader->level = 3;
-            } else {
-                $leader->level = 4;
-            }
-
-            return $leader;
-        });
+        $leaders = Leader::where('is_active', true)->orderBy('hierarchy_level')->get();
 
         $user = auth()->user();
         $mainLeaders = $leaders->filter(function ($leader) use ($user) {
-            if ($user->hasRole('ajudan_bupati')) {
-                return $leader->level === 1;
+            if ($user->leader_id) {
+                return $leader->id === $user->leader_id;
             }
-            if ($user->hasRole('ajudan_wabup')) {
-                return $leader->level === 2;
-            }
-            if ($user->hasRole('ajudan_sekda')) {
-                return $leader->level === 3;
-            }
-
-            return in_array($leader->level, [1, 2, 3]);
+            return in_array($leader->hierarchy_level, [1, 2, 3]);
         });
 
         $locations = Location::orderBy('name')->get();

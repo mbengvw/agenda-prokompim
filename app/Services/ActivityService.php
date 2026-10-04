@@ -17,6 +17,10 @@ class ActivityService
         if (! isset($data['status'])) {
             $data['status'] = 'draft';
         }
+        
+        if (isset($data['leader_id'])) {
+            $data['original_leader_id'] = $data['leader_id'];
+        }
 
         $companionIds = $data['companion_ids'] ?? [];
         unset($data['companion_ids']);

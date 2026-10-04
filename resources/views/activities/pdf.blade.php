@@ -79,92 +79,144 @@
 <body>
 
     <div class="header">
-        <h1>AGENDA KEGIATAN BUPATI</h1>
+        <h1>AGENDA KEGIATAN {{ strtoupper($leader->position) }}</h1>
         <p>{{ $dateFormatted }}</p>
     </div>
 
-    <div class="activity-list">
-        @foreach($activities as $index => $activity)
-            @php
-                $start = \Carbon\Carbon::parse($activity->start_time);
-                $end = $activity->end_time ? \Carbon\Carbon::parse($activity->end_time) : null;
-                $duration = $end ? $start->diffInMinutes($end) : null;
-                
-                $timeString = $start->format('H.i');
-                if ($end) {
-                    $timeString .= '-' . $end->format('H.i');
-                }
-                $timeString .= ' WIB';
-                if ($duration) {
-                    $timeString .= " ({$duration}')";
-                }
-            @endphp
-            <div class="activity-item">
-                <div class="time-row">({{ $index + 1 }}). Pkl. {{ $timeString }}</div>
-                <div class="title-row">{{ $activity->title }}</div>
-                <table class="detail-table">
-                    <tr>
-                        <td class="label-col">Lokasi</td>
-                        <td class="colon-col">:</td>
-                        <td>{{ $activity->location ? $activity->location->name : $activity->location_text }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label-col">Penyelenggara</td>
-                        <td class="colon-col">:</td>
-                        <td>{{ $activity->organization ? $activity->organization->name : $activity->organizer_text }}</td>
-                    </tr>
-                    @if($activity->dress_code)
-                    <tr>
-                        <td class="label-col">Pakaian</td>
-                        <td class="colon-col">:</td>
-                        <td>{{ $activity->dress_code }}</td>
-                    </tr>
+    @if($dihadiri->isEmpty() && $didisposisi->isEmpty())
+        <p>Tidak ada agenda kegiatan pada tanggal ini.</p>
+    @else
+
+        @if($dihadiri->isNotEmpty())
+            <h2 style="font-size: 15px; margin-bottom: 10px; border-bottom: 2px solid #ccc; padding-bottom: 5px;">A. KEGIATAN DIHADIRI</h2>
+            <div class="activity-list">
+                @foreach($dihadiri as $index => $activity)
+                    @php
+                        $start = \Carbon\Carbon::parse($activity->start_time);
+                        $end = $activity->end_time ? \Carbon\Carbon::parse($activity->end_time) : null;
+                        $duration = $end ? $start->diffInMinutes($end) : null;
+                        
+                        $timeString = $start->format('H.i');
+                        if ($end) {
+                            $timeString .= '-' . $end->format('H.i');
+                        }
+                        $timeString .= ' WIB';
+                        if ($duration) {
+                            $timeString .= " ({$duration}')";
+                        }
+                    @endphp
+                    <div class="activity-item">
+                        <div class="time-row">({{ $index + 1 }}). Pkl. {{ $timeString }}</div>
+                        <div class="title-row">{{ $activity->title }}</div>
+                        <table class="detail-table">
+                            <tr>
+                                <td class="label-col">Lokasi</td>
+                                <td class="colon-col">:</td>
+                                <td>{{ $activity->location ? $activity->location->name : $activity->location_text }}</td>
+                            </tr>
+                            <tr>
+                                <td class="label-col">Penyelenggara</td>
+                                <td class="colon-col">:</td>
+                                <td>{{ $activity->organization ? $activity->organization->name : $activity->organizer_text }}</td>
+                            </tr>
+                            @if($activity->dress_code)
+                            <tr>
+                                <td class="label-col">Pakaian</td>
+                                <td class="colon-col">:</td>
+                                <td>{{ $activity->dress_code }}</td>
+                            </tr>
+                            @endif
+                            @if($activity->companions->count() > 0)
+                            <tr>
+                                <td class="label-col">Pendamping</td>
+                                <td class="colon-col">:</td>
+                                <td>{{ $activity->companions->pluck('name')->join(', ') }}</td>
+                            </tr>
+                            @endif
+                            @if($activity->protocolOfficer)
+                            <tr>
+                                <td class="label-col">PIC Protokol</td>
+                                <td class="colon-col">:</td>
+                                <td>{{ $activity->protocolOfficer->name }}</td>
+                            </tr>
+                            <tr>
+                                <td class="label-col">No.Hp</td>
+                                <td class="colon-col">:</td>
+                                <td>{{ $activity->protocolOfficer->phone ?? '-' }}</td>
+                            </tr>
+                            @endif
+                            @if($activity->contact_person_name)
+                            <tr>
+                                <td class="label-col">Narahubung</td>
+                                <td class="colon-col">:</td>
+                                <td>{{ $activity->contact_person_name }}</td>
+                            </tr>
+                                @if($activity->contact_person_phone)
+                                <tr>
+                                    <td class="label-col">No.Hp</td>
+                                    <td class="colon-col">:</td>
+                                    <td>{{ $activity->contact_person_phone }}</td>
+                                </tr>
+                                @endif
+                            @endif
+                        </table>
+                    </div>
+                    
+                    @if(!$loop->last)
+                        <hr class="separator">
                     @endif
-                    @if($activity->companions->count() > 0)
-                    <tr>
-                        <td class="label-col">Pendamping</td>
-                        <td class="colon-col">:</td>
-                        <td>{{ $activity->companions->pluck('name')->join(', ') }}</td>
-                    </tr>
-                    @endif
-                    @if($activity->protocolOfficer)
-                    <tr>
-                        <td class="label-col">PIC Protokol</td>
-                        <td class="colon-col">:</td>
-                        <td>{{ $activity->protocolOfficer->name }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label-col">No.Hp</td>
-                        <td class="colon-col">:</td>
-                        <td>{{ $activity->protocolOfficer->phone ?? '-' }}</td>
-                    </tr>
-                    @endif
-                    @if($activity->contact_person_name)
-                    <tr>
-                        <td class="label-col">Narahubung</td>
-                        <td class="colon-col">:</td>
-                        <td>{{ $activity->contact_person_name }}</td>
-                    </tr>
-                        @if($activity->contact_person_phone)
-                        <tr>
-                            <td class="label-col">No.Hp</td>
-                            <td class="colon-col">:</td>
-                            <td>{{ $activity->contact_person_phone }}</td>
-                        </tr>
-                        @endif
-                    @endif
-                </table>
+                @endforeach
             </div>
-            
-            @if(!$loop->last)
-                <hr class="separator">
-            @endif
-        @endforeach
-        
-        @if($activities->isEmpty())
-            <p>Tidak ada agenda kegiatan yang disetujui pada tanggal ini.</p>
         @endif
-    </div>
+
+        @if($didisposisi->isNotEmpty())
+            <h2 style="font-size: 15px; margin-bottom: 10px; border-bottom: 2px solid #ccc; padding-bottom: 5px; margin-top: 30px;">B. KEGIATAN DIDISPOSISIKAN</h2>
+            <div class="activity-list">
+                @foreach($didisposisi as $index => $activity)
+                    @php
+                        $start = \Carbon\Carbon::parse($activity->start_time);
+                        $end = $activity->end_time ? \Carbon\Carbon::parse($activity->end_time) : null;
+                        $duration = $end ? $start->diffInMinutes($end) : null;
+                        
+                        $timeString = $start->format('H.i');
+                        if ($end) {
+                            $timeString .= '-' . $end->format('H.i');
+                        }
+                        $timeString .= ' WIB';
+                        if ($duration) {
+                            $timeString .= " ({$duration}')";
+                        }
+                    @endphp
+                    <div class="activity-item">
+                        <div class="time-row">({{ $index + 1 }}). Pkl. {{ $timeString }}</div>
+                        <div class="title-row">{{ $activity->title }}</div>
+                        <table class="detail-table">
+                            <tr>
+                                <td class="label-col" style="color: #e50000; font-weight: bold;">Didisposisikan Ke</td>
+                                <td class="colon-col">:</td>
+                                <td style="font-weight: bold;">{{ $activity->leader ? $activity->leader->name . ' (' . $activity->leader->position . ')' : '-' }}</td>
+                            </tr>
+                            <tr>
+                                <td class="label-col">Lokasi</td>
+                                <td class="colon-col">:</td>
+                                <td>{{ $activity->location ? $activity->location->name : $activity->location_text }}</td>
+                            </tr>
+                            <tr>
+                                <td class="label-col">Penyelenggara</td>
+                                <td class="colon-col">:</td>
+                                <td>{{ $activity->organization ? $activity->organization->name : $activity->organizer_text }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    @if(!$loop->last)
+                        <hr class="separator">
+                    @endif
+                @endforeach
+            </div>
+        @endif
+
+    @endif
 
     <div class="footer">
         Dicetak pada: {{ \Carbon\Carbon::now()->translatedFormat('d M Y, H:i') }} WIB | Dicetak dari sistem LEAD-IT Prokompim Kuningan

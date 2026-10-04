@@ -26,6 +26,7 @@ class StoreLeaderRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'position' => ['required', 'string', 'max:255'],
             'short_name' => ['nullable', 'string', 'max:255'],
+            'hierarchy_level' => ['required', 'integer', 'min:1'],
             'is_active' => ['nullable', 'boolean'],
         ];
     }

@@ -34,6 +34,7 @@ class Activity extends Model
         'organization_id',
         'organizer_text',
         'leader_id',
+        'original_leader_id',
         'contact_person_name',
         'contact_person_phone',
         'adc',
@@ -82,5 +83,10 @@ class Activity extends Model
     public function dispositions(): HasMany
     {
         return $this->hasMany(ActivityDisposition::class);
+    }
+
+    public function dispositionTo(): BelongsTo
+    {
+        return $this->belongsTo(Leader::class, 'disposition_to_id');
     }
 }

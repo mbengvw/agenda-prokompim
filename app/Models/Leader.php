@@ -10,6 +10,7 @@ class Leader extends Model
         'name',
         'position',
         'short_name',
+        'hierarchy_level',
         'is_active',
     ];
 

@@ -214,14 +214,7 @@
                                 $canManageDisposition = false;
                                 $user = auth()->user();
                                 
-                                $userLeaderIds = [];
-                                if ($user->hasRole('ajudan_bupati')) {
-                                    $userLeaderIds = \App\Models\Leader::whereRaw('LOWER(position) LIKE ?', ['%bupati%'])->whereRaw('LOWER(position) NOT LIKE ?', ['%wakil%'])->pluck('id')->toArray();
-                                } elseif ($user->hasRole('ajudan_wabup')) {
-                                    $userLeaderIds = \App\Models\Leader::whereRaw('LOWER(position) LIKE ?', ['%wakil bupati%'])->pluck('id')->toArray();
-                                } elseif ($user->hasRole('ajudan_sekda')) {
-                                    $userLeaderIds = \App\Models\Leader::whereRaw('LOWER(position) LIKE ?', ['%sekda%'])->orWhereRaw('LOWER(position) LIKE ?', ['%sekretaris daerah%'])->pluck('id')->toArray();
-                                }
+                                $userLeaderIds = $user->leader_id ? [$user->leader_id] : [];
 
                                 $existingDisposition = null;
                                 if (!empty($userLeaderIds)) {
@@ -356,38 +349,19 @@
                 <select id="disposition_to_{{ $activity->id }}" name="to_leader_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
                     <option value="">-- Pilih Pejabat --</option>
                     @php
-                        $currentLeaderLevel = 1;
-                        if ($activity->leader) {
-                            $pos = strtolower($activity->leader->position);
-                            if (str_contains($pos, 'bupati') && !str_contains($pos, 'wakil')) {
-                                $currentLeaderLevel = 1;
-                            } elseif (str_contains($pos, 'wakil bupati')) {
-                                $currentLeaderLevel = 2;
-                            } elseif (str_contains($pos, 'sekda') || str_contains($pos, 'sekretaris daerah')) {
-                                $currentLeaderLevel = 3;
-                            } else {
-                                $currentLeaderLevel = 4;
-                            }
+                        $currentLeaderLevel = 99;
+                        $fromLeaderId = $userLeaderId ?? $activity->leader_id;
+                        $fromLeader = \App\Models\Leader::find($fromLeaderId);
+                        
+                        if ($fromLeader) {
+                            $currentLeaderLevel = $fromLeader->hierarchy_level;
                         }
 
                         $dispoLeaders = \App\Models\Leader::where('is_active', true)
-                            ->where('id', '!=', $activity->leader_id)
-                            ->get()
-                            ->map(function($leader) {
-                                $pos = strtolower($leader->position);
-                                if (str_contains($pos, 'bupati') && !str_contains($pos, 'wakil')) {
-                                    $leader->level = 1;
-                                } elseif (str_contains($pos, 'wakil bupati')) {
-                                    $leader->level = 2;
-                                } elseif (str_contains($pos, 'sekda') || str_contains($pos, 'sekretaris daerah')) {
-                                    $leader->level = 3;
-                                } else {
-                                    $leader->level = 4;
-                                }
-                                return $leader;
-                            })->filter(function($leader) use ($currentLeaderLevel) {
-                                return $leader->level > $currentLeaderLevel;
-                            })->sortBy('level');
+                            ->where('id', '!=', $fromLeaderId)
+                            ->where('hierarchy_level', '>', $currentLeaderLevel)
+                            ->orderBy('hierarchy_level', 'asc')
+                            ->get();
                     @endphp
                     @foreach($dispoLeaders as $dl)
                         <option value="{{ $dl->id }}">{{ $dl->name }} ({{ $dl->position }})</option>

@@ -19,7 +19,8 @@ class UserController extends Controller
     public function index()
     {
         $users = $this->userQueryService->getAllUsers();
-        return view('users.index', compact('users'));
+        $leaders = \App\Models\Leader::where('is_active', true)->get();
+        return view('users.index', compact('users', 'leaders'));
     }
 
     public function create()
@@ -35,6 +36,7 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
             'roles' => 'required|array',
+            'leader_id' => 'nullable|exists:leaders,id',
         ]);
 
         $this->userService->create($validated);
@@ -55,6 +57,7 @@ class UserController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'password' => 'nullable|string|min:8|confirmed',
             'roles' => 'required|array',
+            'leader_id' => 'nullable|exists:leaders,id',
         ]);
 
         $this->userService->update($user, $validated);

@@ -204,6 +204,11 @@
                                 <x-text-input id="short_name_{{ $leader->id }}" name="short_name" type="text" class="mt-1 block w-full" :value="old('short_name', $leader->short_name)" />
                                 <x-input-error :messages="$errors->get('short_name')" class="mt-2" />
                             </div>
+                            <div>
+                                <x-input-label for="hierarchy_level_{{ $leader->id }}" value="{{ __('Level Hierarki (1=Tertinggi, 2=Bawahnya, dst)') }}" />
+                                <x-text-input id="hierarchy_level_{{ $leader->id }}" name="hierarchy_level" type="number" class="mt-1 block w-full" :value="old('hierarchy_level', $leader->hierarchy_level)" required />
+                                <x-input-error :messages="$errors->get('hierarchy_level')" class="mt-2" />
+                            </div>
                             <div class="flex items-center pt-2">
                                 <input type="hidden" name="is_active" value="0">
                                 <input id="is_active_{{ $leader->id }}" name="is_active" type="checkbox" value="1" class="w-5 h-5 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 focus:ring-2 cursor-pointer" {{ old('is_active', $leader->is_active) ? 'checked' : '' }}>
@@ -254,6 +259,11 @@
                     <x-input-label for="short_name" value="{{ __('Singkatan Jabatan (Opsional)') }}" />
                     <x-text-input id="short_name" name="short_name" type="text" class="mt-1 block w-full" :value="old('short_name')" />
                     <x-input-error :messages="$errors->get('short_name')" class="mt-2" />
+                </div>
+                <div>
+                    <x-input-label for="hierarchy_level" value="{{ __('Level Hierarki (1=Tertinggi, 2=Bawahnya, dst)') }}" />
+                    <x-text-input id="hierarchy_level" name="hierarchy_level" type="number" class="mt-1 block w-full" :value="old('hierarchy_level', 99)" required />
+                    <x-input-error :messages="$errors->get('hierarchy_level')" class="mt-2" />
                 </div>
                 <div class="flex items-center pt-2">
                     <input type="hidden" name="is_active" value="0">
