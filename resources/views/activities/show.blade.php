@@ -143,7 +143,7 @@
                                     <p class="text-teal-600 text-sm">{{ $activity->contact_person_phone }}</p>
                                 </div>
                                 <div>
-                                    <h3 class="text-xs font-bold text-teal-800 uppercase tracking-wider mb-1">Protokol</h3>
+                                    <h3 class="text-xs font-bold text-teal-800 uppercase tracking-wider mb-1">PIC Protokol</h3>
                                     <p class="text-gray-900">{{ $activity->protocolOfficer?->name ?: '-' }}</p>
                                     <p class="text-teal-600 text-sm">{{ $activity->protocolOfficer?->phone }}</p>
                                 </div>
