@@ -4,7 +4,7 @@
             <h2 class="font-bold text-lg sm:text-xl text-primary-900 leading-tight truncate">
                 {{ __('Tambah Agenda Baru') }}
             </h2>
-            <a href="{{ route('activities.index') }}" class="shrink-0 inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 bg-gray-200 hover:bg-gray-300 border border-transparent rounded-full font-bold text-[10px] sm:text-xs text-gray-800 uppercase tracking-widest shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
+            <a href="{{ route('activities.index', array_filter(['date' => $date ?? request('date'), 'leader' => $leaderFilter ?? request('leader')])) }}" class="shrink-0 inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 bg-gray-200 hover:bg-gray-300 border border-transparent rounded-full font-bold text-[10px] sm:text-xs text-gray-800 uppercase tracking-widest shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
                 <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 Kembali
             </a>
@@ -14,7 +14,7 @@
     <div class="py-6 sm:py-12">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-white sm:rounded-2xl shadow-xl border border-primary-100 overflow-hidden">
-                <form method="post" action="{{ route('activities.store') }}" class="p-5 sm:p-8">
+                <form method="post" action="{{ route('activities.store', array_filter(['date' => request('date'), 'leader' => request('leader')])) }}" class="p-5 sm:p-8">
                     @csrf
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -60,23 +60,35 @@
                         </div>
                         
                         <div>
-                            <x-input-label value="Pimpinan (Utama)" />
-                            <select name="leader_id" x-data x-on:change="$dispatch('main-leader-changed', $event.target.value)" class="mt-2 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
-                                <option value="">-- Pilih --</option>
-                                @foreach($mainLeaders as $ld)
-                                    <option value="{{ $ld->id }}">{{ $ld->name }} ({{ $ld->position }})</option>
-                                @endforeach
-                            </select>
+                            @if($defaultLeaderId)
+                                @php
+                                    $defaultLeader = $mainLeaders->firstWhere('id', $defaultLeaderId);
+                                @endphp
+                                <x-input-label value="Agenda {{ $defaultLeader->position ?? 'Pimpinan' }}" />
+                                <input type="hidden" name="leader_id" value="{{ $defaultLeaderId }}">
+                                <div class="mt-2 block w-full px-3 py-2 bg-primary-50 border border-primary-200 rounded-md text-sm text-primary-800 font-semibold flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                    {{ $defaultLeader->name ?? '' }} ({{ $defaultLeader->position ?? '' }})
+                                </div>
+                            @else
+                                <x-input-label value="Pimpinan (Utama)" />
+                                <select name="leader_id" x-data x-on:change="$dispatch('main-leader-changed', $event.target.value)" class="mt-2 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm" required>
+                                    <option value="">-- Pilih --</option>
+                                    @foreach($mainLeaders as $ld)
+                                        <option value="{{ $ld->id }}" {{ old('leader_id', $defaultLeaderId ?? '') == $ld->id ? 'selected' : '' }}>{{ $ld->name }} ({{ $ld->position }})</option>
+                                    @endforeach
+                                </select>
+                            @endif
                         </div>
                         
                         <div>
                             <x-input-label value="Pendamping" />
                             <div class="flex gap-2 items-start">
                                 <div x-data="{
-                                    mainLeaderId: '{{ old('leader_id', '') }}',
+                                    mainLeaderId: '{{ old('leader_id', $defaultLeaderId ?? '') }}',
                                     options: [
                                         @foreach($leaders as $ld)
-                                            { value: '{{ $ld->id }}', text: '{{ addslashes($ld->name) }} ({{ addslashes($ld->position) }})', level: {{ $ld->level }} },
+                                            { value: '{{ $ld->id }}', text: '{{ addslashes($ld->name) }} ({{ addslashes($ld->position) }})', level: {{ $ld->hierarchy_level ?? 4 }} },
                                         @endforeach
                                     ],
                                     selected: {{ json_encode(array_map('strval', old('companion_ids', []))) }},
@@ -199,7 +211,7 @@
                     </div>
                     
                     <div class="mt-8 flex justify-end gap-3 pt-6 border-t border-gray-100">
-                        <a href="{{ route('activities.index') }}" class="px-6 py-2.5 bg-gray-200 text-gray-800 rounded-md font-semibold text-xs uppercase hover:bg-gray-300 transition-colors">Batal</a>
+                        <a href="{{ route('activities.index', array_filter(['date' => $date ?? request('date'), 'leader' => $leaderFilter ?? request('leader')])) }}" class="px-6 py-2.5 bg-gray-200 text-gray-800 rounded-md font-semibold text-xs uppercase hover:bg-gray-300 transition-colors">Batal</a>
                         <button type="submit" class="px-6 py-2.5 bg-secondary-500 text-primary-900 rounded-md font-bold text-xs uppercase hover:bg-secondary-600 transition-colors shadow-sm">Simpan Draf</button>
                     </div>
                 </form>

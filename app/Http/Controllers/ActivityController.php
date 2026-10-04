@@ -69,9 +69,16 @@ class ActivityController extends Controller
         $leaderFilter = $request->input('leader');
         $dateFilter = $request->input('date', Carbon::today()->toDateString());
         $statusFilter = $request->input('status');
+        $user = auth()->user();
+        if ($user->leader_id && $user->leader) {
+            $leaderFilter = $user->leader->position;
+        }
+        if (!auth()->user()->leader_id && !$leaderFilter) {
+            return view('activities.select-leader', compact('dateFilter'));
+        }
 
         $activities = $this->queryService->getPaginatedActivities(10, $search, $leaderFilter, $dateFilter, $statusFilter);
-        $timelineData = $this->queryService->getTimelineData($dateFilter, null); // Status removed
+        $timelineData = $this->queryService->getTimelineData($dateFilter, null, $leaderFilter); // Status removed
 
         $leaders = Leader::where('is_active', true)->orderBy('name')->get();
         $locations = Location::orderBy('name')->get();
@@ -84,6 +91,7 @@ class ActivityController extends Controller
     public function create(Request $request)
     {
         $date = $request->query('date', Carbon::today()->toDateString());
+        $leaderFilter = $request->query('leader');
 
         $leaders = Leader::where('is_active', true)->orderBy('hierarchy_level')->get();
 
@@ -94,12 +102,22 @@ class ActivityController extends Controller
             }
             return in_array($leader->hierarchy_level, [1, 2, 3]);
         });
+        
+        $defaultLeaderId = null;
+        if ($user->leader_id) {
+            $defaultLeaderId = $user->leader_id;
+        } elseif ($leaderFilter) {
+            $matched = $mainLeaders->first(fn($l) => strtolower($l->position) === strtolower($leaderFilter));
+            if ($matched) {
+                $defaultLeaderId = $matched->id;
+            }
+        }
 
         $locations = Location::orderBy('name')->get();
         $organizations = Organization::orderBy('name')->get();
         $protocolOfficers = ProtocolOfficer::where('is_active', true)->orderBy('name')->get();
 
-        return view('activities.create', compact('leaders', 'mainLeaders', 'locations', 'organizations', 'protocolOfficers', 'date'));
+        return view('activities.create', compact('leaders', 'mainLeaders', 'locations', 'organizations', 'protocolOfficers', 'date', 'defaultLeaderId', 'leaderFilter'));
     }
 
     public function store(StoreActivityRequest $request)
@@ -162,10 +180,13 @@ class ActivityController extends Controller
             $msg = 'Agenda berhasil ditambahkan (Draf).';
         }
 
-        return redirect()->route('activities.index')->with('success', $msg);
+        return redirect()->route('activities.index', array_filter([
+            'date' => $request->query('date'),
+            'leader' => $request->query('leader')
+        ]))->with('success', $msg);
     }
 
-    public function show(Activity $activity)
+    public function show(Request $request, Activity $activity)
     {
         $activity->load(['leader', 'companions', 'location', 'organization', 'protocolOfficer']);
 
@@ -174,10 +195,13 @@ class ActivityController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return view('activities.show', compact('activity', 'activityLogs'));
+        $dateFilter = $request->query('date');
+        $leaderFilter = $request->query('leader');
+
+        return view('activities.show', compact('activity', 'activityLogs', 'dateFilter', 'leaderFilter'));
     }
 
-    public function edit(Activity $activity)
+    public function edit(Request $request, Activity $activity)
     {
         $leaders = Leader::where('is_active', true)->orderBy('hierarchy_level')->get();
 
@@ -193,7 +217,10 @@ class ActivityController extends Controller
         $organizations = Organization::orderBy('name')->get();
         $protocolOfficers = ProtocolOfficer::where('is_active', true)->orderBy('name')->get();
 
-        return view('activities.edit', compact('activity', 'leaders', 'mainLeaders', 'locations', 'organizations', 'protocolOfficers'));
+        $dateFilter = $request->query('date');
+        $leaderFilter = $request->query('leader');
+
+        return view('activities.edit', compact('activity', 'leaders', 'mainLeaders', 'locations', 'organizations', 'protocolOfficers', 'dateFilter', 'leaderFilter'));
     }
 
     public function update(UpdateActivityRequest $request, Activity $activity)
@@ -237,7 +264,10 @@ class ActivityController extends Controller
 
         $this->service->updateActivity($activity, $data);
 
-        return redirect()->route('activities.index')->with('success', 'Agenda berhasil diperbarui.');
+        return redirect()->route('activities.index', array_filter([
+            'date' => $request->query('date'),
+            'leader' => $request->query('leader')
+        ]))->with('success', 'Agenda berhasil diperbarui.');
     }
 
     public function updateStatus(Request $request, Activity $activity)

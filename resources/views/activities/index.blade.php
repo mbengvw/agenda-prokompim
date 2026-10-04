@@ -4,7 +4,7 @@
             <h2 class="font-bold text-lg sm:text-xl text-primary-900 leading-tight truncate">
                 {{ __('Kelola Agenda Kegiatan') }}
             </h2>
-            <a href="{{ route('activities.create', ['date' => $dateFilter ?? '']) }}" class="shrink-0 inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 bg-secondary-500 hover:bg-secondary-600 border border-transparent rounded-full font-bold text-[10px] sm:text-xs text-primary-900 uppercase tracking-widest shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
+            <a href="{{ route('activities.create', ['date' => $dateFilter ?? '', 'leader' => $leaderFilter]) }}" class="shrink-0 inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 bg-secondary-500 hover:bg-secondary-600 border border-transparent rounded-full font-bold text-[10px] sm:text-xs text-primary-900 uppercase tracking-widest shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
                 <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                 Tambah Agenda
             </a>
@@ -20,6 +20,37 @@
                 </div>
             @endif
 
+            <!-- Active Leader Context Icon for Protocol -->
+            @if(!auth()->user()->leader_id && $leaderFilter)
+            <div class="mb-6 flex justify-center">
+                @php
+                    $quickLeaders = [
+                        ['id' => 'Bupati', 'label' => 'Bupati', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />'],
+                        ['id' => 'Wakil Bupati', 'label' => 'Wakil Bupati', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />'],
+                        ['id' => 'Sekda', 'label' => 'Sekda', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />']
+                    ];
+                    $activeLeader = collect($quickLeaders)->firstWhere('id', $leaderFilter);
+                @endphp
+                
+                @if($activeLeader)
+                <a href="{{ route('activities.index', ['leader' => '', 'date' => $dateFilter, 'view' => request('view')]) }}" 
+                   class="flex flex-col items-center justify-center p-4 sm:p-6 w-48 sm:w-64 rounded-2xl shadow-sm border bg-gradient-to-br from-primary-50 to-primary-100 border-primary-500 ring-2 ring-primary-300 ring-offset-1 transform -translate-y-1 shadow-md hover:shadow-lg transition-all duration-300 group" title="Klik untuk Ganti Pimpinan">
+                    <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mb-3 transition-colors duration-300 bg-primary-600 text-white shadow-inner group-hover:bg-primary-700">
+                        <svg class="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            {!! $activeLeader['icon'] !!}
+                        </svg>
+                    </div>
+                    <span class="font-extrabold text-sm sm:text-base tracking-wider uppercase text-primary-800 text-center leading-tight">
+                        {{ $activeLeader['label'] }}
+                    </span>
+                    <span class="mt-2 text-[10px] text-primary-600 font-medium bg-white px-2 py-0.5 rounded-full border border-primary-200 group-hover:bg-primary-50">
+                        Ganti Pimpinan &rarr;
+                    </span>
+                </a>
+                @endif
+            </div>
+            @endif
+
             <!-- Filters -->
             <div class="mb-6 bg-white p-4 rounded-xl shadow-sm border border-primary-100 flex flex-col sm:flex-row gap-4 items-center justify-between">
                 <form action="{{ route('activities.index') }}" method="GET" class="w-full sm:w-auto flex flex-col sm:flex-row gap-2">
@@ -33,12 +64,9 @@
                             </svg>
                         </div>
                     </div>
-                    <select name="leader" onchange="this.form.submit()" class="border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500">
-                        <option value="">Semua Pimpinan</option>
-                        <option value="Bupati" {{ $leaderFilter == 'Bupati' ? 'selected' : '' }}>Bupati</option>
-                        <option value="Wakil Bupati" {{ $leaderFilter == 'Wakil Bupati' ? 'selected' : '' }}>Wakil Bupati</option>
-                        <option value="Sekda" {{ $leaderFilter == 'Sekda' ? 'selected' : '' }}>Sekda</option>
-                    </select>
+                    @if($leaderFilter)
+                        <input type="hidden" name="leader" value="{{ $leaderFilter }}">
+                    @endif
                     <select name="status" onchange="this.form.submit()" class="border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500">
                         <option value="">Semua Status</option>
                         <option value="draft" {{ $statusFilter == 'draft' ? 'selected' : '' }}>Draft</option>
@@ -107,7 +135,7 @@
                                     <span>{{ \Carbon\Carbon::parse($activity->start_time)->format('H:i') }} - {{ $activity->end_time ? \Carbon\Carbon::parse($activity->end_time)->format('H:i') : 'Selesai' }}</span>
                                 </div>
                             </div>
-                            <a href="{{ route('activities.show', $activity->id) }}" class="block mt-4 mb-2">
+                            <a href="{{ route('activities.show', ['activity' => $activity->id, 'date' => $dateFilter, 'leader' => $leaderFilter]) }}" class="block mt-4 mb-2">
                                 <h3 class="text-lg font-extrabold text-gray-900 leading-snug group-hover:text-primary-600 transition-colors pr-12 line-clamp-2">{{ $activity->title }}</h3>
                             </a>
                             
@@ -234,7 +262,7 @@
                                     {{ ucfirst($activity->status) }}
                                 </span>
                             </div>                            <div class="flex items-center gap-3">
-                                <a href="{{ route('activities.edit', $activity->id) }}" class="p-1.5 inline-flex text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all" title="Edit">
+                                <a href="{{ route('activities.edit', ['activity' => $activity->id, 'date' => $dateFilter, 'leader' => $leaderFilter]) }}" class="p-1.5 inline-flex text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all" title="Edit">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                 </a>
                                 @if($activity->created_by === auth()->id() || str_contains(auth()->user()->roles->first()?->name ?? '', 'ajudan_'))
@@ -292,7 +320,7 @@
                                         
                                         <!-- Kegiatan -->
                                         <td class="px-6 py-4">
-                                            <a href="{{ route('activities.show', $activity->id) }}" class="text-sm font-bold text-gray-900 hover:text-primary-600 line-clamp-2 mb-2">
+                                            <a href="{{ route('activities.show', ['activity' => $activity->id, 'date' => $dateFilter, 'leader' => $leaderFilter]) }}" class="text-sm font-bold text-gray-900 hover:text-primary-600 line-clamp-2 mb-2">
                                                 {{ $activity->title }}
                                             </a>
                                             <div class="text-xs text-gray-600">
@@ -367,8 +395,8 @@
                                         <!-- Aksi -->
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <div class="flex flex-col items-end gap-2">
-                                                <a href="{{ route('activities.show', $activity->id) }}" class="text-teal-600 hover:text-teal-900 bg-teal-50 hover:bg-teal-100 px-3 py-1 rounded transition-colors text-xs inline-block text-center min-w-[70px]">Detail</a>
-                                                <a href="{{ route('activities.edit', $activity->id) }}" class="text-primary-600 hover:text-primary-900 bg-primary-50 hover:bg-primary-100 px-3 py-1 rounded transition-colors text-xs inline-block text-center min-w-[70px]">Edit</a>
+                                                <a href="{{ route('activities.show', ['activity' => $activity->id, 'date' => $dateFilter, 'leader' => $leaderFilter]) }}" class="text-teal-600 hover:text-teal-900 bg-teal-50 hover:bg-teal-100 px-3 py-1 rounded transition-colors text-xs inline-block text-center min-w-[70px]">Detail</a>
+                                                <a href="{{ route('activities.edit', ['activity' => $activity->id, 'date' => $dateFilter, 'leader' => $leaderFilter]) }}" class="text-primary-600 hover:text-primary-900 bg-primary-50 hover:bg-primary-100 px-3 py-1 rounded transition-colors text-xs inline-block text-center min-w-[70px]">Edit</a>
                                                 @if($activity->created_by === auth()->id() || str_contains(auth()->user()->roles->first()?->name ?? '', 'ajudan_'))
                                                 <form action="{{ route('activities.destroy', $activity->id) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus agenda ini?');">
                                                     @csrf
@@ -456,7 +484,7 @@
                                             $bgClass = $la['is_primary'] ? 'bg-slate-600 border-slate-700 text-white' : 'bg-slate-100 border-slate-300 text-slate-800 border-dashed';
                                         }
                                     @endphp
-                                    <a href="{{ route('activities.show', $la['activity']->id) }}"
+                                    <a href="{{ route('activities.show', ['activity' => $la['activity']->id, 'date' => $dateFilter, 'leader' => $leaderFilter]) }}"
                                        class="absolute rounded p-1.5 shadow-sm border cursor-pointer hover:shadow-md hover:ring-2 hover:ring-offset-1 hover:ring-primary-400 transition-all overflow-hidden flex flex-col justify-center {{ $bgClass }}"
                                        style="left: {{ $la['left'] }}%; width: {{ max($la['width'], 2) }}%; top: {{ $la['row'] * 45 + 10 }}px; height: 38px; z-index: 10;"
                                        title="{{ $la['start_time'] }} - {{ $la['end_time'] }} | {{ $la['activity']->title }}">

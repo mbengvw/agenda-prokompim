@@ -28,13 +28,8 @@ class ActivityQueryService
 
         if ($leader) {
             $searchLeader = strtolower($leader);
-            $query->where(function ($q) use ($searchLeader) {
-                $q->whereHas('leader', function ($q2) use ($searchLeader) {
-                    $q2->whereRaw('LOWER(position) = ?', [$searchLeader]);
-                })
-                    ->orWhereHas('companions', function ($q2) use ($searchLeader) {
-                        $q2->whereRaw('LOWER(position) = ?', [$searchLeader]);
-                    });
+            $query->whereHas('leader', function ($q) use ($searchLeader) {
+                $q->whereRaw('LOWER(position) = ?', [$searchLeader]);
             });
         }
 
@@ -54,14 +49,18 @@ class ActivityQueryService
         return $query->paginate($perPage)->withQueryString();
     }
 
-    public function getTimelineData(string $date, ?string $status = null): array
+    public function getTimelineData(string $date, ?string $status = null, ?string $leaderFilter = null): array
     {
         $timelineStartHour = 4;
         $timelineEndHour = 22;
         $totalMinutes = ($timelineEndHour - $timelineStartHour) * 60;
 
         $timelineData = [];
-        $activeLeaders = Leader::where('is_active', true)->get()->map(function ($leader) {
+        $activeLeaders = Leader::where('is_active', true)
+            ->when($leaderFilter, function ($query) use ($leaderFilter) {
+                $query->whereRaw('LOWER(position) = ?', [strtolower($leaderFilter)]);
+            })
+            ->get()->map(function ($leader) {
             $pos = strtolower($leader->position);
             if (str_contains($pos, 'bupati') && ! str_contains($pos, 'wakil')) {
                 $leader->level = 1;

@@ -27,6 +27,9 @@ Route::get('/dashboard', function () {
                      });
               });
         })
+        ->when(auth()->user()->leader_id, function ($q) {
+            $q->where('leader_id', auth()->user()->leader_id);
+        })
         ->orderBy('activity_date', 'asc')
         ->orderBy('start_time', 'asc')
         ->get();
