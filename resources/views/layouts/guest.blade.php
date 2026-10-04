@@ -35,19 +35,25 @@
         </div>
 
         <div class="relative z-10 mb-8 flex flex-col items-center text-center">
-            <a href="/" class="flex items-center gap-3 group">
-                <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-12 h-12 object-contain group-hover:scale-105 transition-transform duration-300">
-                <span class="font-bold text-3xl tracking-tight text-gray-800">LEAD <span
-                        class="text-primary-600">IT</span></span>
+            <a href="/" class="flex items-center gap-3 group -mb-4">
+                <img src="{{ asset('images/logo.png') }}" alt="Logo"
+                    class="w-24 h-24 object-contain group-hover:scale-105 transition-transform duration-300">
+                {{-- <span class="font-bold text-3xl tracking-tight text-gray-800">LEAD <span
+                        class="text-primary-600">IT</span></span> --}}
             </a>
 
-            <h2 class="mt-3 text-lg font-semibold text-gray-700">Leadership Agenda & Integration Tool</h2>
+            <h2 class="text-lg font-semibold text-gray-700">Leadership Agenda & Integration Tool</h2>
             <p class="mt-1 text-sm text-gray-500">Masuk untuk mengelola agenda</p>
         </div>
 
-        <div
-            class="relative z-10 w-[88%] sm:w-full sm:max-w-md px-6 sm:px-8 py-10 bg-gradient-to-br from-primary-50/90 via-white/90 to-secondary-50/90 backdrop-blur-xl shadow-2xl shadow-primary-500/10 overflow-hidden rounded-2xl sm:rounded-3xl border border-primary-100">
-            {{ $slot }}
+        <div class="relative z-10 w-[88%] sm:w-full sm:max-w-md">
+            {{-- Background layer for blur and gradient --}}
+            <div class="absolute inset-0 bg-gradient-to-br from-primary-50/90 via-white/90 to-secondary-50/90 backdrop-blur-xl shadow-2xl shadow-primary-500/10 rounded-2xl sm:rounded-3xl border border-primary-100 pointer-events-none"></div>
+            
+            {{-- Content layer --}}
+            <div class="relative px-6 sm:px-8 py-10">
+                {{ $slot }}
+            </div>
         </div>
 
         <div class="relative z-10 mt-10 text-center text-sm text-gray-500 font-medium">

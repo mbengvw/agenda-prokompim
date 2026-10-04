@@ -34,9 +34,10 @@
         <nav
             class="relative z-10 w-full px-6 py-5 md:px-12 lg:px-24 flex justify-between items-center backdrop-blur-md bg-white/60 border-b border-gray-100/50 sticky top-0">
             <div class="flex items-center gap-3 group cursor-pointer">
-                <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-10 h-10 object-contain group-hover:scale-105 transition-transform duration-300">
-                <span class="font-bold text-xl tracking-tight text-gray-800">LEAD <span
-                        class="text-primary-600">IT</span></span>
+                <img src="{{ asset('images/logo.png') }}" alt="Logo"
+                    class="w-24 h-24 object-contain group-hover:scale-105 transition-transform duration-300">
+                {{-- <span class="font-bold text-xl tracking-tight text-gray-800">LEAD <span
+                        class="text-primary-600">IT</span></span> --}}
             </div>
 
             @if (Route::has('login'))
@@ -107,12 +108,15 @@
                                 </a>
                             @endauth
                         @endif
-                        
+
                         <button id="installAppBtn" style="display: none;"
                             class="px-8 py-3.5 w-full sm:w-auto text-base font-semibold text-primary-700 bg-white border-2 border-primary-100 rounded-full hover:bg-primary-50 transition-all shadow-md active:scale-95 text-center flex items-center justify-center gap-2 group">
                             Install Aplikasi
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:-translate-y-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                class="h-5 w-5 group-hover:-translate-y-1 transition-transform" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                             </svg>
                         </button>
                     </div>
@@ -191,7 +195,7 @@
             <p>&copy; {{ date('Y') }} LEAD-IT | Developed By. Code-91</p>
         </footer>
     </div>
-    
+
     <script>
         let deferredPrompt;
         const installBtn = document.getElementById('installAppBtn');
@@ -210,7 +214,9 @@
                 // Show the install prompt
                 deferredPrompt.prompt();
                 // Wait for the user to respond to the prompt
-                const { outcome } = await deferredPrompt.userChoice;
+                const {
+                    outcome
+                } = await deferredPrompt.userChoice;
                 if (outcome === 'accepted') {
                     console.log('User accepted the install prompt');
                 }
@@ -219,7 +225,7 @@
                 installBtn.style.display = 'none';
             }
         });
-        
+
         window.addEventListener('appinstalled', (evt) => {
             console.log('INSTALL: Success');
             installBtn.style.display = 'none';
