@@ -21,6 +21,69 @@
                 </div>
             </div>
 
+            @if(isset($actionRequiredActivities) && $actionRequiredActivities->isNotEmpty())
+                <div class="bg-red-50 border border-red-200 rounded-2xl p-5 shadow-sm relative overflow-hidden" x-data="{ expanded: false }">
+                    <div class="absolute top-0 left-0 w-1.5 h-full bg-red-500"></div>
+                    <div class="flex justify-between items-center cursor-pointer" @click="expanded = !expanded">
+                        <div class="flex items-center gap-4">
+                            <div class="bg-red-100 p-3 rounded-xl text-red-600 shadow-inner">
+                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                            </div>
+                            <div>
+                                <h3 class="text-red-800 font-extrabold text-base sm:text-lg">Perhatian: Ada {{ $actionRequiredActivities->count() }} agenda yang memerlukan tindakan!</h3>
+                                <p class="text-red-600 text-sm mt-0.5">Agenda ini belum disetujui atau belum ada konfirmasi kehadiran (Klik untuk melihat detail).</p>
+                            </div>
+                        </div>
+                        <div>
+                            <svg class="w-6 h-6 text-red-600 transform transition-transform duration-300" :class="{'rotate-180': expanded}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                    </div>
+                    
+                    <div x-show="expanded" x-collapse x-cloak class="mt-5 border-t border-red-200 pt-4">
+                        <div class="max-h-72 overflow-y-auto pr-2 space-y-3">
+                            @foreach($actionRequiredActivities as $act)
+                                @php
+                                    $needsApproval = $act->status === 'submitted';
+                                    $needsConfirmation = $act->leader_id && !$act->dispositions->where('from_leader_id', $act->leader_id)->count();
+                                @endphp
+                                <a href="{{ route('activities.show', $act->id) }}" class="block bg-white p-4 rounded-xl border border-red-100 hover:border-red-400 hover:shadow-md transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 group">
+                                    <div>
+                                        <div class="flex flex-wrap items-center gap-2 mb-1.5">
+                                            @if($needsApproval)
+                                                <span class="text-[10px] font-extrabold px-2.5 py-1 uppercase tracking-wider rounded-md shadow-sm border bg-yellow-50 text-yellow-700 border-yellow-200">
+                                                    Menunggu Approval
+                                                </span>
+                                            @endif
+                                            @if($needsConfirmation)
+                                                <span class="text-[10px] font-extrabold px-2.5 py-1 uppercase tracking-wider rounded-md shadow-sm border bg-red-50 text-red-700 border-red-200">
+                                                    Belum Konfirmasi
+                                                </span>
+                                            @endif
+                                            <span class="text-xs text-gray-500 font-bold flex items-center gap-1">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                                {{ \Carbon\Carbon::parse($act->activity_date)->translatedFormat('d M Y') }}
+                                            </span>
+                                            <span class="text-xs text-gray-500 font-bold flex items-center gap-1">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                {{ \Carbon\Carbon::parse($act->start_time)->format('H:i') }} - {{ $act->end_time ? \Carbon\Carbon::parse($act->end_time)->format('H:i') : 'Selesai' }} WIB
+                                            </span>
+                                        </div>
+                                        <div class="text-base font-extrabold text-gray-800 group-hover:text-red-700 transition-colors">{{ $act->title }}</div>
+                                        @if($act->leader)
+                                            <div class="text-sm text-gray-600 mt-1">Pimpinan Utama: <span class="font-bold text-gray-800">{{ $act->leader->name }}</span></div>
+                                        @endif
+                                    </div>
+                                    <div class="text-red-600 flex items-center text-sm font-bold shrink-0 bg-red-50 px-4 py-2 rounded-lg group-hover:bg-red-600 group-hover:text-white transition-all">
+                                        Tindak Lanjuti
+                                        <svg class="w-4 h-4 ml-1.5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                                    </div>
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             <!-- Quick Access Section -->
             <div class="px-2 sm:px-0 mt-8">
                 <div class="grid grid-cols-3 sm:grid-cols-6 gap-x-4 gap-y-10">

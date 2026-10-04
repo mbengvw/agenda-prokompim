@@ -22,6 +22,23 @@ class ActivityController extends Controller
         protected ActivityService $service
     ) {}
 
+    public function exportPdf(Request $request)
+    {
+        $dateFilter = $request->input('date', Carbon::today()->toDateString());
+        
+        $activities = Activity::with(['leader', 'location', 'organization', 'protocolOfficer', 'companions'])
+            ->whereDate('activity_date', $dateFilter)
+            ->where('status', 'approved')
+            ->orderBy('start_time')
+            ->get();
+
+        $dateFormatted = Carbon::parse($dateFilter)->locale('id')->translatedFormat('l, j F Y');
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('activities.pdf', compact('activities', 'dateFormatted'));
+        
+        return $pdf->download("Agenda_Kegiatan_{$dateFilter}.pdf");
+    }
+
     public function index(Request $request)
     {
         $search = $request->input('search');
@@ -113,9 +130,7 @@ class ActivityController extends Controller
         $user = auth()->user();
         $data['created_by'] = $user?->id;
 
-        if ($user && $user->hasRole('admin')) {
-            $data['status'] = 'approved';
-        } elseif ($user && str_contains($user->roles->first()?->name ?? '', 'ajudan_')) {
+        if ($user && str_contains($user->roles->first()?->name ?? '', 'ajudan_')) {
             $data['status'] = 'submitted';
         } else {
             $data['status'] = 'draft';
@@ -265,6 +280,14 @@ class ActivityController extends Controller
 
     public function destroy(Activity $activity)
     {
+        $user = auth()->user();
+        $isCreator = $activity->created_by === $user->id;
+        $isAjudan = str_contains($user->roles->first()?->name ?? '', 'ajudan_');
+
+        if (!$isCreator && !$isAjudan) {
+            abort(403, 'Hanya pembuat agenda dan ajudan yang diizinkan untuk menghapus.');
+        }
+
         $this->service->deleteActivity($activity);
 
         return redirect()->route('activities.index')->with('success', 'Agenda berhasil dihapus.');

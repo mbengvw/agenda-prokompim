@@ -16,7 +16,22 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    $actionRequiredActivities = \App\Models\Activity::with(['leader', 'dispositions'])
+        ->where(function ($q) {
+            $q->where('status', 'submitted')
+              ->orWhere(function ($q2) {
+                  $q2->where('status', 'approved')
+                     ->whereNotNull('leader_id')
+                     ->whereDoesntHave('dispositions', function ($q3) {
+                         $q3->whereColumn('from_leader_id', 'activities.leader_id');
+                     });
+              });
+        })
+        ->orderBy('activity_date', 'asc')
+        ->orderBy('start_time', 'asc')
+        ->get();
+
+    return view('dashboard', compact('actionRequiredActivities'));
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
@@ -47,6 +62,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('roles', RoleController::class);
     });
 
+    Route::get('activities/export-pdf', [ActivityController::class, 'exportPdf'])->name('activities.export-pdf');
     Route::resource('activities', ActivityController::class);
     Route::patch('activities/{activity}/status', [ActivityController::class, 'updateStatus'])->name('activities.update-status');
     Route::post('activities/{activity}/disposition', [ActivityDispositionController::class, 'store'])->name('activities.disposition');

@@ -133,17 +133,24 @@
 
                                 @php
                                     $dispositionStatus = null;
+                                    $needsConfirmation = false;
                                     if ($activity->leader_id && $activity->relationLoaded('dispositions')) {
                                         $leaderDisposition = $activity->dispositions->firstWhere('from_leader_id', $activity->leader_id);
                                         if ($leaderDisposition) {
                                             $dispositionStatus = $leaderDisposition->status;
+                                        } elseif (in_array($activity->status, ['draft', 'submitted', 'approved', 'revision'])) {
+                                            $needsConfirmation = true;
                                         }
                                     }
                                 @endphp
 
                                 @if($dispositionStatus)
-                                    <span class="ml-auto inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border {{ $dispositionStatus === 'hadir' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : ($dispositionStatus === 'skip' ? 'bg-red-100 text-red-800 border-red-200' : 'bg-indigo-100 text-indigo-800 border-indigo-200') }}">
-                                        {{ $dispositionStatus }}
+                                    <span class="ml-auto inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-extrabold uppercase tracking-wider shadow-sm border {{ $dispositionStatus === 'hadir' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : ($dispositionStatus === 'skip' ? 'bg-red-100 text-red-800 border-red-200' : 'bg-indigo-100 text-indigo-800 border-indigo-200') }}">
+                                        Kehadiran: {{ $dispositionStatus }}
+                                    </span>
+                                @elseif($needsConfirmation)
+                                    <span class="ml-auto inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-extrabold uppercase tracking-wider shadow-sm border bg-red-100 text-red-800 border-red-300 animate-pulse">
+                                        Belum Konfirmasi
                                     </span>
                                 @endif
                             </div>
@@ -223,13 +230,14 @@
                                         'cancelled' => 'bg-slate-800 text-white ring-1 ring-inset ring-slate-900/10',
                                     ];
                                 @endphp
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold shadow-sm {{ $statusStyles[$activity->status] ?? 'bg-gray-50 text-gray-700 ring-1 ring-inset ring-gray-600/10' }}">
+                                <span class="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-extrabold uppercase tracking-wide shadow-sm {{ $statusStyles[$activity->status] ?? 'bg-gray-50 text-gray-700 ring-1 ring-inset ring-gray-600/10' }} {{ $activity->status === 'submitted' ? 'animate-pulse ring-2 ring-yellow-400' : '' }}">
                                     {{ ucfirst($activity->status) }}
                                 </span>
                             </div>                            <div class="flex items-center gap-3">
                                 <a href="{{ route('activities.edit', $activity->id) }}" class="p-1.5 inline-flex text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all" title="Edit">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                 </a>
+                                @if($activity->created_by === auth()->id() || str_contains(auth()->user()->roles->first()?->name ?? '', 'ajudan_'))
                                 <form action="{{ route('activities.destroy', $activity->id) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus agenda ini?');">
                                     @csrf
                                     @method('DELETE')
@@ -237,6 +245,7 @@
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                     </button>
                                 </form>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -309,9 +318,34 @@
                                                     'cancelled' => 'bg-slate-800 text-white border-slate-900',
                                                 ];
                                             @endphp
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border {{ $statusStyles[$activity->status] ?? 'bg-gray-50 text-gray-700 border-gray-200' }}">
-                                                {{ ucfirst($activity->status) }}
-                                            </span>
+                                            <div class="flex flex-col gap-1.5 items-start mt-2">
+                                                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-extrabold uppercase tracking-wider shadow-sm border {{ $statusStyles[$activity->status] ?? 'bg-gray-50 text-gray-700 border-gray-200' }} {{ $activity->status === 'submitted' ? 'animate-pulse ring-2 ring-yellow-400' : '' }}">
+                                                    Status: {{ ucfirst($activity->status) }}
+                                                </span>
+                                                
+                                                @php
+                                                    $dispositionStatus = null;
+                                                    $needsConfirmation = false;
+                                                    if ($activity->leader_id && $activity->relationLoaded('dispositions')) {
+                                                        $leaderDisposition = $activity->dispositions->firstWhere('from_leader_id', $activity->leader_id);
+                                                        if ($leaderDisposition) {
+                                                            $dispositionStatus = $leaderDisposition->status;
+                                                        } elseif (in_array($activity->status, ['draft', 'submitted', 'approved', 'revision'])) {
+                                                            $needsConfirmation = true;
+                                                        }
+                                                    }
+                                                @endphp
+
+                                                @if($dispositionStatus)
+                                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-extrabold uppercase tracking-wider shadow-sm border {{ $dispositionStatus === 'hadir' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : ($dispositionStatus === 'skip' ? 'bg-red-100 text-red-800 border-red-200' : 'bg-indigo-100 text-indigo-800 border-indigo-200') }}">
+                                                        Kehadiran: {{ $dispositionStatus }}
+                                                    </span>
+                                                @elseif($needsConfirmation)
+                                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-extrabold uppercase tracking-wider shadow-sm border bg-red-100 text-red-800 border-red-300 animate-pulse">
+                                                        Belum Konfirmasi
+                                                    </span>
+                                                @endif
+                                            </div>
                                         </td>
                                         
                                         <!-- Keterangan (Pendamping & Kontak) -->
@@ -335,11 +369,13 @@
                                             <div class="flex flex-col items-end gap-2">
                                                 <a href="{{ route('activities.show', $activity->id) }}" class="text-teal-600 hover:text-teal-900 bg-teal-50 hover:bg-teal-100 px-3 py-1 rounded transition-colors text-xs inline-block text-center min-w-[70px]">Detail</a>
                                                 <a href="{{ route('activities.edit', $activity->id) }}" class="text-primary-600 hover:text-primary-900 bg-primary-50 hover:bg-primary-100 px-3 py-1 rounded transition-colors text-xs inline-block text-center min-w-[70px]">Edit</a>
+                                                @if($activity->created_by === auth()->id() || str_contains(auth()->user()->roles->first()?->name ?? '', 'ajudan_'))
                                                 <form action="{{ route('activities.destroy', $activity->id) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus agenda ini?');">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1 rounded transition-colors text-xs w-full min-w-[70px]">Hapus</button>
                                                 </form>
+                                                @endif
                                             </div>
                                         </td>
                                     </tr>
@@ -439,6 +475,18 @@
     </div>
 
 
+
+    <!-- Floating PDF Export Button -->
+    <a href="{{ route('activities.export-pdf', ['date' => $dateFilter ?? \Carbon\Carbon::today()->toDateString()]) }}" target="_blank"
+       class="fixed bottom-6 right-6 z-50 bg-red-600 text-white p-3.5 rounded-full shadow-lg hover:bg-red-700 hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center justify-center group"
+       title="Export to PDF">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        <span class="max-w-0 overflow-hidden whitespace-nowrap opacity-0 group-hover:max-w-xs group-hover:opacity-100 group-hover:ml-2 group-hover:mr-1 transition-all duration-300 ease-in-out font-bold text-sm">
+            Export PDF
+        </span>
+    </a>
 
     <!-- Datalists for Autocomplete -->
     <datalist id="locations_list">
