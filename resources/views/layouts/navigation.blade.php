@@ -45,6 +45,15 @@
                     <x-nav-link :href="route('protocol-officers.index')" :active="request()->routeIs('protocol-officers.*')" class="text-primary-50 hover:text-white hover:border-secondary-400 focus:text-white focus:border-secondary-400 {{ request()->routeIs('protocol-officers.*') ? 'border-secondary-400 text-white font-bold' : 'border-transparent' }}">
                         {{ __('Petugas Protokol') }}
                     </x-nav-link>
+
+                    @role('admin')
+                    <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')" class="text-primary-50 hover:text-white hover:border-secondary-400 focus:text-white focus:border-secondary-400 {{ request()->routeIs('users.*') ? 'border-secondary-400 text-white font-bold' : 'border-transparent' }}">
+                        {{ __('Pengguna') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('roles.index')" :active="request()->routeIs('roles.*')" class="text-primary-50 hover:text-white hover:border-secondary-400 focus:text-white focus:border-secondary-400 {{ request()->routeIs('roles.*') ? 'border-secondary-400 text-white font-bold' : 'border-transparent' }}">
+                        {{ __('Role') }}
+                    </x-nav-link>
+                    @endrole
                 </div>
             </div>
 
@@ -142,6 +151,15 @@
                                 <x-responsive-nav-link :href="route('protocol-officers.index')" :active="request()->routeIs('protocol-officers.*')" class="text-primary-50 hover:bg-primary-800 hover:text-white {{ request()->routeIs('protocol-officers.*') ? 'bg-primary-800 text-secondary-300 border-l-4 border-secondary-400' : '' }}">
                                     {{ __('Petugas Protokol') }}
                                 </x-responsive-nav-link>
+                                
+                                @role('admin')
+                                <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')" class="text-primary-50 hover:bg-primary-800 hover:text-white {{ request()->routeIs('users.*') ? 'bg-primary-800 text-secondary-300 border-l-4 border-secondary-400' : '' }}">
+                                    {{ __('Pengguna') }}
+                                </x-responsive-nav-link>
+                                <x-responsive-nav-link :href="route('roles.index')" :active="request()->routeIs('roles.*')" class="text-primary-50 hover:bg-primary-800 hover:text-white {{ request()->routeIs('roles.*') ? 'bg-primary-800 text-secondary-300 border-l-4 border-secondary-400' : '' }}">
+                                    {{ __('Role') }}
+                                </x-responsive-nav-link>
+                                @endrole
                             </div>
 
                             <!-- Responsive Settings Options -->
