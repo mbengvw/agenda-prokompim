@@ -48,8 +48,8 @@
                 </form>
             </div>
 
-            <!-- Mobile View (Cards) & Desktop View (Grid/Table) -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4" x-data>
+            <!-- 1. Mobile View (Cards) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:hidden" x-data>
                 @forelse($leaders as $leader)
                     <div class="bg-gradient-to-br from-primary-200 to-secondary-100 rounded-xl shadow-sm border border-primary-200 hover:shadow-md transition-all duration-300 flex flex-col justify-between overflow-hidden">
                         <div class="p-4 flex justify-between items-start gap-3 flex-grow">
@@ -83,52 +83,6 @@
                         </div>
                         @endrole
                     </div>
-                    
-                    <!-- Edit Modal for this Leader -->
-                    <x-modal name="edit-leader-{{ $leader->id }}" focusable>
-                        <form method="post" action="{{ route('leaders.update', $leader->id) }}" class="p-6">
-                            @csrf
-                            @method('PUT')
-
-                            <h2 class="text-lg font-bold text-primary-900 mb-6 border-b pb-2">
-                                {{ __('Edit Data Pimpinan') }}
-                            </h2>
-
-                            <div class="space-y-4">
-                                <div>
-                                    <x-input-label for="name_{{ $leader->id }}" value="{{ __('Nama Lengkap') }}" />
-                                    <x-text-input id="name_{{ $leader->id }}" name="name" type="text" class="mt-1 block w-full" :value="old('name', $leader->name)" required />
-                                    <x-input-error :messages="$errors->get('name')" class="mt-2" />
-                                </div>
-                                <div>
-                                    <x-input-label for="position_{{ $leader->id }}" value="{{ __('Jabatan') }}" />
-                                    <x-text-input id="position_{{ $leader->id }}" name="position" type="text" class="mt-1 block w-full" :value="old('position', $leader->position)" required />
-                                    <x-input-error :messages="$errors->get('position')" class="mt-2" />
-                                </div>
-                                <div>
-                                    <x-input-label for="short_name_{{ $leader->id }}" value="{{ __('Singkatan Jabatan (Opsional)') }}" />
-                                    <x-text-input id="short_name_{{ $leader->id }}" name="short_name" type="text" class="mt-1 block w-full" :value="old('short_name', $leader->short_name)" />
-                                    <x-input-error :messages="$errors->get('short_name')" class="mt-2" />
-                                </div>
-                                <div class="flex items-center pt-2">
-                                    <input type="hidden" name="is_active" value="0">
-                                    <input id="is_active_{{ $leader->id }}" name="is_active" type="checkbox" value="1" class="w-5 h-5 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 focus:ring-2 cursor-pointer" {{ old('is_active', $leader->is_active) ? 'checked' : '' }}>
-                                    <label for="is_active_{{ $leader->id }}" class="ml-3 text-sm font-medium text-primary-900 cursor-pointer">Status Aktif</label>
-                                    <x-input-error :messages="$errors->get('is_active')" class="mt-2" />
-                                </div>
-                            </div>
-
-                            <div class="mt-6 flex justify-end gap-3">
-                                <button type="button" x-on:click="$dispatch('close')" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md font-semibold text-xs uppercase tracking-widest hover:bg-gray-300 transition">
-                                    {{ __('Batal') }}
-                                </button>
-                                <button type="submit" class="px-4 py-2 bg-secondary-500 text-primary-900 rounded-md font-bold text-xs uppercase tracking-widest hover:bg-secondary-600 transition">
-                                    {{ __('Simpan Perubahan') }}
-                                </button>
-                            </div>
-                        </form>
-                    </x-modal>
-
                 @empty
                     <div class="col-span-full bg-white rounded-xl shadow p-8 text-center border border-primary-100">
                         <div class="text-primary-300 mb-4">
@@ -148,6 +102,127 @@
                     </div>
                 @endforelse
             </div>
+
+            <!-- 2. Desktop View (Table) -->
+            <div class="hidden md:block bg-white rounded-xl shadow-sm border border-primary-100 overflow-hidden" x-data>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-primary-200">
+                        <thead class="bg-primary-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-primary-800 uppercase tracking-wider">Nama Lengkap</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-primary-800 uppercase tracking-wider">Jabatan</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-primary-800 uppercase tracking-wider">Status</th>
+                                @role('admin')
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-bold text-primary-800 uppercase tracking-wider">Aksi</th>
+                                @endrole
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-primary-100">
+                            @forelse($leaders as $leader)
+                                <tr class="hover:bg-primary-50/50 transition-colors duration-150">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-bold text-primary-900">{{ $leader->name }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-primary-800">{{ $leader->position }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        @if($leader->is_active)
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-secondary-400 text-primary-900">
+                                                Aktif
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-gray-200 text-gray-500">
+                                                Nonaktif
+                                            </span>
+                                        @endif
+                                    </td>
+                                    @role('admin')
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <button x-on:click.prevent="$dispatch('open-modal', 'edit-leader-{{ $leader->id }}')" class="text-primary-600 hover:text-primary-900 bg-primary-100 hover:bg-primary-200 px-3 py-1.5 rounded-md transition-colors mr-2">
+                                            Edit
+                                        </button>
+                                        <form action="{{ route('leaders.destroy', $leader->id) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus data ini?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-red-600 hover:text-red-900 bg-red-100 hover:bg-red-200 px-3 py-1.5 rounded-md transition-colors">
+                                                Hapus
+                                            </button>
+                                        </form>
+                                    </td>
+                                    @endrole
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="4" class="px-6 py-10 text-center">
+                                        <div class="text-primary-300 mb-4">
+                                            <svg class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                            </svg>
+                                        </div>
+                                        <h3 class="mt-2 text-sm font-medium text-gray-900">Belum ada data pimpinan</h3>
+                                        <p class="mt-1 text-sm text-gray-500">Mulai dengan menambahkan data pimpinan baru.</p>
+                                        @role('admin')
+                                        <div class="mt-6">
+                                            <button x-on:click.prevent="$dispatch('open-modal', 'create-leader')" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-full text-primary-900 bg-secondary-500 hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition">
+                                                + Tambah Pimpinan
+                                            </button>
+                                        </div>
+                                        @endrole
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Edit Modals -->
+            @foreach($leaders as $leader)
+                <x-modal name="edit-leader-{{ $leader->id }}" focusable>
+                    <form method="post" action="{{ route('leaders.update', $leader->id) }}" class="p-6">
+                        @csrf
+                        @method('PUT')
+
+                        <h2 class="text-lg font-bold text-primary-900 mb-6 border-b pb-2">
+                            {{ __('Edit Data Pimpinan') }}
+                        </h2>
+
+                        <div class="space-y-4">
+                            <div>
+                                <x-input-label for="name_{{ $leader->id }}" value="{{ __('Nama Lengkap') }}" />
+                                <x-text-input id="name_{{ $leader->id }}" name="name" type="text" class="mt-1 block w-full" :value="old('name', $leader->name)" required />
+                                <x-input-error :messages="$errors->get('name')" class="mt-2" />
+                            </div>
+                            <div>
+                                <x-input-label for="position_{{ $leader->id }}" value="{{ __('Jabatan') }}" />
+                                <x-text-input id="position_{{ $leader->id }}" name="position" type="text" class="mt-1 block w-full" :value="old('position', $leader->position)" required />
+                                <x-input-error :messages="$errors->get('position')" class="mt-2" />
+                            </div>
+                            <div>
+                                <x-input-label for="short_name_{{ $leader->id }}" value="{{ __('Singkatan Jabatan (Opsional)') }}" />
+                                <x-text-input id="short_name_{{ $leader->id }}" name="short_name" type="text" class="mt-1 block w-full" :value="old('short_name', $leader->short_name)" />
+                                <x-input-error :messages="$errors->get('short_name')" class="mt-2" />
+                            </div>
+                            <div class="flex items-center pt-2">
+                                <input type="hidden" name="is_active" value="0">
+                                <input id="is_active_{{ $leader->id }}" name="is_active" type="checkbox" value="1" class="w-5 h-5 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 focus:ring-2 cursor-pointer" {{ old('is_active', $leader->is_active) ? 'checked' : '' }}>
+                                <label for="is_active_{{ $leader->id }}" class="ml-3 text-sm font-medium text-primary-900 cursor-pointer">Status Aktif</label>
+                                <x-input-error :messages="$errors->get('is_active')" class="mt-2" />
+                            </div>
+                        </div>
+
+                        <div class="mt-6 flex justify-end gap-3">
+                            <button type="button" x-on:click="$dispatch('close')" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md font-semibold text-xs uppercase tracking-widest hover:bg-gray-300 transition">
+                                {{ __('Batal') }}
+                            </button>
+                            <button type="submit" class="px-4 py-2 bg-secondary-500 text-primary-900 rounded-md font-bold text-xs uppercase tracking-widest hover:bg-secondary-600 transition">
+                                {{ __('Simpan Perubahan') }}
+                            </button>
+                        </div>
+                    </form>
+                </x-modal>
+            @endforeach
 
             <div class="mt-6">
                 {{ $leaders->links() }}

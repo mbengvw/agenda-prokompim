@@ -71,7 +71,7 @@
 
             <!-- List View -->
             <div x-show="viewMode === 'list'">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" x-data>
+                <!-- 1. Mobile View (Cards) --><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 xl:hidden" x-data>
                 @forelse($activities as $activity)
                     <div class="bg-gradient-to-br from-teal-100 via-white to-yellow-100 rounded-2xl shadow-sm border border-teal-100 hover:shadow-xl hover:shadow-teal-500/20 hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col relative group">
                         <!-- Top decorative bar -->
@@ -250,7 +250,116 @@
                 @endforelse
                 </div>
                 
-                <div class="mt-6">
+                
+                <!-- 2. Desktop View (Table) -->
+                <div class="hidden xl:block bg-white rounded-xl shadow-sm border border-primary-100 overflow-hidden mb-6" x-data>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-primary-200">
+                            <thead class="bg-primary-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-primary-800 uppercase tracking-wider">Waktu & Lokasi</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-primary-800 uppercase tracking-wider">Kegiatan</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-primary-800 uppercase tracking-wider">Pimpinan & Status</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-primary-800 uppercase tracking-wider">Keterangan</th>
+                                    <th scope="col" class="px-6 py-3 text-right text-xs font-bold text-primary-800 uppercase tracking-wider">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-primary-100">
+                                @forelse($activities as $activity)
+                                    <tr class="hover:bg-primary-50/50 transition-colors duration-150">
+                                        <!-- Waktu & Lokasi -->
+                                        <td class="px-6 py-4">
+                                            <div class="text-sm font-bold text-primary-900 mb-1">
+                                                {{ \Carbon\Carbon::parse($activity->activity_date)->translatedFormat('d M Y') }}
+                                            </div>
+                                            <div class="text-xs font-medium text-primary-600 mb-2">
+                                                {{ \Carbon\Carbon::parse($activity->start_time)->format('H:i') }} - {{ $activity->end_time ? \Carbon\Carbon::parse($activity->end_time)->format('H:i') : 'Selesai' }}
+                                            </div>
+                                            <div class="text-xs text-gray-700 flex items-start gap-1">
+                                                <svg class="w-3.5 h-3.5 text-primary-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg>
+                                                <span class="line-clamp-2">{{ $activity->location_id ? $activity->location?->name : ($activity->location_text ?: '-') }}</span>
+                                            </div>
+                                        </td>
+                                        
+                                        <!-- Kegiatan -->
+                                        <td class="px-6 py-4">
+                                            <a href="{{ route('activities.show', $activity->id) }}" class="text-sm font-bold text-gray-900 hover:text-primary-600 line-clamp-2 mb-2">
+                                                {{ $activity->title }}
+                                            </a>
+                                            <div class="text-xs text-gray-600">
+                                                <span class="font-semibold">Penyelenggara:</span> 
+                                                {{ $activity->organization_id ? $activity->organization?->name : ($activity->organizer_text ?: '-') }}
+                                            </div>
+                                        </td>
+                                        
+                                        <!-- Pimpinan & Status -->
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            @if($activity->leader)
+                                                <div class="text-sm font-bold text-gray-900">{{ $activity->leader->name }}</div>
+                                                <div class="text-xs text-gray-500 mb-2">{{ $activity->leader->position }}</div>
+                                            @endif
+                                            
+                                            @php
+                                                $statusStyles = [
+                                                    'draft' => 'bg-gray-50 text-gray-700 border-gray-200',
+                                                    'submitted' => 'bg-yellow-50 text-yellow-700 border-yellow-200',
+                                                    'revision' => 'bg-orange-50 text-orange-700 border-orange-200',
+                                                    'approved' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                                                    'rejected' => 'bg-red-50 text-red-700 border-red-200',
+                                                    'cancelled' => 'bg-slate-800 text-white border-slate-900',
+                                                ];
+                                            @endphp
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border {{ $statusStyles[$activity->status] ?? 'bg-gray-50 text-gray-700 border-gray-200' }}">
+                                                {{ ucfirst($activity->status) }}
+                                            </span>
+                                        </td>
+                                        
+                                        <!-- Keterangan (Pendamping & Kontak) -->
+                                        <td class="px-6 py-4">
+                                            <div class="text-xs mb-1">
+                                                <span class="font-bold text-teal-800">Pendamping:</span>
+                                                <span class="text-gray-700 line-clamp-1">{{ $activity->companions->count() > 0 ? $activity->companions->pluck('name')->join(', ') : '-' }}</span>
+                                            </div>
+                                            <div class="text-xs mb-1">
+                                                <span class="font-bold text-teal-800">Narahubung:</span>
+                                                <span class="text-gray-700">{{ $activity->contact_person_name ?: '-' }}</span>
+                                            </div>
+                                            <div class="text-xs">
+                                                <span class="font-bold text-teal-800">PIC Protokol:</span>
+                                                <span class="text-gray-700">{{ $activity->protocolOfficer?->name ?: '-' }}</span>
+                                            </div>
+                                        </td>
+                                        
+                                        <!-- Aksi -->
+                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <div class="flex flex-col items-end gap-2">
+                                                <a href="{{ route('activities.show', $activity->id) }}" class="text-teal-600 hover:text-teal-900 bg-teal-50 hover:bg-teal-100 px-3 py-1 rounded transition-colors text-xs inline-block text-center min-w-[70px]">Detail</a>
+                                                <a href="{{ route('activities.edit', $activity->id) }}" class="text-primary-600 hover:text-primary-900 bg-primary-50 hover:bg-primary-100 px-3 py-1 rounded transition-colors text-xs inline-block text-center min-w-[70px]">Edit</a>
+                                                <form action="{{ route('activities.destroy', $activity->id) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus agenda ini?');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1 rounded transition-colors text-xs w-full min-w-[70px]">Hapus</button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="px-6 py-10 text-center">
+                                            <div class="text-primary-300 mb-4">
+                                                <svg class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                </svg>
+                                            </div>
+                                            <h3 class="mt-2 text-sm font-medium text-gray-900">Belum ada agenda</h3>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+<div class="mt-6">
                     {{ $activities->links() }}
                 </div>
             </div>

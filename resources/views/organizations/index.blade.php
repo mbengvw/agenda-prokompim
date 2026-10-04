@@ -48,8 +48,8 @@
                 </form>
             </div>
 
-            <!-- Mobile View (Cards) & Desktop View (Grid/Table) -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4" x-data>
+            <!-- 1. Mobile View (Cards) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:hidden" x-data>
                 @forelse($organizations as $organization)
                     <div class="bg-gradient-to-br from-primary-200 to-secondary-100 rounded-xl shadow-sm border border-primary-200 hover:shadow-md transition-all duration-300 flex flex-col justify-between overflow-hidden">
                         <div class="p-4 flex justify-between items-start gap-3 flex-grow">
@@ -80,9 +80,112 @@
                         </div>
                         @endrole
                     </div>
-                    
-                    <!-- Edit Modal for this Leader -->
-                    <x-modal name="edit-location-{{ $organization->id }}" focusable>
+                @empty
+                    <div class="col-span-full bg-white rounded-xl shadow p-8 text-center border border-primary-100">
+                        <div class="text-primary-300 mb-4">
+                            <svg class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                            </svg>
+                        </div>
+                        <h3 class="mt-2 text-sm font-medium text-gray-900">Belum ada data organisasi</h3>
+                        <p class="mt-1 text-sm text-gray-500">Mulai dengan menambahkan data organisasi baru.</p>
+                        @role('admin')
+                        <div class="mt-6">
+                            <button x-on:click.prevent="$dispatch('open-modal', 'create-location')" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-full text-primary-900 bg-secondary-500 hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition">
+                                + Tambah Organisasi
+                            </button>
+                        </div>
+                        @endrole
+                    </div>
+                @endforelse
+            </div>
+
+            <!-- 2. Desktop View (Table) -->
+            <div class="hidden md:block bg-white rounded-xl shadow-sm border border-primary-100 overflow-hidden" x-data>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-primary-200">
+                        <thead class="bg-primary-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-primary-800 uppercase tracking-wider">Nama Organisasi</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-primary-800 uppercase tracking-wider">Tipe</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-primary-800 uppercase tracking-wider">Kontak</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-primary-800 uppercase tracking-wider">Alamat & Catatan</th>
+                                @role('admin')
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-bold text-primary-800 uppercase tracking-wider">Aksi</th>
+                                @endrole
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-primary-100">
+                            @forelse($organizations as $organization)
+                                <tr class="hover:bg-primary-50/50 transition-colors duration-150">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-bold text-primary-900">{{ $organization->name }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-primary-800">
+                                            {{ $organization->type ? ($orgTypes[$organization->type] ?? $organization->type) : '-' }}
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        @if($organization->contact_person || $organization->phone || $organization->email)
+                                            <div class="text-sm text-primary-700">
+                                                @if($organization->contact_person) <div><span class="font-medium">PIC:</span> {{ $organization->contact_person }}</div> @endif
+                                                @if($organization->phone) <div><span class="font-medium">Telp:</span> {{ $organization->phone }}</div> @endif
+                                                @if($organization->email) <div><span class="font-medium">Email:</span> {{ $organization->email }}</div> @endif
+                                            </div>
+                                        @else
+                                            <div class="text-sm text-gray-500">-</div>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="text-sm text-primary-700 line-clamp-2 max-w-xs mb-1">{{ $organization->address ?: '-' }}</div>
+                                        @if($organization->notes)
+                                            <div class="text-xs text-gray-500 line-clamp-1 max-w-xs italic">{{ $organization->notes }}</div>
+                                        @endif
+                                    </td>
+                                    @role('admin')
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <button x-on:click.prevent="$dispatch('open-modal', 'edit-location-{{ $organization->id }}')" class="text-primary-600 hover:text-primary-900 bg-primary-100 hover:bg-primary-200 px-3 py-1.5 rounded-md transition-colors mr-2">
+                                            Edit
+                                        </button>
+                                        <form action="{{ route('organizations.destroy', $organization->id) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus data ini?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-red-600 hover:text-red-900 bg-red-100 hover:bg-red-200 px-3 py-1.5 rounded-md transition-colors">
+                                                Hapus
+                                            </button>
+                                        </form>
+                                    </td>
+                                    @endrole
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="px-6 py-10 text-center">
+                                        <div class="text-primary-300 mb-4">
+                                            <svg class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                            </svg>
+                                        </div>
+                                        <h3 class="mt-2 text-sm font-medium text-gray-900">Belum ada data organisasi</h3>
+                                        <p class="mt-1 text-sm text-gray-500">Mulai dengan menambahkan data organisasi baru.</p>
+                                        @role('admin')
+                                        <div class="mt-6">
+                                            <button x-on:click.prevent="$dispatch('open-modal', 'create-location')" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-full text-primary-900 bg-secondary-500 hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition">
+                                                + Tambah Organisasi
+                                            </button>
+                                        </div>
+                                        @endrole
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Edit Modals -->
+            @foreach($organizations as $organization)
+                <x-modal name="edit-location-{{ $organization->id }}" focusable>
                         <form method="post" action="{{ route('organizations.update', $organization->id) }}" class="p-6">
                             @csrf
                             @method('PUT')
@@ -148,26 +251,8 @@
                             </div>
                         </form>
                     </x-modal>
-
-                @empty
-                    <div class="col-span-full bg-white rounded-xl shadow p-8 text-center border border-primary-100">
-                        <div class="text-primary-300 mb-4">
-                            <svg class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                            </svg>
-                        </div>
-                        <h3 class="mt-2 text-sm font-medium text-gray-900">Belum ada data organisasi</h3>
-                        <p class="mt-1 text-sm text-gray-500">Mulai dengan menambahkan data organisasi baru.</p>
-                        @role('admin')
-                        <div class="mt-6">
-                            <button x-on:click.prevent="$dispatch('open-modal', 'create-location')" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-full text-primary-900 bg-secondary-500 hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition">
-                                + Tambah Organisasi
-                            </button>
-                        </div>
-                        @endrole
-                    </div>
-                @endforelse
-            </div>
+            @endforeach
+            
 
             <div class="mt-6">
                 {{ $organizations->links() }}
