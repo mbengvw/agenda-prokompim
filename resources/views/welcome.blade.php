@@ -34,10 +34,7 @@
         <nav
             class="relative z-10 w-full px-6 py-5 md:px-12 lg:px-24 flex justify-between items-center backdrop-blur-md bg-white/60 border-b border-gray-100/50 sticky top-0">
             <div class="flex items-center gap-3 group cursor-pointer">
-                <div
-                    class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-primary-500/30 group-hover:scale-105 transition-transform duration-300">
-                    LI
-                </div>
+                <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-10 h-10 object-contain group-hover:scale-105 transition-transform duration-300">
                 <span class="font-bold text-xl tracking-tight text-gray-800">LEAD <span
                         class="text-primary-600">IT</span></span>
             </div>

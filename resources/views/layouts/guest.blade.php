@@ -36,10 +36,7 @@
 
         <div class="relative z-10 mb-8 flex flex-col items-center text-center">
             <a href="/" class="flex items-center gap-3 group">
-                <div
-                    class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-primary-500/30 group-hover:scale-105 transition-transform duration-300">
-                    LI
-                </div>
+                <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-12 h-12 object-contain group-hover:scale-105 transition-transform duration-300">
                 <span class="font-bold text-3xl tracking-tight text-gray-800">LEAD <span
                         class="text-primary-600">IT</span></span>
             </a>
