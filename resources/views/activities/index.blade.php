@@ -25,8 +25,8 @@
             <div class="mb-6 flex justify-center">
                 @php
                     $quickLeaders = [
-                        ['id' => 'Bupati', 'label' => 'Bupati', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />'],
-                        ['id' => 'Wakil Bupati', 'label' => 'Wakil Bupati', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />'],
+                        ['id' => 'Bupati', 'label' => 'Bupati', 'image' => asset('images/bupati.jpeg'), 'icon' => ''],
+                        ['id' => 'Wakil Bupati', 'label' => 'Wakil Bupati', 'image' => asset('images/wabup.jpeg'), 'icon' => ''],
                         ['id' => 'Sekda', 'label' => 'Sekda', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />']
                     ];
                     $activeLeader = collect($quickLeaders)->firstWhere('id', $leaderFilter);
@@ -35,10 +35,14 @@
                 @if($activeLeader)
                 <a href="{{ route('activities.index', ['leader' => '', 'date' => $dateFilter, 'view' => request('view')]) }}" 
                    class="flex flex-col items-center justify-center p-4 sm:p-6 w-48 sm:w-64 rounded-2xl shadow-sm border bg-gradient-to-br from-primary-50 to-primary-100 border-primary-500 ring-2 ring-primary-300 ring-offset-1 transform -translate-y-1 shadow-md hover:shadow-lg transition-all duration-300 group" title="Klik untuk Ganti Pimpinan">
-                    <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mb-3 transition-colors duration-300 bg-primary-600 text-white shadow-inner group-hover:bg-primary-700">
-                        <svg class="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            {!! $activeLeader['icon'] !!}
-                        </svg>
+                    <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-full overflow-hidden flex items-center justify-center mb-3 transition-colors duration-300 bg-primary-600 text-white shadow-inner group-hover:bg-primary-700 relative">
+                        @if(isset($activeLeader['image']))
+                            <img src="{{ $activeLeader['image'] }}" alt="{{ $activeLeader['label'] }}" class="w-full h-full object-cover">
+                        @else
+                            <svg class="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                {!! $activeLeader['icon'] !!}
+                            </svg>
+                        @endif
                     </div>
                     <span class="font-extrabold text-sm sm:text-base tracking-wider uppercase text-primary-800 text-center leading-tight">
                         {{ $activeLeader['label'] }}
