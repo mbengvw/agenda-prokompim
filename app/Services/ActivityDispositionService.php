@@ -55,6 +55,18 @@ class ActivityDispositionService
                     'is_disposition' => true,
                     'disposition_to_id' => $toLeaderId,
                 ]);
+
+                // Jika target disposisi sebelumnya adalah pendamping di kegiatan ini,
+                // maka kita hapus kegiatan "Mendampingi" miliknya agar tidak duplikat.
+                $companionActivity = Activity::where('parent_activity_id', $activity->id)
+                    ->where('leader_id', $toLeaderId)
+                    ->first();
+                    
+                if ($companionActivity) {
+                    $this->activityRepository->delete($companionActivity);
+                    $activity->companions()->detach($toLeaderId);
+                }
+
             } else {
                 // If cancelled (e.g. changed to hadir/skip), revert to the original leader if it was disposed
                 if ($activity->is_disposition && $activity->leader_id != $fromLeaderId) {

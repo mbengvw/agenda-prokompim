@@ -46,6 +46,7 @@ class Activity extends Model
         'notes',
         'revision_notes',
         'created_by',
+        'parent_activity_id',
     ];
 
     protected $casts = [
@@ -88,5 +89,10 @@ class Activity extends Model
     public function dispositionTo(): BelongsTo
     {
         return $this->belongsTo(Leader::class, 'disposition_to_id');
+    }
+
+    public function originalLeader(): BelongsTo
+    {
+        return $this->belongsTo(Leader::class, 'original_leader_id');
     }
 }

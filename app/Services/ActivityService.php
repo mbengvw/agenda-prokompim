@@ -17,7 +17,7 @@ class ActivityService
         if (! isset($data['status'])) {
             $data['status'] = 'draft';
         }
-        
+
         if (isset($data['leader_id'])) {
             $data['original_leader_id'] = $data['leader_id'];
         }
@@ -38,8 +38,8 @@ class ActivityService
                     $companionData['leader_id'] = $companionId;
                     $companionData['original_leader_id'] = $companionId;
                     $companionData['parent_activity_id'] = $activity->id;
-                    $companionData['title'] = "Mendampingi " . $mainLeader->position . " dalam " . $activity->title;
-                    
+                    $companionData['title'] = "Mendampingi " . $mainLeader->position . " dalam kegiatan " . $activity->title;
+
                     $this->repository->create($companionData);
                 }
             }

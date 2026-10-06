@@ -16,7 +16,7 @@ class ActivityQueryService
 
     public function getPaginatedActivities(int $perPage = 10, ?string $search = null, ?string $leader = null, ?string $date = null, ?string $status = null): LengthAwarePaginator
     {
-        $query = $this->model->with(['protocolOfficer', 'location', 'organization', 'companions', 'leader', 'dispositions']);
+        $query = $this->model->with(['protocolOfficer', 'location', 'organization', 'companions', 'leader', 'originalLeader', 'dispositions']);
 
         if ($date) {
             $query->whereDate('activity_date', $date)
@@ -28,8 +28,12 @@ class ActivityQueryService
 
         if ($leader) {
             $searchLeader = strtolower($leader);
-            $query->whereHas('leader', function ($q) use ($searchLeader) {
-                $q->whereRaw('LOWER(position) = ?', [$searchLeader]);
+            $query->where(function ($q) use ($searchLeader) {
+                $q->whereHas('leader', function ($q2) use ($searchLeader) {
+                    $q2->whereRaw('LOWER(position) = ?', [$searchLeader]);
+                })->orWhereHas('originalLeader', function ($q2) use ($searchLeader) {
+                    $q2->whereRaw('LOWER(position) = ?', [$searchLeader]);
+                });
             });
         }
 
@@ -86,7 +90,7 @@ class ActivityQueryService
         foreach ($activeLeaders as $leader) {
             $leaderActivities = [];
             foreach ($timelineActivities as $act) {
-                $isPrimary = $act->leader_id === $leader->id;
+                $isPrimary = $act->leader_id === $leader->id || $act->original_leader_id === $leader->id;
                 $isCompanion = $act->companions->contains('id', $leader->id);
 
                 if ($isPrimary || $isCompanion) {

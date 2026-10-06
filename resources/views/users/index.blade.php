@@ -180,14 +180,15 @@
                             
                             <div class="mt-4">
                                 <x-input-label for="leader_id_{{ $user->id }}" value="{{ __('Pimpinan (Khusus Ajudan)') }}" />
-                                <select id="leader_id_{{ $user->id }}" name="leader_id" class="mt-1 block w-full border-gray-300 focus:border-primary-500 focus:ring-primary-500 rounded-md shadow-sm">
-                                    <option value="">-- Pilih Pimpinan --</option>
-                                    @foreach($leaders as $leader)
-                                        <option value="{{ $leader->id }}" {{ old('leader_id', $user->leader_id) == $leader->id ? 'selected' : '' }}>
-                                            {{ $leader->name }} - {{ $leader->position }}
-                                        </option>
-                                    @endforeach
-                                </select>
+                                @php
+                                    $leaderOptions = collect($leaders)->map(fn($l) => ['value' => $l->id, 'label' => $l->name . ' - ' . $l->position])->toArray();
+                                @endphp
+                                <x-custom-select 
+                                    name="leader_id" 
+                                    placeholder="-- Pilih Pimpinan --" 
+                                    :options="$leaderOptions" 
+                                    :value="old('leader_id', $user->leader_id)"
+                                />
                                 <x-input-error :messages="$errors->get('leader_id')" class="mt-2" />
                             </div>
                         </div>
@@ -248,14 +249,15 @@
                 
                 <div class="mt-4">
                     <x-input-label for="leader_id_new" value="{{ __('Pimpinan (Khusus Ajudan)') }}" />
-                    <select id="leader_id_new" name="leader_id" class="mt-1 block w-full border-gray-300 focus:border-primary-500 focus:ring-primary-500 rounded-md shadow-sm">
-                        <option value="">-- Pilih Pimpinan --</option>
-                        @foreach($leaders as $leader)
-                            <option value="{{ $leader->id }}" {{ old('leader_id') == $leader->id ? 'selected' : '' }}>
-                                {{ $leader->name }} - {{ $leader->position }}
-                            </option>
-                        @endforeach
-                    </select>
+                    @php
+                        $leaderOptions = collect($leaders)->map(fn($l) => ['value' => $l->id, 'label' => $l->name . ' - ' . $l->position])->toArray();
+                    @endphp
+                    <x-custom-select 
+                        name="leader_id" 
+                        placeholder="-- Pilih Pimpinan --" 
+                        :options="$leaderOptions" 
+                        :value="old('leader_id')"
+                    />
                     <x-input-error :messages="$errors->get('leader_id')" class="mt-2" />
                 </div>
             </div>

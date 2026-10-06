@@ -346,8 +346,6 @@
             <h2 class="text-lg font-bold text-indigo-700 mb-4 border-b pb-2">Disposisikan Agenda</h2>
             <div class="mb-4">
                 <x-input-label for="disposition_to_{{ $activity->id }}" value="Disposisikan Kepada" />
-                <select id="disposition_to_{{ $activity->id }}" name="to_leader_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
-                    <option value="">-- Pilih Pejabat --</option>
                     @php
                         $currentLeaderLevel = 99;
                         $fromLeaderId = $userLeaderId ?? $activity->leader_id;
@@ -362,11 +360,15 @@
                             ->where('hierarchy_level', '>', $currentLeaderLevel)
                             ->orderBy('hierarchy_level', 'asc')
                             ->get();
+                            
+                        $dispoOptions = $dispoLeaders->map(fn($l) => ['value' => $l->id, 'label' => $l->name . ' (' . $l->position . ')'])->toArray();
                     @endphp
-                    @foreach($dispoLeaders as $dl)
-                        <option value="{{ $dl->id }}">{{ $dl->name }} ({{ $dl->position }})</option>
-                    @endforeach
-                </select>
+                    <x-custom-select 
+                        name="to_leader_id" 
+                        placeholder="-- Pilih Pejabat --" 
+                        :options="$dispoOptions" 
+                        required
+                    />
             </div>
             <div class="mb-4">
                 <x-input-label for="notes_{{ $activity->id }}" value="Catatan Tambahan (Opsional)" />

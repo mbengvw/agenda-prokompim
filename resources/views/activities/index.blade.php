@@ -71,15 +71,25 @@
                     @if($leaderFilter)
                         <input type="hidden" name="leader" value="{{ $leaderFilter }}">
                     @endif
-                    <select name="status" onchange="this.form.submit()" class="border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500">
-                        <option value="">Semua Status</option>
-                        <option value="draft" {{ $statusFilter == 'draft' ? 'selected' : '' }}>Draft</option>
-                        <option value="submitted" {{ $statusFilter == 'submitted' ? 'selected' : '' }}>Submitted</option>
-                        <option value="revision" {{ $statusFilter == 'revision' ? 'selected' : '' }}>Revision</option>
-                        <option value="approved" {{ $statusFilter == 'approved' ? 'selected' : '' }}>Approved</option>
-                        <option value="rejected" {{ $statusFilter == 'rejected' ? 'selected' : '' }}>Rejected</option>
-                        <option value="cancelled" {{ $statusFilter == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
-                    </select>
+                    @php
+                        $statusOptions = [
+                            ['value' => 'draft', 'label' => 'Draft'],
+                            ['value' => 'submitted', 'label' => 'Submitted'],
+                            ['value' => 'revision', 'label' => 'Revision'],
+                            ['value' => 'approved', 'label' => 'Approved'],
+                            ['value' => 'rejected', 'label' => 'Rejected'],
+                            ['value' => 'cancelled', 'label' => 'Cancelled'],
+                        ];
+                    @endphp
+                    <div class="w-48">
+                        <x-custom-select 
+                            name="status" 
+                            placeholder="Semua Status" 
+                            :options="$statusOptions" 
+                            :value="$statusFilter"
+                            onchange="this.form.submit()"
+                        />
+                    </div>
                     <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-md text-sm font-medium hover:bg-primary-700">Cari</button>
                     @if($search || $leaderFilter || $statusFilter)
                         <a href="{{ route('activities.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50">Reset</a>
@@ -144,9 +154,13 @@
                             </a>
                             
                             <div class="flex items-center gap-2 mb-3">
-                                @if($activity->leader)
+                                @php
+                                    $isOriginalLeader = auth()->user()->leader_id && auth()->user()->leader_id == $activity->original_leader_id;
+                                    $displayLeader = $isOriginalLeader ? ($activity->originalLeader ?? $activity->leader) : $activity->leader;
+                                @endphp
+                                @if($displayLeader)
                                     @php
-                                        $position = strtolower($activity->leader->position);
+                                        $position = strtolower($displayLeader->position);
                                         if (str_contains($position, 'wakil bupati')) {
                                             $badgeClass = 'bg-purple-100 text-purple-800 border-purple-200';
                                         } elseif (str_contains($position, 'bupati')) {
@@ -158,9 +172,15 @@
                                         }
                                     @endphp
                                     <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border {{ $badgeClass }}">
-                                        {{ $activity->leader->position }}
+                                        {{ $displayLeader->position }}
                                     </span>
-                                    <span class="text-sm font-bold text-gray-800">{{ $activity->leader->name }}</span>
+                                    <span class="text-sm font-bold text-gray-800">{{ $displayLeader->name }}</span>
+                                @endif
+
+                                @if($isOriginalLeader && $activity->is_disposition && $activity->leader_id !== $activity->original_leader_id && $activity->leader)
+                                    <div class="ml-2 text-[10px] font-semibold text-primary-700 bg-primary-50 px-2 py-0.5 rounded border border-primary-200 shadow-sm inline-flex items-center">
+                                        <span class="uppercase tracking-wider mr-1">Disposisi ke:</span> {{ $activity->leader->position }}
+                                    </div>
                                 @endif
 
                                 @php
@@ -300,7 +320,7 @@
                                 <tr>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-primary-800 uppercase tracking-wider">Waktu & Lokasi</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-primary-800 uppercase tracking-wider">Kegiatan</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-primary-800 uppercase tracking-wider">Pimpinan & Status</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-primary-800 uppercase tracking-wider">Agenda & Status</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-primary-800 uppercase tracking-wider">Keterangan</th>
                                     <th scope="col" class="px-6 py-3 text-right text-xs font-bold text-primary-800 uppercase tracking-wider">Aksi</th>
                                 </tr>
@@ -333,11 +353,22 @@
                                             </div>
                                         </td>
                                         
-                                        <!-- Pimpinan & Status -->
+                                        <!-- Agenda & Status -->
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            @if($activity->leader)
-                                                <div class="text-sm font-bold text-gray-900">{{ $activity->leader->name }}</div>
-                                                <div class="text-xs text-gray-500 mb-2">{{ $activity->leader->position }}</div>
+                                            @php
+                                                $isOriginalLeader = auth()->user()->leader_id && auth()->user()->leader_id == $activity->original_leader_id;
+                                                $displayLeader = $isOriginalLeader ? ($activity->originalLeader ?? $activity->leader) : $activity->leader;
+                                            @endphp
+                                            @if($displayLeader)
+                                                <div class="text-sm font-bold text-gray-900 uppercase">{{ $displayLeader->position }}</div>
+                                                <div class="text-xs text-gray-500 mb-2">{{ $displayLeader->name }}</div>
+                                            @endif
+                                            
+                                            @if($isOriginalLeader && $activity->is_disposition && $activity->leader_id !== $activity->original_leader_id && $activity->leader)
+                                                <div class="mb-2 text-xs font-semibold text-primary-700 bg-primary-50 p-1.5 rounded border border-primary-200 shadow-sm inline-block">
+                                                    <span class="block text-[10px] text-primary-500 uppercase tracking-wider mb-0.5">Didisposisikan ke:</span>
+                                                    {{ $activity->leader->position }}
+                                                </div>
                                             @endif
                                             
                                             @php
@@ -363,7 +394,9 @@
                                                         if ($leaderDisposition) {
                                                             $dispositionStatus = $leaderDisposition->status;
                                                         } elseif (in_array($activity->status, ['draft', 'submitted', 'approved', 'revision'])) {
-                                                            $needsConfirmation = true;
+                                                            if (!$activity->is_disposition) {
+                                                                $needsConfirmation = true;
+                                                            }
                                                         }
                                                     }
                                                 @endphp

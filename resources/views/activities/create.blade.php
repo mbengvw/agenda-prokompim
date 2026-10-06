@@ -72,12 +72,16 @@
                                 </div>
                             @else
                                 <x-input-label value="Pimpinan (Utama)" />
-                                <select name="leader_id" x-data x-on:change="$dispatch('main-leader-changed', $event.target.value)" class="mt-2 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm" required>
-                                    <option value="">-- Pilih --</option>
-                                    @foreach($mainLeaders as $ld)
-                                        <option value="{{ $ld->id }}" {{ old('leader_id', $defaultLeaderId ?? '') == $ld->id ? 'selected' : '' }}>{{ $ld->name }} ({{ $ld->position }})</option>
-                                    @endforeach
-                                </select>
+                                @php
+                                    $leaderOptions = collect($mainLeaders)->map(fn($l) => ['value' => $l->id, 'label' => $l->name . ' (' . $l->position . ')'])->toArray();
+                                @endphp
+                                <x-custom-select 
+                                    name="leader_id" 
+                                    placeholder="-- Pilih --" 
+                                    :options="$leaderOptions" 
+                                    :value="old('leader_id', $defaultLeaderId ?? '')"
+                                    x-on:change="$dispatch('main-leader-changed', $event.target.value)" 
+                                />
                             @endif
                         </div>
                         
@@ -184,19 +188,19 @@
                         </div>
                         
                         <div x-data="{ 
-                            selectedPhone: '{{ old('protocol_officer_id') ? collect($protocolOfficers)->firstWhere('id', old('protocol_officer_id'))?->phone : '' }}',
+                            poData: {{ json_encode(collect($protocolOfficers)->mapWithKeys(fn($po) => [$po->id => $po->phone])) }},
+                            selectedPhone: '',
                             updatePhone(e) {
-                                let selectedOption = e.target.options[e.target.selectedIndex];
-                                this.selectedPhone = selectedOption.dataset.phone || '';
+                                this.selectedPhone = this.poData[e.target.value] || '';
                             }
-                        }">
+                        }" x-init="updatePhone({target: {value: '{{ old('protocol_officer_id') }}'}})">
                             <x-input-label value="PIC Protokol" />
-                            <select name="protocol_officer_id" @change="updatePhone" class="mt-2 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500">
-                                <option value="" data-phone="">-- Pilih --</option>
-                                @foreach($protocolOfficers as $po)
-                                    <option value="{{ $po->id }}" data-phone="{{ $po->phone }}" {{ old('protocol_officer_id') == $po->id ? 'selected' : '' }}>{{ $po->name }}</option>
-                                @endforeach
-                            </select>
+                            <x-custom-select 
+                                name="protocol_officer_id" 
+                                placeholder="-- Pilih --" 
+                                :options="$protocolOfficers" 
+                                @change="updatePhone"
+                            />
                             <p x-show="selectedPhone" x-text="selectedPhone ? 'Kontak: ' + selectedPhone : ''" class="mt-1 text-xs text-gray-500" style="display: none;"></p>
                         </div>
                         <div>
@@ -206,7 +210,11 @@
                         
                         <div class="col-span-full">
                             <x-input-label value="Pakaian" />
-                            <x-text-input name="dress_code" type="text" class="mt-2 block w-full" placeholder="Contoh: PSL, Batik" />
+                            <x-custom-select 
+                                name="dress_code" 
+                                placeholder="-- Pilih Pakaian --" 
+                                :options="['PSL', 'Batik/Lengan panjang', 'Yang berlaku pada hari itu', 'PDH Khaki', 'PDUB', 'Menyesuaikan', 'Olah Raga', 'Muslim', 'Pakaian Adat', 'Smart Casual']" 
+                            />
                         </div>
                     </div>
                     
