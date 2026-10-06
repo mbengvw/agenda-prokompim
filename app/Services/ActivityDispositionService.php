@@ -70,11 +70,24 @@ class ActivityDispositionService
             } else {
                 // If cancelled (e.g. changed to hadir/skip), revert to the original leader if it was disposed
                 if ($activity->is_disposition && $activity->leader_id != $fromLeaderId) {
+                    $previousToLeaderId = $activity->leader_id;
+                    
                     $this->activityRepository->update($activity, [
                         'leader_id' => $fromLeaderId,
                         'is_disposition' => false,
                         'disposition_to_id' => null,
                     ]);
+
+                    // Kembalikan kegiatan "Mendampingi" yang sempat di-soft-delete jika ada
+                    $trashedCompanionActivity = Activity::onlyTrashed()
+                        ->where('parent_activity_id', $activity->id)
+                        ->where('leader_id', $previousToLeaderId)
+                        ->first();
+                        
+                    if ($trashedCompanionActivity) {
+                        $trashedCompanionActivity->restore();
+                        $activity->companions()->syncWithoutDetaching([$previousToLeaderId]);
+                    }
                 }
             }
 
