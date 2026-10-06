@@ -296,10 +296,13 @@ class ActivityController extends Controller
     {
         $user = auth()->user();
         $isCreator = $activity->created_by === $user->id;
-        $isAjudan = str_contains($user->roles->first()?->name ?? '', 'ajudan_');
+        $roleName = $user->roles->first()?->name ?? '';
+        $isAjudan = str_contains($roleName, 'ajudan_');
+        $isSekpri = str_contains($roleName, 'sekpri_');
+        $isOwnLeader = $user->leader_id === $activity->leader_id;
 
-        if (!$isCreator && !$isAjudan) {
-            abort(403, 'Hanya pembuat agenda dan ajudan yang diizinkan untuk menghapus.');
+        if (!$isCreator && !$isAjudan && !($isSekpri && $isOwnLeader)) {
+            abort(403, 'Anda tidak diizinkan untuk menghapus agenda ini.');
         }
 
         $this->service->deleteActivity($activity);

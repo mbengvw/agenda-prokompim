@@ -213,6 +213,7 @@
                             @php
                                 $canManageDisposition = false;
                                 $user = auth()->user();
+                                $isAjudan = str_contains($user->roles->first()?->name ?? '', 'ajudan_');
                                 
                                 $userLeaderIds = $user->leader_id ? [$user->leader_id] : [];
 
@@ -224,7 +225,7 @@
                                         ->first();
                                 }
 
-                                if (in_array($activity->status, ['submitted', 'revision', 'approved'])) {
+                                if ($isAjudan && in_array($activity->status, ['submitted', 'revision', 'approved'])) {
                                     if ($existingDisposition) {
                                         $canManageDisposition = true;
                                     } elseif (!empty($userLeaderIds) && in_array($activity->leader_id, $userLeaderIds)) {
@@ -232,7 +233,7 @@
                                     }
                                 }
                                 
-                                $userLeaderId = $existingDisposition ? $existingDisposition->from_leader_id : (empty($userLeaderIds) ? $activity->leader_id : $userLeaderIds[0]);
+                                $userLeaderId = $existingDisposition ? $existingDisposition->from_leader_id : (empty($userLeaderIds) ? $activity->leader_id : $userLeaderIds[0] ?? null);
                             @endphp
 
                             @if($canManageDisposition)

@@ -15,9 +15,8 @@ class RoleService
     {
         $role = $this->roleRepository->create(['name' => $data['name']]);
         
-        if (isset($data['permissions'])) {
-            $role->syncPermissions($data['permissions']);
-        }
+        $permissions = $data['permissions'] ?? [];
+        $role->syncPermissions($permissions);
         
         return $role;
     }
@@ -26,9 +25,8 @@ class RoleService
     {
         $result = $this->roleRepository->update($role, ['name' => $data['name']]);
         
-        if (isset($data['permissions'])) {
-            $role->syncPermissions($data['permissions']);
-        }
+        $permissions = $data['permissions'] ?? [];
+        $role->syncPermissions($permissions);
         
         return $result;
     }

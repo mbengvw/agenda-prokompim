@@ -12,6 +12,10 @@ class ActivityDispositionController extends Controller
 
     public function store(Request $request, Activity $activity)
     {
+        if (!str_contains(auth()->user()->roles->first()?->name ?? '', 'ajudan_')) {
+            abort(403, 'Hanya ajudan yang dapat mengelola kehadiran dan disposisi.');
+        }
+
         $validated = $request->validate([
             'status' => 'required|in:hadir,skip,disposisi',
             'to_leader_id' => 'required_if:status,disposisi|nullable|exists:leaders,id',

@@ -9,6 +9,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProtocolOfficerController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\PermissionController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -63,6 +64,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('users', UserController::class);
         Route::patch('users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
         Route::resource('roles', RoleController::class);
+        Route::resource('permissions', PermissionController::class);
     });
 
     Route::get('activities/export-pdf', [ActivityController::class, 'exportPdf'])->name('activities.export-pdf');

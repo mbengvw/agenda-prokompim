@@ -34,7 +34,7 @@
                     <!-- Master Data Dropdown -->
                     <div class="hidden sm:flex sm:items-center sm:ms-2">
                         @php
-                            $isMasterDataActive = request()->routeIs('leaders.*', 'locations.*', 'organizations.*', 'protocol-officers.*', 'users.*', 'roles.*');
+                            $isMasterDataActive = request()->routeIs('leaders.*', 'locations.*', 'organizations.*', 'protocol-officers.*', 'users.*', 'roles.*', 'permissions.*');
                             $masterDataClasses = $isMasterDataActive
                                 ? 'inline-flex items-center px-1 pt-1 border-b-2 border-secondary-400 text-sm font-medium leading-5 text-white focus:outline-none transition duration-150 ease-in-out font-bold'
                                 : 'inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-primary-50 hover:text-white hover:border-secondary-400 focus:outline-none focus:text-white focus:border-secondary-400 transition duration-150 ease-in-out';
@@ -71,6 +71,9 @@
                                 </x-dropdown-link>
                                 <x-dropdown-link :href="route('roles.index')" class="{{ request()->routeIs('roles.*') ? 'font-bold bg-gray-100' : '' }}">
                                     {{ __('Role') }}
+                                </x-dropdown-link>
+                                <x-dropdown-link :href="route('permissions.index')" class="{{ request()->routeIs('permissions.*') ? 'font-bold bg-gray-100' : '' }}">
+                                    {{ __('Permission') }}
                                 </x-dropdown-link>
                                 @endrole
                             </x-slot>
@@ -164,8 +167,8 @@
                                 </x-responsive-nav-link>
 
                                 <!-- Master Data Group -->
-                                <div x-data="{ masterDataOpen: {{ request()->routeIs('leaders.*', 'locations.*', 'organizations.*', 'protocol-officers.*', 'users.*', 'roles.*') ? 'true' : 'false' }} }" class="space-y-1">
-                                    <button @click="masterDataOpen = !masterDataOpen" class="w-full flex justify-between items-center w-full ps-3 pe-4 py-2 border-l-4 border-transparent text-start text-base font-medium text-primary-50 hover:bg-primary-800 hover:text-white focus:outline-none focus:text-white focus:bg-primary-800 transition duration-150 ease-in-out {{ request()->routeIs('leaders.*', 'locations.*', 'organizations.*', 'protocol-officers.*', 'users.*', 'roles.*') ? 'bg-primary-800 text-secondary-300 border-secondary-400' : '' }}">
+                                <div x-data="{ masterDataOpen: {{ request()->routeIs('leaders.*', 'locations.*', 'organizations.*', 'protocol-officers.*', 'users.*', 'roles.*', 'permissions.*') ? 'true' : 'false' }} }" class="space-y-1">
+                                    <button @click="masterDataOpen = !masterDataOpen" class="w-full flex justify-between items-center w-full ps-3 pe-4 py-2 border-l-4 border-transparent text-start text-base font-medium text-primary-50 hover:bg-primary-800 hover:text-white focus:outline-none focus:text-white focus:bg-primary-800 transition duration-150 ease-in-out {{ request()->routeIs('leaders.*', 'locations.*', 'organizations.*', 'protocol-officers.*', 'users.*', 'roles.*', 'permissions.*') ? 'bg-primary-800 text-secondary-300 border-secondary-400' : '' }}">
                                         <div>{{ __('Master Data') }}</div>
                                         <svg class="h-4 w-4 transition-transform duration-200" :class="{ 'rotate-180': masterDataOpen }" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                             <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -192,6 +195,9 @@
                                         </x-responsive-nav-link>
                                         <x-responsive-nav-link :href="route('roles.index')" :active="request()->routeIs('roles.*')" class="text-primary-50 hover:bg-primary-800 hover:text-white {{ request()->routeIs('roles.*') ? 'bg-primary-800 text-secondary-300 border-l-4 border-secondary-400' : '' }}">
                                             {{ __('Role') }}
+                                        </x-responsive-nav-link>
+                                        <x-responsive-nav-link :href="route('permissions.index')" :active="request()->routeIs('permissions.*')" class="text-primary-50 hover:bg-primary-800 hover:text-white {{ request()->routeIs('permissions.*') ? 'bg-primary-800 text-secondary-300 border-l-4 border-secondary-400' : '' }}">
+                                            {{ __('Permission') }}
                                         </x-responsive-nav-link>
                                         @endrole
                                     </div>
