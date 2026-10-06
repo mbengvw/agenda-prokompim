@@ -29,6 +29,20 @@ class ActivityService
 
         if (! empty($companionIds)) {
             $activity->companions()->sync($companionIds);
+
+            // Create child activities for companions
+            $mainLeader = \App\Models\Leader::find($activity->leader_id);
+            if ($mainLeader) {
+                foreach ($companionIds as $companionId) {
+                    $companionData = $data;
+                    $companionData['leader_id'] = $companionId;
+                    $companionData['original_leader_id'] = $companionId;
+                    $companionData['parent_activity_id'] = $activity->id;
+                    $companionData['title'] = "Mendampingi " . $mainLeader->position . " dalam " . $activity->title;
+                    
+                    $this->repository->create($companionData);
+                }
+            }
         }
 
         return $activity;

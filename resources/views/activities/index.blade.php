@@ -117,7 +117,7 @@
                                     @php
                                         $isUtama = false;
                                         if ($activity->leader) {
-                                            $isUtama = (strtolower($activity->leader->position) === strtolower($leaderFilter));
+                                            $isUtama = (strtolower(trim($activity->leader->position)) === strtolower(trim($leaderFilter)));
                                         }
                                     @endphp
                                     @if($isUtama)

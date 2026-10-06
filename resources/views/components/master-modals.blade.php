@@ -75,6 +75,11 @@
                     <x-input-label value="Jabatan" />
                     <x-text-input id="ldr_position" type="text" class="mt-1 block w-full" required />
                 </div>
+                <div>
+                    <x-input-label value="Level Hierarki" />
+                    <x-text-input id="ldr_hierarchy" type="number" class="mt-1 block w-full" value="99" required />
+                    <p class="text-xs text-gray-500 mt-1">1=Tertinggi, 2=Bawahnya, dst (Default: 99)</p>
+                </div>
             </div>
             <div class="mt-6 flex justify-end gap-3">
                 <button type="button" x-on:click="$dispatch('close')" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md font-semibold text-xs uppercase hover:bg-gray-300">Batal</button>
@@ -204,6 +209,7 @@
         const errorEl = document.getElementById('ldr_error');
         const nameInput = document.getElementById('ldr_name');
         const positionInput = document.getElementById('ldr_position');
+        const hierarchyInput = document.getElementById('ldr_hierarchy');
         
         btn.disabled = true;
         btn.innerHTML = 'Menyimpan...';
@@ -220,6 +226,7 @@
                 body: JSON.stringify({ 
                     name: nameInput.value,
                     position: positionInput.value,
+                    hierarchy_level: hierarchyInput.value,
                     is_active: true
                 })
             });
@@ -264,6 +271,7 @@
                 // Reset form
                 nameInput.value = '';
                 positionInput.value = '';
+                hierarchyInput.value = '99';
             } else {
                 errorEl.textContent = data.message || 'Terjadi kesalahan.';
                 errorEl.classList.remove('hidden');

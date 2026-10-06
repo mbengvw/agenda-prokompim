@@ -77,7 +77,7 @@
                                     mainLeaderId: '{{ old('leader_id', $activity->leader_id) }}',
                                     options: [
                                         @foreach($leaders as $ld)
-                                            { value: '{{ $ld->id }}', text: '{{ addslashes($ld->name) }} ({{ addslashes($ld->position) }})', level: {{ $ld->level }} },
+                                            { value: '{{ $ld->id }}', text: '{{ addslashes($ld->name) }} ({{ addslashes($ld->position) }})', level: {{ $ld->hierarchy_level ?? 99 }} },
                                         @endforeach
                                     ],
                                     selected: {{ json_encode(array_map('strval', old('companion_ids', $activity->companions->pluck('id')->toArray()))) }},
