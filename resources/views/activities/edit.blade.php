@@ -63,7 +63,7 @@
                         <div>
                             <x-input-label value="Pimpinan (Utama)" />
                             @php
-                                $leaderOptions = collect($mainLeaders)->map(fn($l) => ['value' => $l->id, 'label' => $l->name . ' (' . $l->position . ')'])->toArray();
+                                $leaderOptions = collect($mainLeaders)->map(fn($l) => ['value' => $l->id, 'label' => $l->name . ' (' . strtoupper($l->position) . ')'])->toArray();
                             @endphp
                             <x-custom-select 
                                 name="leader_id" 
@@ -81,7 +81,7 @@
                                     mainLeaderId: '{{ old('leader_id', $activity->leader_id) }}',
                                     options: [
                                         @foreach($leaders as $ld)
-                                            { value: '{{ $ld->id }}', text: '{{ addslashes($ld->name) }} ({{ addslashes($ld->position) }})', level: {{ $ld->hierarchy_level ?? 99 }} },
+                                            { value: '{{ $ld->id }}', text: '{{ addslashes(ucwords(strtolower($ld->position))) }}', level: {{ $ld->hierarchy_level ?? 99 }} },
                                         @endforeach
                                     ],
                                     selected: {{ json_encode(array_map('strval', old('companion_ids', $activity->companions->pluck('id')->toArray()))) }},

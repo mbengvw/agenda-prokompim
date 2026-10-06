@@ -15,8 +15,9 @@
 
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-white" />
+                    <a href="{{ route('dashboard') }}" class="flex flex-col justify-center items-start">
+                        <x-application-logo class="block h-8 w-auto fill-current text-white" />
+                        <span class="text-[0.55rem] text-primary-100 font-bold tracking-wider mt-1.5 uppercase leading-none">Leadership Agenda & Integration Tools</span>
                     </a>
                 </div>
 
@@ -26,34 +27,55 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
                     
-                    <x-nav-link :href="route('leaders.index')" :active="request()->routeIs('leaders.*')" class="text-primary-50 hover:text-white hover:border-secondary-400 focus:text-white focus:border-secondary-400 {{ request()->routeIs('leaders.*') ? 'border-secondary-400 text-white font-bold' : 'border-transparent' }}">
-                        {{ __('Pimpinan') }}
-                    </x-nav-link>
-
                     <x-nav-link :href="route('activities.index')" :active="request()->routeIs('activities.*')" class="text-primary-50 hover:text-white hover:border-secondary-400 focus:text-white focus:border-secondary-400 {{ request()->routeIs('activities.*') ? 'border-secondary-400 text-white font-bold' : 'border-transparent' }}">
                         {{ __('Agenda') }}
                     </x-nav-link>
 
-                    <x-nav-link :href="route('locations.index')" :active="request()->routeIs('locations.*')" class="text-primary-50 hover:text-white hover:border-secondary-400 focus:text-white focus:border-secondary-400 {{ request()->routeIs('locations.*') ? 'border-secondary-400 text-white font-bold' : 'border-transparent' }}">
-                        {{ __('Lokasi') }}
-                    </x-nav-link>
+                    <!-- Master Data Dropdown -->
+                    <div class="hidden sm:flex sm:items-center sm:ms-2">
+                        @php
+                            $isMasterDataActive = request()->routeIs('leaders.*', 'locations.*', 'organizations.*', 'protocol-officers.*', 'users.*', 'roles.*');
+                            $masterDataClasses = $isMasterDataActive
+                                ? 'inline-flex items-center px-1 pt-1 border-b-2 border-secondary-400 text-sm font-medium leading-5 text-white focus:outline-none transition duration-150 ease-in-out font-bold'
+                                : 'inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-primary-50 hover:text-white hover:border-secondary-400 focus:outline-none focus:text-white focus:border-secondary-400 transition duration-150 ease-in-out';
+                        @endphp
+                        <x-dropdown align="left" width="48">
+                            <x-slot name="trigger">
+                                <button class="{{ $masterDataClasses }} h-16">
+                                    <div>{{ __('Master Data') }}</div>
+                                    <div class="ms-1">
+                                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                </button>
+                            </x-slot>
 
-                    <x-nav-link :href="route('organizations.index')" :active="request()->routeIs('organizations.*')" class="text-primary-50 hover:text-white hover:border-secondary-400 focus:text-white focus:border-secondary-400 {{ request()->routeIs('organizations.*') ? 'border-secondary-400 text-white font-bold' : 'border-transparent' }}">
-                        {{ __('Organisasi') }}
-                    </x-nav-link>
-
-                    <x-nav-link :href="route('protocol-officers.index')" :active="request()->routeIs('protocol-officers.*')" class="text-primary-50 hover:text-white hover:border-secondary-400 focus:text-white focus:border-secondary-400 {{ request()->routeIs('protocol-officers.*') ? 'border-secondary-400 text-white font-bold' : 'border-transparent' }}">
-                        {{ __('Petugas Protokol') }}
-                    </x-nav-link>
-
-                    @role('admin')
-                    <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')" class="text-primary-50 hover:text-white hover:border-secondary-400 focus:text-white focus:border-secondary-400 {{ request()->routeIs('users.*') ? 'border-secondary-400 text-white font-bold' : 'border-transparent' }}">
-                        {{ __('Pengguna') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('roles.index')" :active="request()->routeIs('roles.*')" class="text-primary-50 hover:text-white hover:border-secondary-400 focus:text-white focus:border-secondary-400 {{ request()->routeIs('roles.*') ? 'border-secondary-400 text-white font-bold' : 'border-transparent' }}">
-                        {{ __('Role') }}
-                    </x-nav-link>
-                    @endrole
+                            <x-slot name="content">
+                                <x-dropdown-link :href="route('leaders.index')" class="{{ request()->routeIs('leaders.*') ? 'font-bold bg-gray-100' : '' }}">
+                                    {{ __('Pimpinan') }}
+                                </x-dropdown-link>
+                                <x-dropdown-link :href="route('locations.index')" class="{{ request()->routeIs('locations.*') ? 'font-bold bg-gray-100' : '' }}">
+                                    {{ __('Lokasi') }}
+                                </x-dropdown-link>
+                                <x-dropdown-link :href="route('organizations.index')" class="{{ request()->routeIs('organizations.*') ? 'font-bold bg-gray-100' : '' }}">
+                                    {{ __('Organisasi') }}
+                                </x-dropdown-link>
+                                <x-dropdown-link :href="route('protocol-officers.index')" class="{{ request()->routeIs('protocol-officers.*') ? 'font-bold bg-gray-100' : '' }}">
+                                    {{ __('Petugas Protokol') }}
+                                </x-dropdown-link>
+                                @role('admin')
+                                <div class="border-t border-gray-100 my-1"></div>
+                                <x-dropdown-link :href="route('users.index')" class="{{ request()->routeIs('users.*') ? 'font-bold bg-gray-100' : '' }}">
+                                    {{ __('Pengguna') }}
+                                </x-dropdown-link>
+                                <x-dropdown-link :href="route('roles.index')" class="{{ request()->routeIs('roles.*') ? 'font-bold bg-gray-100' : '' }}">
+                                    {{ __('Role') }}
+                                </x-dropdown-link>
+                                @endrole
+                            </x-slot>
+                        </x-dropdown>
+                    </div>
                 </div>
             </div>
 
@@ -120,8 +142,9 @@
                         <div class="flex h-full flex-col overflow-y-auto bg-primary-700 shadow-xl">
                             <!-- Drawer Header -->
                             <div class="flex items-center justify-between px-4 h-16 border-b border-primary-600 bg-primary-600">
-                                <a href="{{ route('dashboard') }}">
-                                    <x-application-logo class="block h-8 w-auto fill-current text-white" />
+                                <a href="{{ route('dashboard') }}" class="flex flex-col justify-center items-start">
+                                    <x-application-logo class="block h-7 w-auto fill-current text-white" />
+                                    <span class="text-[0.5rem] text-primary-100 font-bold tracking-wider mt-1.5 uppercase leading-none">Leadership Agenda & Integration Tools</span>
                                 </a>
                                 <button type="button" @click="open = false" class="rounded-md text-primary-200 hover:text-white focus:outline-none">
                                     <span class="sr-only">Close menu</span>
@@ -136,30 +159,43 @@
                                 <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" class="text-primary-50 hover:bg-primary-800 hover:text-white {{ request()->routeIs('dashboard') ? 'bg-primary-800 text-secondary-300 border-l-4 border-secondary-400' : '' }}">
                                     {{ __('Dashboard') }}
                                 </x-responsive-nav-link>
-                                <x-responsive-nav-link :href="route('leaders.index')" :active="request()->routeIs('leaders.*')" class="text-primary-50 hover:bg-primary-800 hover:text-white {{ request()->routeIs('leaders.*') ? 'bg-primary-800 text-secondary-300 border-l-4 border-secondary-400' : '' }}">
-                                    {{ __('Pimpinan') }}
-                                </x-responsive-nav-link>
                                 <x-responsive-nav-link :href="route('activities.index')" :active="request()->routeIs('activities.*')" class="text-primary-50 hover:bg-primary-800 hover:text-white {{ request()->routeIs('activities.*') ? 'bg-primary-800 text-secondary-300 border-l-4 border-secondary-400' : '' }}">
                                     {{ __('Agenda') }}
                                 </x-responsive-nav-link>
-                                <x-responsive-nav-link :href="route('locations.index')" :active="request()->routeIs('locations.*')" class="text-primary-50 hover:bg-primary-800 hover:text-white {{ request()->routeIs('locations.*') ? 'bg-primary-800 text-secondary-300 border-l-4 border-secondary-400' : '' }}">
-                                    {{ __('Lokasi') }}
-                                </x-responsive-nav-link>
-                                <x-responsive-nav-link :href="route('organizations.index')" :active="request()->routeIs('organizations.*')" class="text-primary-50 hover:bg-primary-800 hover:text-white {{ request()->routeIs('organizations.*') ? 'bg-primary-800 text-secondary-300 border-l-4 border-secondary-400' : '' }}">
-                                    {{ __('Organisasi') }}
-                                </x-responsive-nav-link>
-                                <x-responsive-nav-link :href="route('protocol-officers.index')" :active="request()->routeIs('protocol-officers.*')" class="text-primary-50 hover:bg-primary-800 hover:text-white {{ request()->routeIs('protocol-officers.*') ? 'bg-primary-800 text-secondary-300 border-l-4 border-secondary-400' : '' }}">
-                                    {{ __('Petugas Protokol') }}
-                                </x-responsive-nav-link>
-                                
-                                @role('admin')
-                                <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')" class="text-primary-50 hover:bg-primary-800 hover:text-white {{ request()->routeIs('users.*') ? 'bg-primary-800 text-secondary-300 border-l-4 border-secondary-400' : '' }}">
-                                    {{ __('Pengguna') }}
-                                </x-responsive-nav-link>
-                                <x-responsive-nav-link :href="route('roles.index')" :active="request()->routeIs('roles.*')" class="text-primary-50 hover:bg-primary-800 hover:text-white {{ request()->routeIs('roles.*') ? 'bg-primary-800 text-secondary-300 border-l-4 border-secondary-400' : '' }}">
-                                    {{ __('Role') }}
-                                </x-responsive-nav-link>
-                                @endrole
+
+                                <!-- Master Data Group -->
+                                <div x-data="{ masterDataOpen: {{ request()->routeIs('leaders.*', 'locations.*', 'organizations.*', 'protocol-officers.*', 'users.*', 'roles.*') ? 'true' : 'false' }} }" class="space-y-1">
+                                    <button @click="masterDataOpen = !masterDataOpen" class="w-full flex justify-between items-center w-full ps-3 pe-4 py-2 border-l-4 border-transparent text-start text-base font-medium text-primary-50 hover:bg-primary-800 hover:text-white focus:outline-none focus:text-white focus:bg-primary-800 transition duration-150 ease-in-out {{ request()->routeIs('leaders.*', 'locations.*', 'organizations.*', 'protocol-officers.*', 'users.*', 'roles.*') ? 'bg-primary-800 text-secondary-300 border-secondary-400' : '' }}">
+                                        <div>{{ __('Master Data') }}</div>
+                                        <svg class="h-4 w-4 transition-transform duration-200" :class="{ 'rotate-180': masterDataOpen }" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                        </svg>
+                                    </button>
+                                    
+                                    <div x-show="masterDataOpen" class="pl-4 space-y-1 bg-primary-800/30 py-1" style="display: none;">
+                                        <x-responsive-nav-link :href="route('leaders.index')" :active="request()->routeIs('leaders.*')" class="text-primary-50 hover:bg-primary-800 hover:text-white {{ request()->routeIs('leaders.*') ? 'bg-primary-800 text-secondary-300 border-l-4 border-secondary-400' : '' }}">
+                                            {{ __('Pimpinan') }}
+                                        </x-responsive-nav-link>
+                                        <x-responsive-nav-link :href="route('locations.index')" :active="request()->routeIs('locations.*')" class="text-primary-50 hover:bg-primary-800 hover:text-white {{ request()->routeIs('locations.*') ? 'bg-primary-800 text-secondary-300 border-l-4 border-secondary-400' : '' }}">
+                                            {{ __('Lokasi') }}
+                                        </x-responsive-nav-link>
+                                        <x-responsive-nav-link :href="route('organizations.index')" :active="request()->routeIs('organizations.*')" class="text-primary-50 hover:bg-primary-800 hover:text-white {{ request()->routeIs('organizations.*') ? 'bg-primary-800 text-secondary-300 border-l-4 border-secondary-400' : '' }}">
+                                            {{ __('Organisasi') }}
+                                        </x-responsive-nav-link>
+                                        <x-responsive-nav-link :href="route('protocol-officers.index')" :active="request()->routeIs('protocol-officers.*')" class="text-primary-50 hover:bg-primary-800 hover:text-white {{ request()->routeIs('protocol-officers.*') ? 'bg-primary-800 text-secondary-300 border-l-4 border-secondary-400' : '' }}">
+                                            {{ __('Petugas Protokol') }}
+                                        </x-responsive-nav-link>
+                                        
+                                        @role('admin')
+                                        <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')" class="text-primary-50 hover:bg-primary-800 hover:text-white {{ request()->routeIs('users.*') ? 'bg-primary-800 text-secondary-300 border-l-4 border-secondary-400' : '' }}">
+                                            {{ __('Pengguna') }}
+                                        </x-responsive-nav-link>
+                                        <x-responsive-nav-link :href="route('roles.index')" :active="request()->routeIs('roles.*')" class="text-primary-50 hover:bg-primary-800 hover:text-white {{ request()->routeIs('roles.*') ? 'bg-primary-800 text-secondary-300 border-l-4 border-secondary-400' : '' }}">
+                                            {{ __('Role') }}
+                                        </x-responsive-nav-link>
+                                        @endrole
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- Responsive Settings Options -->

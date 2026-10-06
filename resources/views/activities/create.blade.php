@@ -64,16 +64,16 @@
                                 @php
                                     $defaultLeader = $mainLeaders->firstWhere('id', $defaultLeaderId);
                                 @endphp
-                                <x-input-label value="Agenda {{ $defaultLeader->position ?? 'Pimpinan' }}" />
+                                <x-input-label value="Agenda {{ strtoupper($defaultLeader->position ?? 'PIMPINAN') }}" />
                                 <input type="hidden" name="leader_id" value="{{ $defaultLeaderId }}">
                                 <div class="mt-2 block w-full px-3 py-2 bg-primary-50 border border-primary-200 rounded-md text-sm text-primary-800 font-semibold flex items-center gap-2">
                                     <svg class="w-4 h-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                                    {{ $defaultLeader->name ?? '' }} ({{ $defaultLeader->position ?? '' }})
+                                    {{ $defaultLeader->name ?? '' }} ({{ strtoupper($defaultLeader->position ?? '') }})
                                 </div>
                             @else
                                 <x-input-label value="Pimpinan (Utama)" />
                                 @php
-                                    $leaderOptions = collect($mainLeaders)->map(fn($l) => ['value' => $l->id, 'label' => $l->name . ' (' . $l->position . ')'])->toArray();
+                                    $leaderOptions = collect($mainLeaders)->map(fn($l) => ['value' => $l->id, 'label' => $l->name . ' (' . strtoupper($l->position) . ')'])->toArray();
                                 @endphp
                                 <x-custom-select 
                                     name="leader_id" 
@@ -92,7 +92,7 @@
                                     mainLeaderId: '{{ old('leader_id', $defaultLeaderId ?? '') }}',
                                     options: [
                                         @foreach($leaders as $ld)
-                                            { value: '{{ $ld->id }}', text: '{{ addslashes($ld->name) }} ({{ addslashes($ld->position) }})', level: {{ $ld->hierarchy_level ?? 4 }} },
+                                            { value: '{{ $ld->id }}', text: '{{ addslashes(ucwords(strtolower($ld->position))) }}', level: {{ $ld->hierarchy_level ?? 4 }} },
                                         @endforeach
                                     ],
                                     selected: {{ json_encode(array_map('strval', old('companion_ids', []))) }},
