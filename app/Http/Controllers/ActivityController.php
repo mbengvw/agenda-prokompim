@@ -124,6 +124,11 @@ class ActivityController extends Controller
     {
         $data = $request->validated();
         $data['is_disposition'] = $request->boolean('is_disposition');
+        $data['is_tentative'] = $request->boolean('is_tentative');
+        if ($data['is_tentative']) {
+            $data['start_time'] = null;
+            $data['end_time'] = null;
+        }
 
         if (! empty($data['location_input'])) {
             $location = Location::where('name', $data['location_input'])->first();
@@ -227,6 +232,11 @@ class ActivityController extends Controller
     {
         $data = $request->validated();
         $data['is_disposition'] = $request->boolean('is_disposition');
+        $data['is_tentative'] = $request->boolean('is_tentative');
+        if ($data['is_tentative']) {
+            $data['start_time'] = null;
+            $data['end_time'] = null;
+        }
 
         if (array_key_exists('location_input', $data)) {
             if (empty($data['location_input'])) {
@@ -263,6 +273,10 @@ class ActivityController extends Controller
         unset($data['location_input'], $data['organizer_input']);
 
         $this->service->updateActivity($activity, $data);
+
+        if ($request->filled('redirect_to')) {
+            return redirect($request->input('redirect_to'))->with('success', 'Agenda berhasil diperbarui.');
+        }
 
         return redirect()->route('activities.index', array_filter([
             'date' => $request->query('date'),

@@ -21,6 +21,9 @@ class RoleSeeder extends Seeder
             'ajudan_bupati',
             'ajudan_wabup',
             'ajudan_sekda',
+            'sekpri_bupati',
+            'sekpri_wabup',
+            'sekpri_sekda',
         ];
 
         foreach ($roles as $role) {
@@ -35,6 +38,9 @@ class RoleSeeder extends Seeder
             'ajudan_bupati' => 'Ajudan Bupati',
             'ajudan_wabup' => 'Ajudan Wabup',
             'ajudan_sekda' => 'Ajudan Sekda',
+            'sekpri_bupati' => 'Sekpri Bupati',
+            'sekpri_wabup' => 'Sekpri Wabup',
+            'sekpri_sekda' => 'Sekpri Sekda',
         ];
 
         foreach ($testUsers as $role => $name) {

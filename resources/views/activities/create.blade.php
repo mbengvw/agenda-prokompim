@@ -28,14 +28,27 @@
                             <x-text-input name="activity_date" type="date" class="mt-2 block w-full" :value="old('activity_date', $date)" required />
                         </div>
                         
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <x-input-label value="Mulai" />
-                                <x-text-input name="start_time" type="time" class="mt-2 block w-full" required />
+                        <div x-data="{ isTentative: {{ old('is_tentative') ? 'true' : 'false' }} }">
+                            <div class="flex items-center justify-between mb-2">
+                                <x-input-label value="Waktu Pelaksanaan" />
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" name="is_tentative" value="1" x-model="isTentative" class="rounded border-gray-300 text-primary-600 shadow-sm focus:ring-primary-500">
+                                    <span class="ml-2 text-xs text-gray-600 font-medium">Waktu belum ditentukan (Tentatif)</span>
+                                </label>
                             </div>
-                            <div>
-                                <x-input-label value="Selesai" />
-                                <x-text-input name="end_time" type="time" class="mt-2 block w-full" />
+                            
+                            <div class="grid grid-cols-2 gap-4" x-show="!isTentative" x-transition>
+                                <div>
+                                    <x-input-label value="Mulai" />
+                                    <x-text-input name="start_time" type="time" class="mt-2 block w-full" :value="old('start_time')" x-bind:required="!isTentative" x-bind:disabled="isTentative" />
+                                </div>
+                                <div>
+                                    <x-input-label value="Selesai" />
+                                    <x-text-input name="end_time" type="time" class="mt-2 block w-full" :value="old('end_time')" x-bind:disabled="isTentative" />
+                                </div>
+                            </div>
+                            <div x-show="isTentative" style="display: none;" class="mt-2 text-sm text-amber-600 bg-amber-50 p-2.5 rounded border border-amber-200">
+                                Waktu kegiatan ini bersifat tentatif (belum pasti). Anda bisa menentukan jamnya nanti.
                             </div>
                         </div>
                         

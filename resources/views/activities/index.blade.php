@@ -146,7 +146,11 @@
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                     <span>{{ \Carbon\Carbon::parse($activity->activity_date)->translatedFormat('l, d M') }}</span>
                                     <span class="text-primary-300">•</span>
-                                    <span>{{ \Carbon\Carbon::parse($activity->start_time)->format('H:i') }} - {{ $activity->end_time ? \Carbon\Carbon::parse($activity->end_time)->format('H:i') : 'Selesai' }}</span>
+                                    @if($activity->is_tentative)
+                                        <span>Waktu Tentatif</span>
+                                    @else
+                                        <span>{{ \Carbon\Carbon::parse($activity->start_time)->format('H:i') }} - {{ $activity->end_time ? \Carbon\Carbon::parse($activity->end_time)->format('H:i') : 'Selesai' }}</span>
+                                    @endif
                                 </div>
                             </div>
                             <a href="{{ route('activities.show', ['activity' => $activity->id, 'date' => $dateFilter, 'leader' => $leaderFilter]) }}" class="block mt-4 mb-2">
@@ -286,7 +290,7 @@
                                     {{ ucfirst($activity->status) }}
                                 </span>
                             </div>                            <div class="flex items-center gap-3">
-                                <a href="{{ route('activities.edit', ['activity' => $activity->id, 'date' => $dateFilter, 'leader' => $leaderFilter]) }}" class="p-1.5 inline-flex text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all" title="Edit">
+                                <a href="{{ route('activities.edit', ['activity' => $activity->id, 'redirect_to' => request()->fullUrl(), 'date' => $dateFilter, 'leader' => $leaderFilter]) }}" class="p-1.5 inline-flex text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all" title="Edit">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                 </a>
                                 @if($activity->created_by === auth()->id() || str_contains(auth()->user()->roles->first()?->name ?? '', 'ajudan_'))
@@ -334,7 +338,11 @@
                                                 {{ \Carbon\Carbon::parse($activity->activity_date)->translatedFormat('d M Y') }}
                                             </div>
                                             <div class="text-xs font-medium text-primary-600 mb-2">
-                                                {{ \Carbon\Carbon::parse($activity->start_time)->format('H:i') }} - {{ $activity->end_time ? \Carbon\Carbon::parse($activity->end_time)->format('H:i') : 'Selesai' }}
+                                                @if($activity->is_tentative)
+                                                    Waktu Tentatif
+                                                @else
+                                                    {{ \Carbon\Carbon::parse($activity->start_time)->format('H:i') }} - {{ $activity->end_time ? \Carbon\Carbon::parse($activity->end_time)->format('H:i') : 'Selesai' }}
+                                                @endif
                                             </div>
                                             <div class="text-xs text-gray-700 flex items-start gap-1">
                                                 <svg class="w-3.5 h-3.5 text-primary-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg>
@@ -433,7 +441,7 @@
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <div class="flex flex-col items-end gap-2">
                                                 <a href="{{ route('activities.show', ['activity' => $activity->id, 'date' => $dateFilter, 'leader' => $leaderFilter]) }}" class="text-teal-600 hover:text-teal-900 bg-teal-50 hover:bg-teal-100 px-3 py-1 rounded transition-colors text-xs inline-block text-center min-w-[70px]">Detail</a>
-                                                <a href="{{ route('activities.edit', ['activity' => $activity->id, 'date' => $dateFilter, 'leader' => $leaderFilter]) }}" class="text-primary-600 hover:text-primary-900 bg-primary-50 hover:bg-primary-100 px-3 py-1 rounded transition-colors text-xs inline-block text-center min-w-[70px]">Edit</a>
+                                                <a href="{{ route('activities.edit', ['activity' => $activity->id, 'redirect_to' => request()->fullUrl(), 'date' => $dateFilter, 'leader' => $leaderFilter]) }}" class="text-primary-600 hover:text-primary-900 bg-primary-50 hover:bg-primary-100 px-3 py-1 rounded transition-colors text-xs inline-block text-center min-w-[70px]">Edit</a>
                                                 @if($activity->created_by === auth()->id() || str_contains(auth()->user()->roles->first()?->name ?? '', 'ajudan_'))
                                                 <form action="{{ route('activities.destroy', $activity->id) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus agenda ini?');">
                                                     @csrf

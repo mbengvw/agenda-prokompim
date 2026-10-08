@@ -29,6 +29,7 @@ class Activity extends Model
         'activity_date',
         'start_time',
         'end_time',
+        'is_tentative',
         'location_id',
         'location_text',
         'organization_id',
@@ -54,6 +55,7 @@ class Activity extends Model
         'start_time' => 'datetime:H:i',
         'end_time' => 'datetime:H:i',
         'is_disposition' => 'boolean',
+        'is_tentative' => 'boolean',
     ];
 
     public function protocolOfficer(): BelongsTo

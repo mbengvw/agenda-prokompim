@@ -66,7 +66,11 @@
                             <span>{{ \Carbon\Carbon::parse($activity->activity_date)->translatedFormat('l, d F Y') }}</span>
                             <span class="text-primary-300 mx-1">|</span>
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            <span>{{ \Carbon\Carbon::parse($activity->start_time)->format('H:i') }} - {{ $activity->end_time ? \Carbon\Carbon::parse($activity->end_time)->format('H:i') : 'Selesai' }}</span>
+                            @if($activity->is_tentative)
+                                <span>Waktu Tentatif</span>
+                            @else
+                                <span>{{ \Carbon\Carbon::parse($activity->start_time)->format('H:i') }} - {{ $activity->end_time ? \Carbon\Carbon::parse($activity->end_time)->format('H:i') : 'Selesai' }}</span>
+                            @endif
                         </div>
                     </div>
 
@@ -158,7 +162,7 @@
                         <div class="mt-8 pt-6 border-t border-gray-100 flex flex-wrap gap-2 items-center">
                             <!-- Tombol Staf/Admin -->
                             @hasanyrole('staf_protokol|kabag_protokol|admin')
-                                <a href="{{ route('activities.edit', $activity->id) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 text-xs font-bold shadow-sm transition-all whitespace-nowrap">
+                                <a href="{{ route('activities.edit', ['activity' => $activity->id, 'redirect_to' => request()->fullUrl(), 'date' => $dateFilter ?? request('date'), 'leader' => $leaderFilter ?? request('leader')]) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 text-xs font-bold shadow-sm transition-all whitespace-nowrap">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                     Edit Redaksional
                                 </a>

@@ -4,7 +4,7 @@
             <h2 class="font-bold text-lg sm:text-xl text-primary-900 leading-tight truncate">
                 {{ __('Ubah Agenda Kegiatan') }}
             </h2>
-            <a href="{{ route('activities.index', array_filter(['date' => $dateFilter ?? request('date'), 'leader' => $leaderFilter ?? request('leader')])) }}" class="shrink-0 inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 bg-gray-200 hover:bg-gray-300 border border-transparent rounded-full font-bold text-[10px] sm:text-xs text-gray-800 uppercase tracking-widest shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
+            <a href="{{ request('redirect_to', route('activities.index', array_filter(['date' => $dateFilter ?? request('date'), 'leader' => $leaderFilter ?? request('leader')]))) }}" class="shrink-0 inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 bg-gray-200 hover:bg-gray-300 border border-transparent rounded-full font-bold text-[10px] sm:text-xs text-gray-800 uppercase tracking-widest shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
                 <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 Kembali
             </a>
@@ -14,7 +14,7 @@
     <div class="py-6 sm:py-12">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-white sm:rounded-2xl shadow-xl border border-primary-100 overflow-hidden">
-                <form method="post" action="{{ route('activities.update', ['activity' => $activity->id, 'date' => request('date'), 'leader' => request('leader')]) }}" class="p-5 sm:p-8">
+                <form method="post" action="{{ route('activities.update', ['activity' => $activity->id, 'redirect_to' => request('redirect_to'), 'date' => request('date'), 'leader' => request('leader')]) }}" class="p-5 sm:p-8">
                     @csrf
                     @method('PUT')
                     
@@ -29,14 +29,27 @@
                             <x-text-input name="activity_date" type="date" class="mt-2 block w-full" :value="old('activity_date', $activity->activity_date?->format('Y-m-d'))" required />
                         </div>
                         
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <x-input-label value="Mulai" />
-                                <x-text-input name="start_time" type="time" class="mt-2 block w-full" :value="old('start_time', $activity->start_time?->format('H:i'))" required />
+                        <div x-data="{ isTentative: {{ old('is_tentative', $activity->is_tentative) ? 'true' : 'false' }} }">
+                            <div class="flex items-center justify-between mb-2">
+                                <x-input-label value="Waktu Pelaksanaan" />
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" name="is_tentative" value="1" x-model="isTentative" class="rounded border-gray-300 text-primary-600 shadow-sm focus:ring-primary-500">
+                                    <span class="ml-2 text-xs text-gray-600 font-medium">Waktu belum ditentukan (Tentatif)</span>
+                                </label>
                             </div>
-                            <div>
-                                <x-input-label value="Selesai" />
-                                <x-text-input name="end_time" type="time" class="mt-2 block w-full" :value="old('end_time', $activity->end_time?->format('H:i'))" />
+                            
+                            <div class="grid grid-cols-2 gap-4" x-show="!isTentative" x-transition>
+                                <div>
+                                    <x-input-label value="Mulai" />
+                                    <x-text-input name="start_time" type="time" class="mt-2 block w-full" :value="old('start_time', $activity->start_time?->format('H:i'))" x-bind:required="!isTentative" x-bind:disabled="isTentative" />
+                                </div>
+                                <div>
+                                    <x-input-label value="Selesai" />
+                                    <x-text-input name="end_time" type="time" class="mt-2 block w-full" :value="old('end_time', $activity->end_time?->format('H:i'))" x-bind:disabled="isTentative" />
+                                </div>
+                            </div>
+                            <div x-show="isTentative" style="display: none;" class="mt-2 text-sm text-amber-600 bg-amber-50 p-2.5 rounded border border-amber-200">
+                                Waktu kegiatan ini bersifat tentatif (belum pasti).
                             </div>
                         </div>
                         
@@ -63,15 +76,11 @@
                         <div>
                             <x-input-label value="Pimpinan (Utama)" />
                             @php
-                                $leaderOptions = collect($mainLeaders)->map(fn($l) => ['value' => $l->id, 'label' => $l->name . ' (' . strtoupper($l->position) . ')'])->toArray();
+                                $leader = $activity->leader;
+                                $leaderLabel = $leader ? $leader->name . ' (' . strtoupper($leader->position) . ')' : '';
                             @endphp
-                            <x-custom-select 
-                                name="leader_id" 
-                                placeholder="-- Pilih --" 
-                                :options="$leaderOptions" 
-                                :value="old('leader_id', $activity->leader_id)"
-                                x-on:change="$dispatch('main-leader-changed', $event.target.value)" 
-                            />
+                            <x-text-input type="text" class="mt-2 block w-full bg-gray-100 text-gray-500 cursor-not-allowed" :value="$leaderLabel" readonly />
+                            <input type="hidden" name="leader_id" value="{{ old('leader_id', $activity->leader_id) }}">
                         </div>
                         
                         <div>
@@ -210,7 +219,7 @@
                     </div>
                     
                     <div class="mt-8 flex justify-end gap-3 pt-6 border-t border-gray-100">
-                        <a href="{{ route('activities.index', array_filter(['date' => $dateFilter ?? request('date'), 'leader' => $leaderFilter ?? request('leader')])) }}" class="px-6 py-2.5 bg-gray-200 text-gray-800 rounded-md font-semibold text-xs uppercase hover:bg-gray-300 transition-colors">Batal</a>
+                        <a href="{{ request('redirect_to', route('activities.index', array_filter(['date' => $dateFilter ?? request('date'), 'leader' => $leaderFilter ?? request('leader')]))) }}" class="px-6 py-2.5 bg-gray-200 text-gray-800 rounded-md font-semibold text-xs uppercase hover:bg-gray-300 transition-colors">Batal</a>
                         <button type="submit" class="px-6 py-2.5 bg-secondary-500 text-primary-900 rounded-md font-bold text-xs uppercase hover:bg-secondary-600 transition-colors shadow-sm">Simpan Perubahan</button>
                     </div>
                 </form>
