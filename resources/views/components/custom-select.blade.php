@@ -35,7 +35,7 @@
     <input type="hidden" name="{{ $name }}" x-model="selected" x-ref="hiddenInput" {{ $attributes }}>
     
     <!-- Trigger Button -->
-    <button type="button" @click="open = true" class="mt-2 flex w-full items-center justify-between border border-gray-300 bg-white px-3 py-2 text-left focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 rounded-lg shadow-sm transition-colors sm:text-sm">
+    <button type="button" @click="open = true" class="flex w-full h-full min-h-[38px] items-center justify-between border border-gray-300 bg-white px-3 py-2 text-left focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 rounded-md shadow-sm transition-colors sm:text-sm">
         <span class="block truncate" :class="{'text-gray-900 font-medium': selected, 'text-gray-500': !selected}" x-text="selectedLabel"></span>
         <span class="pointer-events-none flex items-center">
             <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>

@@ -57,11 +57,11 @@
 
             <!-- Filters -->
             <div class="mb-6 bg-white p-4 rounded-xl shadow-sm border border-primary-100 flex flex-col sm:flex-row gap-4 items-center justify-between">
-                <form action="{{ route('activities.index') }}" method="GET" class="w-full sm:w-auto flex flex-col sm:flex-row gap-2">
+                <form action="{{ route('activities.index') }}" method="GET" class="w-full flex flex-col sm:flex-row gap-3 items-center">
                     <input type="hidden" name="view" id="view_input" value="{{ request('view', 'list') }}">
-                    <input type="date" name="date" value="{{ $dateFilter }}" onchange="this.form.submit()" class="border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm">
-                    <div class="relative w-full sm:w-64">
-                        <input type="text" name="search" value="{{ $search }}" placeholder="Cari kegiatan..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm">
+                    <input type="date" name="date" value="{{ $dateFilter }}" onchange="this.form.submit()" class="h-[42px] px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm">
+                    <div class="relative w-full sm:w-64 h-[42px]">
+                        <input type="text" name="search" value="{{ $search }}" placeholder="Cari kegiatan..." class="h-full w-full pl-10 pr-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -81,7 +81,7 @@
                             ['value' => 'cancelled', 'label' => 'Cancelled'],
                         ];
                     @endphp
-                    <div class="w-48">
+                    <div class="w-48 h-[42px]">
                         <x-custom-select 
                             name="status" 
                             placeholder="Semua Status" 
@@ -90,9 +90,9 @@
                             onchange="this.form.submit()"
                         />
                     </div>
-                    <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-md text-sm font-medium hover:bg-primary-700">Cari</button>
+                    <button type="submit" class="h-[42px] px-4 flex items-center justify-center bg-primary-600 text-white rounded-md text-sm font-medium hover:bg-primary-700">Cari</button>
                     @if($search || $leaderFilter || $statusFilter)
-                        <a href="{{ route('activities.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50">Reset</a>
+                        <a href="{{ route('activities.index') }}" class="h-[42px] inline-flex items-center justify-center px-4 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50">Reset</a>
                     @endif
                 </form>
             </div>
@@ -149,7 +149,13 @@
                                     @if($activity->is_tentative)
                                         <span>Waktu Tentatif</span>
                                     @else
-                                        <span>{{ \Carbon\Carbon::parse($activity->start_time)->format('H:i') }} - {{ $activity->end_time ? \Carbon\Carbon::parse($activity->end_time)->format('H:i') : 'Selesai' }}</span>
+                                        <div class="flex items-center gap-1">
+                                            <span>{{ \Carbon\Carbon::parse($activity->start_time)->format('H:i') }} - {{ $activity->end_time ? \Carbon\Carbon::parse($activity->end_time)->format('H:i') : 'Selesai' }}</span>
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-extrabold bg-yellow-300 text-yellow-900 shadow-sm border border-yellow-400">
+                                                <svg class="w-3 h-3 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                {{ $activity->duration }}
+                                            </span>
+                                        </div>
                                     @endif
                                 </div>
                             </div>
@@ -341,7 +347,13 @@
                                                 @if($activity->is_tentative)
                                                     Waktu Tentatif
                                                 @else
-                                                    {{ \Carbon\Carbon::parse($activity->start_time)->format('H:i') }} - {{ $activity->end_time ? \Carbon\Carbon::parse($activity->end_time)->format('H:i') : 'Selesai' }}
+                                                    <div class="flex items-center gap-1.5 mt-0.5">
+                                                        <span>{{ \Carbon\Carbon::parse($activity->start_time)->format('H:i') }} - {{ $activity->end_time ? \Carbon\Carbon::parse($activity->end_time)->format('H:i') : 'Selesai' }}</span>
+                                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-yellow-300 text-yellow-900 border border-yellow-400 shadow-sm">
+                                                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                            {{ $activity->duration }}
+                                                        </span>
+                                                    </div>
                                                 @endif
                                             </div>
                                             <div class="text-xs text-gray-700 flex items-start gap-1">

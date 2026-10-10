@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Activity extends Model
 {
@@ -96,5 +97,23 @@ class Activity extends Model
     public function originalLeader(): BelongsTo
     {
         return $this->belongsTo(Leader::class, 'original_leader_id');
+    }
+
+    public function getDurationAttribute(): string
+    {
+        if (! $this->start_time || ! $this->end_time) {
+            return '-';
+        }
+
+        $start = Carbon::parse($this->start_time);
+        $end = Carbon::parse($this->end_time);
+
+        if ($end->lessThan($start)) {
+            $end->addDay();
+        }
+
+        $diffInMinutes = $start->diffInMinutes($end);
+
+        return $diffInMinutes > 0 ? $diffInMinutes.' Menit' : '-';
     }
 }
