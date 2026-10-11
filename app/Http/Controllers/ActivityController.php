@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreActivityRequest;
 use App\Http\Requests\UpdateActivityRequest;
 use App\Models\Activity;
+use App\Models\DressCode;
 use App\Models\Leader;
 use App\Models\Location;
 use App\Models\Organization;
@@ -12,6 +13,7 @@ use App\Models\ProtocolOfficer;
 use App\QueryServices\ActivityQueryService;
 use App\Services\ActivityDispositionService;
 use App\Services\ActivityService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -27,18 +29,22 @@ class ActivityController extends Controller
         $dateFilter = $request->input('date', Carbon::today()->toDateString());
         $leaderId = $request->input('leader_id');
 
-        if (!$leaderId) {
+        if (! $leaderId) {
             return redirect()->back()->withErrors('Pimpinan harus dipilih untuk mencetak PDF.');
         }
 
         $leader = Leader::findOrFail($leaderId);
 
-        // Dihadiri: 
-        // Kegiatan yang bola akhirnya ada di dia (dia ujung rantainya)
+        // Dihadiri:
+        // Kegiatan yang bola akhirnya ada di dia dan dikonfirmasi 'hadir'
         $dihadiri = Activity::with(['leader', 'location', 'organization', 'protocolOfficer', 'companions'])
             ->whereDate('activity_date', $dateFilter)
             ->whereIn('status', ['approved', 'submitted'])
             ->where('leader_id', $leaderId)
+            ->whereHas('dispositions', function ($q) use ($leaderId) {
+                $q->where('from_leader_id', $leaderId)
+                    ->where('status', 'hadir');
+            })
             ->orderBy('start_time')
             ->get();
 
@@ -50,16 +56,17 @@ class ActivityController extends Controller
             ->where('leader_id', '!=', $leaderId)
             ->whereHas('dispositions', function ($q) use ($leaderId) {
                 $q->where('from_leader_id', $leaderId)
-                  ->where('status', 'disposisi');
+                    ->where('status', 'disposisi');
             })
             ->orderBy('start_time')
             ->get();
 
         $dateFormatted = Carbon::parse($dateFilter)->locale('id')->translatedFormat('l, j F Y');
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('activities.pdf', compact('dihadiri', 'didisposisi', 'leader', 'dateFormatted'));
-        
-        $fileName = "Agenda_" . str_replace(' ', '_', $leader->short_name ?: $leader->name) . "_{$dateFilter}.pdf";
+        $pdf = Pdf::loadView('activities.pdf', compact('dihadiri', 'didisposisi', 'leader', 'dateFormatted'));
+
+        $fileName = 'Agenda_'.str_replace(' ', '_', $leader->short_name ?: $leader->name)."_{$dateFilter}.pdf";
+
         return $pdf->download($fileName);
     }
 
@@ -73,7 +80,7 @@ class ActivityController extends Controller
         if ($user->leader_id && $user->leader) {
             $leaderFilter = $user->leader->position;
         }
-        if (!auth()->user()->leader_id && !$leaderFilter) {
+        if (! auth()->user()->leader_id && ! $leaderFilter) {
             return view('activities.select-leader', compact('dateFilter'));
         }
 
@@ -100,14 +107,15 @@ class ActivityController extends Controller
             if ($user->leader_id) {
                 return $leader->id === $user->leader_id;
             }
+
             return in_array($leader->hierarchy_level, [1, 2, 3]);
         });
-        
+
         $defaultLeaderId = null;
         if ($user->leader_id) {
             $defaultLeaderId = $user->leader_id;
         } elseif ($leaderFilter) {
-            $matched = $mainLeaders->first(fn($l) => strtolower($l->position) === strtolower($leaderFilter));
+            $matched = $mainLeaders->first(fn ($l) => strtolower($l->position) === strtolower($leaderFilter));
             if ($matched) {
                 $defaultLeaderId = $matched->id;
             }
@@ -116,8 +124,9 @@ class ActivityController extends Controller
         $locations = Location::orderBy('name')->get();
         $organizations = Organization::orderBy('name')->get();
         $protocolOfficers = ProtocolOfficer::where('is_active', true)->orderBy('name')->get();
+        $dressCodes = DressCode::where('is_active', true)->orderBy('name')->pluck('name');
 
-        return view('activities.create', compact('leaders', 'mainLeaders', 'locations', 'organizations', 'protocolOfficers', 'date', 'defaultLeaderId', 'leaderFilter'));
+        return view('activities.create', compact('leaders', 'mainLeaders', 'locations', 'organizations', 'protocolOfficers', 'dressCodes', 'date', 'defaultLeaderId', 'leaderFilter'));
     }
 
     public function store(StoreActivityRequest $request)
@@ -187,7 +196,7 @@ class ActivityController extends Controller
 
         return redirect()->route('activities.index', array_filter([
             'date' => $request->query('date'),
-            'leader' => $request->query('leader')
+            'leader' => $request->query('leader'),
         ]))->with('success', $msg);
     }
 
@@ -215,17 +224,19 @@ class ActivityController extends Controller
             if ($user->leader_id) {
                 return $leader->id === $user->leader_id;
             }
+
             return in_array($leader->hierarchy_level, [1, 2, 3]);
         });
 
         $locations = Location::orderBy('name')->get();
         $organizations = Organization::orderBy('name')->get();
         $protocolOfficers = ProtocolOfficer::where('is_active', true)->orderBy('name')->get();
+        $dressCodes = DressCode::where('is_active', true)->orderBy('name')->pluck('name');
 
         $dateFilter = $request->query('date');
         $leaderFilter = $request->query('leader');
 
-        return view('activities.edit', compact('activity', 'leaders', 'mainLeaders', 'locations', 'organizations', 'protocolOfficers', 'dateFilter', 'leaderFilter'));
+        return view('activities.edit', compact('activity', 'leaders', 'mainLeaders', 'locations', 'organizations', 'protocolOfficers', 'dressCodes', 'dateFilter', 'leaderFilter'));
     }
 
     public function update(UpdateActivityRequest $request, Activity $activity)
@@ -280,7 +291,7 @@ class ActivityController extends Controller
 
         return redirect()->route('activities.index', array_filter([
             'date' => $request->query('date'),
-            'leader' => $request->query('leader')
+            'leader' => $request->query('leader'),
         ]))->with('success', 'Agenda berhasil diperbarui.');
     }
 
@@ -315,7 +326,7 @@ class ActivityController extends Controller
         $isSekpri = str_contains($roleName, 'sekpri_');
         $isOwnLeader = $user->leader_id === $activity->leader_id;
 
-        if (!$isCreator && !$isAjudan && !($isSekpri && $isOwnLeader)) {
+        if (! $isCreator && ! $isAjudan && ! ($isSekpri && $isOwnLeader)) {
             abort(403, 'Anda tidak diizinkan untuk menghapus agenda ini.');
         }
 

@@ -226,7 +226,7 @@
                             <x-custom-select 
                                 name="dress_code" 
                                 placeholder="-- Pilih Pakaian --" 
-                                :options="['PSL', 'Batik/Lengan panjang', 'Yang berlaku pada hari itu', 'PDH Khaki', 'PDUB', 'Menyesuaikan', 'Olah Raga', 'Muslim', 'Pakaian Adat', 'Smart Casual']" 
+                                :options="$dressCodes" 
                             />
                         </div>
                     </div>

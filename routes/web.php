@@ -2,14 +2,16 @@
 
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\ActivityDispositionController;
+use App\Http\Controllers\DressCodeController;
 use App\Http\Controllers\LeaderController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\OrganizationController;
+use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProtocolOfficerController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\PermissionController;
+use App\Models\Activity;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -17,16 +19,16 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
-    $actionRequiredActivities = \App\Models\Activity::with(['leader', 'dispositions'])
+    $actionRequiredActivities = Activity::with(['leader', 'dispositions'])
         ->where(function ($q) {
             $q->where('status', 'submitted')
-              ->orWhere(function ($q2) {
-                  $q2->where('status', 'approved')
-                     ->whereNotNull('leader_id')
-                     ->whereDoesntHave('dispositions', function ($q3) {
-                         $q3->whereColumn('from_leader_id', 'activities.leader_id');
-                     });
-              });
+                ->orWhere(function ($q2) {
+                    $q2->where('status', 'approved')
+                        ->whereNotNull('leader_id')
+                        ->whereDoesntHave('dispositions', function ($q3) {
+                            $q3->whereColumn('from_leader_id', 'activities.leader_id');
+                        });
+                });
         })
         ->when(auth()->user()->leader_id, function ($q) {
             $q->where('leader_id', auth()->user()->leader_id);
@@ -50,6 +52,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('protocol-officers', ProtocolOfficerController::class)->parameters([
         'protocol-officers' => 'protocolOfficer',
     ])->only(['index', 'show', 'store']);
+    Route::resource('dress-codes', DressCodeController::class)->parameters([
+        'dress-codes' => 'dressCode',
+    ])->only(['index', 'show', 'store']);
 
     // Master Data - Write for Admin Only
     Route::middleware(['role:admin'])->group(function () {
@@ -59,7 +64,10 @@ Route::middleware('auth')->group(function () {
         Route::resource('protocol-officers', ProtocolOfficerController::class)->parameters([
             'protocol-officers' => 'protocolOfficer',
         ])->except(['index', 'show', 'store']);
-        
+        Route::resource('dress-codes', DressCodeController::class)->parameters([
+            'dress-codes' => 'dressCode',
+        ])->except(['index', 'show', 'store']);
+
         // User & Role Management
         Route::resource('users', UserController::class);
         Route::patch('users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');

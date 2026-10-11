@@ -34,7 +34,7 @@
                     <!-- Master Data Dropdown -->
                     <div class="hidden sm:flex sm:items-center sm:ms-2">
                         @php
-                            $isMasterDataActive = request()->routeIs('leaders.*', 'locations.*', 'organizations.*', 'protocol-officers.*', 'users.*', 'roles.*', 'permissions.*');
+                            $isMasterDataActive = request()->routeIs('leaders.*', 'locations.*', 'organizations.*', 'protocol-officers.*', 'dress-codes.*', 'users.*', 'roles.*', 'permissions.*');
                             $masterDataClasses = $isMasterDataActive
                                 ? 'inline-flex items-center px-1 pt-1 border-b-2 border-secondary-400 text-sm font-medium leading-5 text-white focus:outline-none transition duration-150 ease-in-out font-bold'
                                 : 'inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-primary-50 hover:text-white hover:border-secondary-400 focus:outline-none focus:text-white focus:border-secondary-400 transition duration-150 ease-in-out';
@@ -63,6 +63,9 @@
                                 </x-dropdown-link>
                                 <x-dropdown-link :href="route('protocol-officers.index')" class="{{ request()->routeIs('protocol-officers.*') ? 'font-bold bg-gray-100' : '' }}">
                                     {{ __('Petugas Protokol') }}
+                                </x-dropdown-link>
+                                <x-dropdown-link :href="route('dress-codes.index')" class="{{ request()->routeIs('dress-codes.*') ? 'font-bold bg-gray-100' : '' }}">
+                                    {{ __('Pakaian') }}
                                 </x-dropdown-link>
                                 @role('admin')
                                 <div class="border-t border-gray-100 my-1"></div>
@@ -167,8 +170,8 @@
                                 </x-responsive-nav-link>
 
                                 <!-- Master Data Group -->
-                                <div x-data="{ masterDataOpen: {{ request()->routeIs('leaders.*', 'locations.*', 'organizations.*', 'protocol-officers.*', 'users.*', 'roles.*', 'permissions.*') ? 'true' : 'false' }} }" class="space-y-1">
-                                    <button @click="masterDataOpen = !masterDataOpen" class="w-full flex justify-between items-center w-full ps-3 pe-4 py-2 border-l-4 border-transparent text-start text-base font-medium text-primary-50 hover:bg-primary-800 hover:text-white focus:outline-none focus:text-white focus:bg-primary-800 transition duration-150 ease-in-out {{ request()->routeIs('leaders.*', 'locations.*', 'organizations.*', 'protocol-officers.*', 'users.*', 'roles.*', 'permissions.*') ? 'bg-primary-800 text-secondary-300 border-secondary-400' : '' }}">
+                                <div x-data="{ masterDataOpen: {{ request()->routeIs('leaders.*', 'locations.*', 'organizations.*', 'protocol-officers.*', 'dress-codes.*', 'users.*', 'roles.*', 'permissions.*') ? 'true' : 'false' }} }" class="space-y-1">
+                                    <button @click="masterDataOpen = !masterDataOpen" class="w-full flex justify-between items-center w-full ps-3 pe-4 py-2 border-l-4 border-transparent text-start text-base font-medium text-primary-50 hover:bg-primary-800 hover:text-white focus:outline-none focus:text-white focus:bg-primary-800 transition duration-150 ease-in-out {{ request()->routeIs('leaders.*', 'locations.*', 'organizations.*', 'protocol-officers.*', 'dress-codes.*', 'users.*', 'roles.*', 'permissions.*') ? 'bg-primary-800 text-secondary-300 border-secondary-400' : '' }}">
                                         <div>{{ __('Master Data') }}</div>
                                         <svg class="h-4 w-4 transition-transform duration-200" :class="{ 'rotate-180': masterDataOpen }" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                             <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -187,6 +190,9 @@
                                         </x-responsive-nav-link>
                                         <x-responsive-nav-link :href="route('protocol-officers.index')" :active="request()->routeIs('protocol-officers.*')" class="text-primary-50 hover:bg-primary-800 hover:text-white {{ request()->routeIs('protocol-officers.*') ? 'bg-primary-800 text-secondary-300 border-l-4 border-secondary-400' : '' }}">
                                             {{ __('Petugas Protokol') }}
+                                        </x-responsive-nav-link>
+                                        <x-responsive-nav-link :href="route('dress-codes.index')" :active="request()->routeIs('dress-codes.*')" class="text-primary-50 hover:bg-primary-800 hover:text-white {{ request()->routeIs('dress-codes.*') ? 'bg-primary-800 text-secondary-300 border-l-4 border-secondary-400' : '' }}">
+                                            {{ __('Pakaian') }}
                                         </x-responsive-nav-link>
                                         
                                         @role('admin')
