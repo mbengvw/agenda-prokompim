@@ -99,6 +99,16 @@ class Activity extends Model
         return $this->belongsTo(Leader::class, 'original_leader_id');
     }
 
+    public function parentActivity(): BelongsTo
+    {
+        return $this->belongsTo(Activity::class, 'parent_activity_id');
+    }
+
+    public function childActivities(): HasMany
+    {
+        return $this->hasMany(Activity::class, 'parent_activity_id');
+    }
+
     public function getDurationAttribute(): string
     {
         if (! $this->start_time || ! $this->end_time) {

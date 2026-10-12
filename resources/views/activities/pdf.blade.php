@@ -153,7 +153,8 @@
                                 <tr>
                                     <td class="label-col">Pendamping</td>
                                     <td class="colon-col">:</td>
-                                    <td>{{ $activity->companions->pluck('position')->map(fn($p) => \Illuminate\Support\Str::title($p))->join(', ') }}</td>
+                                    <td>{{ $activity->companions->pluck('position')->map(fn($p) => \Illuminate\Support\Str::title($p))->join(', ') }}
+                                    </td>
                                 </tr>
                             @endif
                             @if ($activity->protocolOfficer)
@@ -195,7 +196,7 @@
         @if ($didisposisi->isNotEmpty())
             <h2
                 style="font-size: 15px; margin-bottom: 10px; border-bottom: 2px solid #ccc; padding-bottom: 5px; margin-top: 30px;">
-                B. KEGIATAN DIDISPOSISIKAN</h2>
+                DISPOSISI:</h2>
             <div class="activity-list">
                 @foreach ($didisposisi as $index => $activity)
                     @php
@@ -222,10 +223,10 @@
                         <div class="title-row">{{ $activity->title }}</div>
                         <table class="detail-table">
                             <tr>
-                                <td class="label-col" style="color: #e50000; font-weight: bold;">Didisposisikan Ke</td>
+                                <td class="label-col" style="color: #e50000; font-weight: bold;">Disposisi: </td>
                                 <td class="colon-col">:</td>
                                 <td style="font-weight: bold;">
-                                    {{ $activity->leader ? $activity->leader->name . ' (' . $activity->leader->position . ')' : '-' }}
+                                    {{ $activity->leader ? $activity->leader->position . ' (' . $activity->leader->position . ')' : '-' }}
                                 </td>
                             </tr>
                             <tr>

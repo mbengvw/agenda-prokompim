@@ -13,7 +13,7 @@ class ActivityRepository
 
     public function create(array $data): Activity
     {
-        $data['created_by'] = auth()->id();
+        $data['created_by'] = auth()->id() ?? $data['created_by'] ?? null;
 
         return $this->model->create($data);
     }
@@ -26,5 +26,10 @@ class ActivityRepository
     public function delete(Activity $activity): bool
     {
         return $activity->delete();
+    }
+
+    public function restore(Activity $activity): bool
+    {
+        return $activity->restore();
     }
 }

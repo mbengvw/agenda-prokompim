@@ -183,8 +183,8 @@
                                 @endif
                             @endrole
 
-                            <!-- Tombol Kabag -->
-                            @role('kabag_protokol')
+                            <!-- Tombol Kabag / Admin -->
+                            @hasanyrole('kabag_protokol|admin')
                                 @if($activity->status === 'submitted')
                                     <form action="{{ route('activities.update-status', $activity->id) }}" method="POST" class="inline">
                                         @csrf
@@ -210,8 +210,18 @@
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                         Revisi
                                     </button>
+                                @elseif($activity->status === 'approved')
+                                    <form action="{{ route('activities.update-status', $activity->id) }}" method="POST" class="inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <input type="hidden" name="status" value="submitted">
+                                        <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-500 text-white rounded-md hover:bg-amber-600 text-xs font-bold shadow-sm transition-all whitespace-nowrap" onclick="return confirm('Batalkan persetujuan (Cancel Approval) agenda ini dan kembalikan ke status diajukan (submitted)?');">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg>
+                                            Cancel Approval
+                                        </button>
+                                    </form>
                                 @endif
-                            @endrole
+                            @endhasanyrole
 
                             <!-- Tombol Ajudan -->
                             @php

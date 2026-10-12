@@ -163,6 +163,8 @@ class ActivityController extends Controller
 
         unset($data['location_input'], $data['organizer_input']);
 
+        $data['companion_ids'] = $request->input('companion_ids', []);
+
         $user = auth()->user();
         $data['created_by'] = $user?->id;
 
@@ -282,6 +284,8 @@ class ActivityController extends Controller
         }
 
         unset($data['location_input'], $data['organizer_input']);
+
+        $data['companion_ids'] = $request->input('companion_ids', []);
 
         $this->service->updateActivity($activity, $data);
 
