@@ -127,7 +127,7 @@
                         }
                     @endphp
                     <div class="activity-item">
-                        <div class="time-row">({{ $index + 1 }}). {{ $timeDisplay }}</div>
+                        <div class="time-row">{{ $dihadiri->count() > 1 ? '(' . ($index + 1) . '). ' : '' }}{{ $timeDisplay }}</div>
                         <div class="title-row">{{ $activity->title }}</div>
                         <table class="detail-table">
                             <tr>
@@ -219,7 +219,7 @@
                         }
                     @endphp
                     <div class="activity-item">
-                        <div class="time-row">({{ $index + 1 }}). {{ $timeDisplay }}</div>
+                        <div class="time-row">{{ $didisposisi->count() > 1 ? '(' . ($index + 1) . '). ' : '' }}{{ $timeDisplay }}</div>
                         <div class="title-row">{{ $activity->title }}</div>
                         <table class="detail-table">
                             <tr>
