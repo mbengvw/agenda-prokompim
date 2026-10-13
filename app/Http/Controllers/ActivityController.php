@@ -214,7 +214,7 @@ class ActivityController extends Controller
         $lines = [];
         $lines[] = '*AGENDA KEGIATAN ' . strtoupper($leader->position) . '*';
         $lines[] = '_' . $dateFormatted . '_';
-        $lines[] = str_repeat('━', 30);
+        // $lines[] = str_repeat('━', 30);
 
         if ($dihadiri->isNotEmpty()) {
             foreach ($dihadiri as $i => $activity) {
@@ -223,14 +223,14 @@ class ActivityController extends Controller
                     $lines[] = $row;
                 }
                 if ($i < $dihadiri->count() - 1) {
-                    $lines[] = str_repeat('─', 20);
+                    // $lines[] = str_repeat('─', 20);
                 }
             }
         }
 
         if ($didisposisi->isNotEmpty()) {
             $lines[] = '';
-            $lines[] = str_repeat('━', 30);
+            // $lines[] = str_repeat('━', 30);
             $lines[] = '*DISPOSISI:*';
 
             foreach ($didisposisi as $i => $activity) {
@@ -257,7 +257,7 @@ class ActivityController extends Controller
         $adcNames = $allActivities->pluck('adc')->filter()->unique()->join(', ');
 
         $lines[] = '';
-        $lines[] = str_repeat('━', 30);
+        // $lines[] = str_repeat('━', 30);
         $lines[] = 'Adc: ' . ($adcNames ?: '-');
         $lines[] = '';
         $lines[] = 'Demikian Disampaikan,';
