@@ -184,24 +184,24 @@ class ActivityController extends Controller
 
             $rows[] = "*{$prefix}{$timeStr}*";
             $rows[] = "*{$activity->title}*";
-            $rows[] = "📍 Lokasi: {$location}";
-            $rows[] = "🏢 Penyelenggara: {$organizer}";
+            $rows[] = "Lokasi: {$location}";
+            $rows[] = "Penyelenggara: {$organizer}";
 
             if ($activity->dress_code) {
-                $rows[] = "👔 Pakaian: {$activity->dress_code}";
+                $rows[] = "Pakaian: {$activity->dress_code}";
             }
             if ($companions) {
-                $rows[] = "👥 Pendamping: {$companions}";
+                $rows[] = "Pendamping: {$companions}";
             }
             if ($activity->contact_person_name) {
-                $cp = "📞 NH: {$activity->contact_person_name}";
+                $cp = "Nara Hubung: {$activity->contact_person_name}";
                 if ($activity->contact_person_phone) {
                     $cp .= " ({$activity->contact_person_phone})";
                 }
                 $rows[] = $cp;
             }
             if ($activity->protocolOfficer) {
-                $prot = "🛡 Protokol: {$activity->protocolOfficer->name}";
+                $prot = "Protokol: {$activity->protocolOfficer->name}";
                 if ($activity->protocolOfficer->phone) {
                     $prot .= " ({$activity->protocolOfficer->phone})";
                 }
