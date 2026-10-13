@@ -195,17 +195,21 @@ class ActivityController extends Controller
             }
             if ($activity->contact_person_name) {
                 $cp = "Nara Hubung: {$activity->contact_person_name}";
-                if ($activity->contact_person_phone) {
-                    $cp .= " ({$activity->contact_person_phone})";
-                }
                 $rows[] = $cp;
+
+                if ($activity->contact_person_phone) {
+                    // $cp .= " ({$activity->contact_person_phone})";
+                    $rows[] = "No HP: {$activity->contact_person_phone}";
+                }
             }
             if ($activity->protocolOfficer) {
-                $prot = "Protokol: {$activity->protocolOfficer->name}";
-                if ($activity->protocolOfficer->phone) {
-                    $prot .= " ({$activity->protocolOfficer->phone})";
-                }
+                $prot = "PIC Protokol: {$activity->protocolOfficer->name}";
                 $rows[] = $prot;
+
+                if ($activity->protocolOfficer->phone) {
+                    // $prot .= " ({$activity->protocolOfficer->phone})";
+                    $rows[] = "No HP: {$activity->protocolOfficer->phone}";
+                }
             }
 
             return $rows;
@@ -263,7 +267,7 @@ class ActivityController extends Controller
         $lines[] = 'Demikian Disampaikan,';
         $lines[] = 'Hatur';
         $lines[] = '';
-        $lines[] = '_Salam,_';
+        $lines[] = 'Salam,';
         $lines[] = "*Tim Sekpri {$leaderTitle}*";
 
         return response()->json(['text' => implode("\n", $lines)]);
