@@ -76,6 +76,8 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::get('activities/export-pdf', [ActivityController::class, 'exportPdf'])->name('activities.export-pdf');
+    Route::get('activities/export-pdf-table', [ActivityController::class, 'exportPdfTable'])->name('activities.export-pdf-table');
+    Route::get('activities/export-whatsapp', [ActivityController::class, 'exportWhatsapp'])->name('activities.export-whatsapp');
     Route::resource('activities', ActivityController::class);
     Route::patch('activities/{activity}/status', [ActivityController::class, 'updateStatus'])->name('activities.update-status');
     Route::post('activities/{activity}/disposition', [ActivityDispositionController::class, 'store'])->name('activities.disposition');

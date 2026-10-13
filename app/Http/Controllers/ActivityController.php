@@ -16,6 +16,7 @@ use App\Services\ActivityService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class ActivityController extends Controller
 {
@@ -68,6 +69,204 @@ class ActivityController extends Controller
         $fileName = 'Agenda_'.str_replace(' ', '_', $leader->short_name ?: $leader->name)."_{$dateFilter}.pdf";
 
         return $pdf->download($fileName);
+    }
+
+    /**
+     * Export semua agenda pada tanggal tertentu dalam format tabel (tanpa filter kehadiran).
+     */
+    public function exportPdfTable(Request $request)
+    {
+        $dateFilter = $request->input('date', Carbon::today()->toDateString());
+        $leaderId = $request->input('leader_id');
+
+        if (! $leaderId) {
+            return redirect()->back()->withErrors('Pimpinan harus dipilih untuk mencetak PDF.');
+        }
+
+        $leader = Leader::findOrFail($leaderId);
+
+        $activities = Activity::with(['leader', 'location', 'organization', 'protocolOfficer', 'companions'])
+            ->whereDate('activity_date', $dateFilter)
+            ->whereIn('status', ['approved', 'submitted', 'draft', 'revision'])
+            ->where(function ($q) use ($leaderId) {
+                // Agenda yang dimiliki leader, atau agenda di mana leader pernah terlibat sebagai original leader
+                $q->where('leader_id', $leaderId)
+                    ->orWhere('original_leader_id', $leaderId);
+            })
+            ->orderBy('start_time')
+            ->get();
+
+        $dateFormatted = Carbon::parse($dateFilter)->locale('id')->translatedFormat('l, j F Y');
+
+        $pdf = Pdf::loadView('activities.pdf-table', compact('activities', 'leader', 'dateFormatted'))
+            ->setPaper('a4', 'landscape');
+
+        $fileName = 'Tabel_Agenda_'.str_replace(' ', '_', $leader->short_name ?: $leader->name)."_{$dateFilter}.pdf";
+
+        return $pdf->download($fileName);
+    }
+
+    /**
+     * Export agenda ke format teks WhatsApp (JSON response).
+     * Struktur mirip PDF: hanya agenda yang dikonfirmasi hadir + yang didisposisi.
+     */
+    public function exportWhatsapp(Request $request)
+    {
+        $dateFilter = $request->input('date', Carbon::today()->toDateString());
+        $leaderId = $request->input('leader_id');
+
+        if (! $leaderId) {
+            return response()->json(['error' => 'Pimpinan harus dipilih.'], 422);
+        }
+
+        $leader = Leader::findOrFail($leaderId);
+
+        $dihadiri = Activity::with(['leader', 'location', 'organization', 'protocolOfficer', 'companions'])
+            ->whereDate('activity_date', $dateFilter)
+            ->whereIn('status', ['approved', 'submitted'])
+            ->where('leader_id', $leaderId)
+            ->whereHas('dispositions', function ($q) use ($leaderId) {
+                $q->where('from_leader_id', $leaderId)->where('status', 'hadir');
+            })
+            ->orderBy('start_time')
+            ->get();
+
+        $didisposisi = Activity::with(['leader', 'location', 'organization', 'protocolOfficer', 'companions'])
+            ->whereDate('activity_date', $dateFilter)
+            ->whereIn('status', ['approved', 'submitted'])
+            ->where('leader_id', '!=', $leaderId)
+            ->whereHas('dispositions', function ($q) use ($leaderId) {
+                $q->where('from_leader_id', $leaderId)->where('status', 'disposisi');
+            })
+            ->orderBy('start_time')
+            ->get();
+
+        $dateFormatted = Carbon::parse($dateFilter)->locale('id')->translatedFormat('l, j F Y');
+
+        $posLower = strtolower($leader->position ?? '');
+        if (str_contains($posLower, 'wakil') || str_contains($posLower, 'wabup')) {
+            $leaderTitle = 'Wabup';
+        } elseif (str_contains($posLower, 'bupati')) {
+            $leaderTitle = 'Bupati';
+        } elseif (str_contains($posLower, 'sekda')) {
+            $leaderTitle = 'Sekda';
+        } else {
+            $leaderTitle = ucwords($posLower);
+        }
+
+        $formatActivity = function (Activity $activity, int $no, int $total): array {
+            $rows = [];
+
+            if ($activity->is_tentative || ! $activity->start_time) {
+                $timeStr = 'Tentatif';
+            } else {
+                $start = Carbon::parse($activity->start_time);
+                $end = $activity->end_time ? Carbon::parse($activity->end_time) : null;
+                $dur = $end ? $start->diffInMinutes($end) : null;
+                $tStr = 'Pkl. '.$start->format('H.i');
+                $tStr .= $end ? '-'.$end->format('H.i').' WIB' : ' WIB';
+                $tStr .= $dur ? " ({$dur}')" : '';
+                $timeStr = $tStr;
+            }
+
+            $prefix = $total > 1 ? "({$no}). " : '';
+            $location = $activity->location_id
+                ? ($activity->location?->name ?? '-')
+                : ($activity->location_text ?: '-');
+            $organizer = $activity->organization_id
+                ? ($activity->organization?->name ?? '-')
+                : ($activity->organizer_text ?: '-');
+            $companions = $activity->companions->count() > 0
+                ? $activity->companions->pluck('position')
+                    ->map(fn ($p) => Str::title($p))
+                    ->join(', ')
+                : null;
+
+            $rows[] = "*{$prefix}{$timeStr}*";
+            $rows[] = "*{$activity->title}*";
+            $rows[] = "📍 Lokasi: {$location}";
+            $rows[] = "🏢 Penyelenggara: {$organizer}";
+
+            if ($activity->dress_code) {
+                $rows[] = "👔 Pakaian: {$activity->dress_code}";
+            }
+            if ($companions) {
+                $rows[] = "👥 Pendamping: {$companions}";
+            }
+            if ($activity->contact_person_name) {
+                $cp = "📞 NH: {$activity->contact_person_name}";
+                if ($activity->contact_person_phone) {
+                    $cp .= " ({$activity->contact_person_phone})";
+                }
+                $rows[] = $cp;
+            }
+            if ($activity->protocolOfficer) {
+                $prot = "🛡 Protokol: {$activity->protocolOfficer->name}";
+                if ($activity->protocolOfficer->phone) {
+                    $prot .= " ({$activity->protocolOfficer->phone})";
+                }
+                $rows[] = $prot;
+            }
+
+            return $rows;
+        };
+
+        $lines = [];
+        $lines[] = '*AGENDA KEGIATAN '.strtoupper($leader->position).'*';
+        $lines[] = '_'.$dateFormatted.'_';
+        $lines[] = str_repeat('━', 30);
+
+        if ($dihadiri->isNotEmpty()) {
+            foreach ($dihadiri as $i => $activity) {
+                $lines[] = '';
+                foreach ($formatActivity($activity, $i + 1, $dihadiri->count()) as $row) {
+                    $lines[] = $row;
+                }
+                if ($i < $dihadiri->count() - 1) {
+                    $lines[] = str_repeat('─', 20);
+                }
+            }
+        }
+
+        if ($didisposisi->isNotEmpty()) {
+            $lines[] = '';
+            $lines[] = str_repeat('━', 30);
+            $lines[] = '*DISPOSISI:*';
+
+            foreach ($didisposisi as $i => $activity) {
+                $lines[] = '';
+                $dispRows = $formatActivity($activity, $i + 1, $didisposisi->count());
+                $lines[] = $dispRows[0]; // waktu
+                $lines[] = $dispRows[1]; // judul
+                $lines[] = '↩ Disposisi ke: '.($activity->leader?->position ?? '-');
+                foreach (array_slice($dispRows, 2) as $row) {
+                    $lines[] = $row;
+                }
+                if ($i < $didisposisi->count() - 1) {
+                    $lines[] = str_repeat('─', 20);
+                }
+            }
+        }
+
+        if ($dihadiri->isEmpty() && $didisposisi->isEmpty()) {
+            $lines[] = '';
+            $lines[] = '_Tidak ada agenda kegiatan pada tanggal ini._';
+        }
+
+        $allActivities = $dihadiri->concat($didisposisi);
+        $adcNames = $allActivities->pluck('adc')->filter()->unique()->join(', ');
+
+        $lines[] = '';
+        $lines[] = str_repeat('━', 30);
+        $lines[] = 'Adc: '.($adcNames ?: '-');
+        $lines[] = '';
+        $lines[] = 'Demikian Disampaikan,';
+        $lines[] = 'Hatur';
+        $lines[] = '';
+        $lines[] = '_Salam,_';
+        $lines[] = "*Tim Sekpri {$leaderTitle}*";
+
+        return response()->json(['text' => implode("\n", $lines)]);
     }
 
     public function index(Request $request)
