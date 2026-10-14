@@ -265,7 +265,7 @@ class ActivityController extends Controller
         $lines[] = 'Adc: ' . ($adcNames ?: '-');
         $lines[] = '';
         $lines[] = 'Demikian Disampaikan,';
-        $lines[] = 'Hatur';
+        $lines[] = 'Hatur Nuhun';
         $lines[] = '';
         $lines[] = 'Salam,';
         $lines[] = "*Tim Sekpri {$leaderTitle}*";
