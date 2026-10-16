@@ -143,6 +143,13 @@
                                 <td>{{ $activity->organization ? $activity->organization->name : $activity->organizer_text }}
                                 </td>
                             </tr>
+                            @if ($activity->info)
+                                <tr>
+                                    <td class="label-col">Informasi</td>
+                                    <td class="colon-col">:</td>
+                                    <td>{!! nl2br(e($activity->info)) !!}</td>
+                                </tr>
+                            @endif
                             @if ($activity->dress_code)
                                 <tr>
                                     <td class="label-col">Pakaian</td>
@@ -243,6 +250,13 @@
                                 <td>{{ $activity->organization ? $activity->organization->name : $activity->organizer_text }}
                                 </td>
                             </tr>
+                            @if ($activity->info)
+                                <tr>
+                                    <td class="label-col">Informasi</td>
+                                    <td class="colon-col">:</td>
+                                    <td>{!! nl2br(e($activity->info)) !!}</td>
+                                </tr>
+                            @endif
                         </table>
                     </div>
 

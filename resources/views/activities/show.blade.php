@@ -84,6 +84,15 @@
                             </div>
                         @endif
 
+                        @if($activity->info)
+                            <div>
+                                <h3 class="text-sm font-bold text-amber-800 uppercase tracking-wider mb-2">Informasi</h3>
+                                <div class="prose prose-sm max-w-none text-gray-700 bg-amber-50 p-4 rounded-xl border border-amber-100">
+                                    {!! nl2br(e($activity->info)) !!}
+                                </div>
+                            </div>
+                        @endif
+
                         <div class="space-y-6">
                             <!-- Section: Pimpinan & Pendamping -->
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">

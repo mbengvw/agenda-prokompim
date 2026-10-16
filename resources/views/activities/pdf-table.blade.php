@@ -64,12 +64,13 @@
 
         .no-col     { width: 3%; text-align: center; }
         .time-col   { width: 10%; }
-        .title-col  { width: 23%; }
-        .loc-col    { width: 15%; }
-        .org-col    { width: 14%; }
-        .leader-col { width: 11%; }
-        .dress-col  { width: 9%; }
-        .cp-col     { width: 15%; }
+        .title-col  { width: 18%; }
+        .info-col   { width: 15%; }
+        .loc-col    { width: 12%; }
+        .org-col    { width: 12%; }
+        .leader-col { width: 10%; }
+        .dress-col  { width: 8%; }
+        .cp-col     { width: 12%; }
 
         .badge {
             display: inline-block;
@@ -126,6 +127,7 @@
                 <th class="no-col">No</th>
                 <th class="time-col">Waktu</th>
                 <th class="title-col">Kegiatan</th>
+                <th class="info-col">Informasi</th>
                 <th class="loc-col">Lokasi</th>
                 <th class="org-col">Penyelenggara</th>
                 <th class="leader-col">Agenda &amp; Status</th>
@@ -178,6 +180,7 @@
                     <td class="no-col">{{ $index + 1 }}</td>
                     <td class="time-col">{!! $timeHtml !!}</td>
                     <td class="title-col">{{ $activity->title }}</td>
+                    <td class="info-col">{{ $activity->info ?: '-' }}</td>
                     <td class="loc-col">{{ $location }}</td>
                     <td class="org-col">{{ $organizer }}</td>
                     <td class="leader-col">
@@ -208,7 +211,7 @@
                 </tr>
             @empty
                 <tr class="empty-row">
-                    <td colspan="8">Tidak ada agenda kegiatan pada tanggal ini.</td>
+                    <td colspan="9">Tidak ada agenda kegiatan pada tanggal ini.</td>
                 </tr>
             @endforelse
         </tbody>

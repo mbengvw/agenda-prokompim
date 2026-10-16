@@ -216,6 +216,11 @@
                                 :value="$activity->dress_code"
                             />
                         </div>
+
+                        <div class="col-span-full">
+                            <x-input-label value="Informasi" />
+                            <textarea name="info" rows="3" placeholder="Informasi tambahan terkait kegiatan (opsional)..." class="mt-2 block w-full border-gray-300 focus:border-primary-500 focus:ring-primary-500 rounded-md shadow-sm">{{ old('info', $activity->info) }}</textarea>
+                        </div>
                     </div>
                     
                     <div class="mt-8 flex justify-end gap-3 pt-6 border-t border-gray-100">

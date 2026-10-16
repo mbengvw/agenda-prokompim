@@ -154,6 +154,7 @@ class ActivityService
             'dress_code' => $activity->dress_code,
             'status' => $activity->status,
             'notes' => $activity->notes,
+            'info' => $activity->info,
         ];
 
         // 2. Create or update/restore child activities for current companions

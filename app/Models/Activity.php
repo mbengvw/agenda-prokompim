@@ -46,6 +46,7 @@ class Activity extends Model
         'dress_code',
         'status',
         'notes',
+        'info',
         'revision_notes',
         'created_by',
         'parent_activity_id',

@@ -411,6 +411,14 @@
                                             @endif
                                         </div>
                                     </div>
+
+                                    @if ($activity->info)
+                                        <!-- Informasi -->
+                                        <div class="text-xs border-t border-teal-100/50 pt-3">
+                                            <div class="font-bold text-teal-800 mb-0.5">Informasi</div>
+                                            <div class="text-gray-700 leading-relaxed">{{ $activity->info }}</div>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
 
@@ -691,6 +699,13 @@
                                                 <span
                                                     class="text-gray-700">{{ $activity->protocolOfficer?->name ?: '-' }}</span>
                                             </div>
+                                            @if ($activity->info)
+                                                <div class="text-xs mt-1">
+                                                    <span class="font-bold text-teal-800">Info:</span>
+                                                    <span
+                                                        class="text-gray-700 line-clamp-2">{{ $activity->info }}</span>
+                                                </div>
+                                            @endif
                                         </td>
 
                                         <!-- Aksi -->
@@ -814,7 +829,7 @@
                                     <a href="{{ route('activities.show', ['activity' => $la['activity']->id, 'date' => $dateFilter, 'leader' => $leaderFilter]) }}"
                                         class="absolute rounded p-1.5 shadow-sm border cursor-pointer hover:shadow-md hover:ring-2 hover:ring-offset-1 hover:ring-primary-400 transition-all overflow-hidden flex flex-col justify-center {{ $bgClass }}"
                                         style="left: {{ $la['left'] }}%; width: {{ max($la['width'], 2) }}%; top: {{ $la['row'] * 45 + 10 }}px; height: 38px; z-index: 10;"
-                                        title="{{ $la['start_time'] }} - {{ $la['end_time'] }} | {{ $la['activity']->title }}">
+                                        title="{{ $la['start_time'] }} - {{ $la['end_time'] }} | {{ $la['activity']->title }}{{ $la['activity']->info ? ' | Info: ' . $la['activity']->info : '' }}">
                                         <div class="text-[10px] font-bold leading-tight truncate">
                                             {{ $la['start_time'] }} - {{ $la['activity']->title }}
                                         </div>

@@ -37,6 +37,7 @@ class UpdateActivityRequest extends FormRequest
             'protocol_officer_id' => ['nullable', 'exists:protocol_officers,id'],
             'dress_code' => ['nullable', 'string', 'max:255'],
             'notes' => ['nullable', 'string'],
+            'info' => ['nullable', 'string'],
         ];
     }
 }
