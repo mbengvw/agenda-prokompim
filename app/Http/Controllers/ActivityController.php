@@ -199,7 +199,7 @@ class ActivityController extends Controller
 
                 if ($activity->contact_person_phone) {
                     // $cp .= " ({$activity->contact_person_phone})";
-                    $rows[] = "No HP: {$activity->contact_person_phone}";
+                    $rows[] = "No. HP: {$activity->contact_person_phone}";
                 }
             }
             if ($activity->protocolOfficer) {
@@ -208,7 +208,7 @@ class ActivityController extends Controller
 
                 if ($activity->protocolOfficer->phone) {
                     // $prot .= " ({$activity->protocolOfficer->phone})";
-                    $rows[] = "No HP: {$activity->protocolOfficer->phone}";
+                    $rows[] = "No. HP: {$activity->protocolOfficer->phone}";
                 }
             }
 
