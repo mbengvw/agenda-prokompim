@@ -40,11 +40,55 @@
                             <div class="grid grid-cols-2 gap-4" x-show="!isTentative" x-transition>
                                 <div>
                                     <x-input-label value="Mulai" />
-                                    <x-text-input name="start_time" type="time" class="mt-2 block w-full" :value="old('start_time')" x-bind:required="!isTentative" x-bind:disabled="isTentative" />
+                                    <div class="mt-2 flex items-center gap-1.5"
+                                         x-data="{
+                                             h: '{{ old('start_time') ? \Illuminate\Support\Str::before(old('start_time'), ':') : '' }}',
+                                             m: '{{ old('start_time') ? \Illuminate\Support\Str::after(old('start_time'), ':') : '' }}',
+                                             get val() { return this.h !== '' && this.m !== '' ? this.h + ':' + this.m : ''; }
+                                         }">
+                                        <select x-model="h" x-bind:disabled="isTentative"
+                                                class="block w-full border-gray-300 focus:border-primary-500 focus:ring-primary-500 rounded-lg shadow-sm transition-colors text-sm py-2">
+                                            <option value="">Jam</option>
+                                            @for ($i = 0; $i < 24; $i++)
+                                                <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}">{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}</option>
+                                            @endfor
+                                        </select>
+                                        <span class="font-bold text-gray-500">:</span>
+                                        <select x-model="m" x-bind:disabled="isTentative"
+                                                class="block w-full border-gray-300 focus:border-primary-500 focus:ring-primary-500 rounded-lg shadow-sm transition-colors text-sm py-2">
+                                            <option value="">Mnt</option>
+                                            @for ($i = 0; $i < 60; $i += 5)
+                                                <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}">{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}</option>
+                                            @endfor
+                                        </select>
+                                        <input type="hidden" name="start_time" :value="val" x-bind:required="!isTentative" />
+                                    </div>
                                 </div>
                                 <div>
                                     <x-input-label value="Selesai" />
-                                    <x-text-input name="end_time" type="time" class="mt-2 block w-full" :value="old('end_time')" x-bind:disabled="isTentative" />
+                                    <div class="mt-2 flex items-center gap-1.5"
+                                         x-data="{
+                                             h: '{{ old('end_time') ? \Illuminate\Support\Str::before(old('end_time'), ':') : '' }}',
+                                             m: '{{ old('end_time') ? \Illuminate\Support\Str::after(old('end_time'), ':') : '' }}',
+                                             get val() { return this.h !== '' && this.m !== '' ? this.h + ':' + this.m : ''; }
+                                         }">
+                                        <select x-model="h" x-bind:disabled="isTentative"
+                                                class="block w-full border-gray-300 focus:border-primary-500 focus:ring-primary-500 rounded-lg shadow-sm transition-colors text-sm py-2">
+                                            <option value="">Jam</option>
+                                            @for ($i = 0; $i < 24; $i++)
+                                                <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}">{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}</option>
+                                            @endfor
+                                        </select>
+                                        <span class="font-bold text-gray-500">:</span>
+                                        <select x-model="m" x-bind:disabled="isTentative"
+                                                class="block w-full border-gray-300 focus:border-primary-500 focus:ring-primary-500 rounded-lg shadow-sm transition-colors text-sm py-2">
+                                            <option value="">Mnt</option>
+                                            @for ($i = 0; $i < 60; $i += 5)
+                                                <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}">{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}</option>
+                                            @endfor
+                                        </select>
+                                        <input type="hidden" name="end_time" :value="val" />
+                                    </div>
                                 </div>
                             </div>
                             <div x-show="isTentative" style="display: none;" class="mt-2 text-sm text-amber-600 bg-amber-50 p-2.5 rounded border border-amber-200">
