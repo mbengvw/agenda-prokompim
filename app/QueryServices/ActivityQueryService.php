@@ -65,21 +65,21 @@ class ActivityQueryService
                 $query->whereRaw('LOWER(position) = ?', [strtolower($leaderFilter)]);
             })
             ->get()->map(function ($leader) {
-            $pos = strtolower($leader->position);
-            if (str_contains($pos, 'bupati') && ! str_contains($pos, 'wakil')) {
-                $leader->level = 1;
-            } elseif (str_contains($pos, 'wakil bupati')) {
-                $leader->level = 2;
-            } elseif (str_contains($pos, 'sekda') || str_contains($pos, 'sekretaris daerah')) {
-                $leader->level = 3;
-            } else {
-                $leader->level = 4;
-            }
+                $pos = strtolower($leader->position);
+                if (str_contains($pos, 'bupati') && ! str_contains($pos, 'wakil')) {
+                    $leader->level = 1;
+                } elseif (str_contains($pos, 'wakil bupati')) {
+                    $leader->level = 2;
+                } elseif (str_contains($pos, 'sekda') || str_contains($pos, 'sekretaris daerah')) {
+                    $leader->level = 3;
+                } else {
+                    $leader->level = 4;
+                }
 
-            return $leader;
-        })->filter(function ($leader) {
-            return $leader->level < 4;
-        })->sortBy('level')->values();
+                return $leader;
+            })->filter(function ($leader) {
+                return $leader->level < 4;
+            })->sortBy('level')->values();
 
         $query = $this->model->with(['companions', 'location', 'organization', 'leader'])
             ->whereDate('activity_date', $date)
@@ -93,8 +93,7 @@ class ActivityQueryService
                 $isPrimary = $act->leader_id === $leader->id || $act->original_leader_id === $leader->id;
                 $isCompanion = $act->companions->contains('id', $leader->id);
 
-                if (($isPrimary || $isCompanion) && !$act->is_tentative) {
-                    $start = clone $act->start_time; // It's cast to datetime usually, wait, it's cast as datetime?
+                if (($isPrimary || $isCompanion) && ! $act->is_tentative) {
                     $start = Carbon::parse($act->start_time);
                     $end = $act->end_time ? Carbon::parse($act->end_time) : $start->copy()->addHour();
 
