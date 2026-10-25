@@ -194,7 +194,7 @@ class ActivityController extends Controller
                 $rows[] = "Pendamping: {$companions}";
             }
             if ($activity->contact_person_name) {
-                $cp = "Nara Hubung: {$activity->contact_person_name}";
+                $cp = "Narahubung: {$activity->contact_person_name}";
                 $rows[] = $cp;
 
                 if ($activity->contact_person_phone) {
@@ -264,10 +264,10 @@ class ActivityController extends Controller
         // $lines[] = str_repeat('━', 30);
         $lines[] = 'Adc: ' . ($adcNames ?: '-');
         $lines[] = '';
-        $lines[] = 'Demikian Disampaikan,';
+        $lines[] = 'Demikian Disampaikan';
         $lines[] = 'Hatur Nuhun';
         $lines[] = '';
-        $lines[] = 'Salam,';
+        $lines[] = 'Salam';
         $lines[] = "*Tim Sekpri {$leaderTitle}*";
 
         return response()->json(['text' => implode("\n", $lines)]);
