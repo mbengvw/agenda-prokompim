@@ -70,6 +70,14 @@
                         Leadership Agenda & Integration Tool
                     </div>
 
+                    <div class="w-fit mx-auto lg:mx-0">
+                        <span
+                            class="text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-widest text-transparent bg-clip-text"
+                            style="background-image: linear-gradient(to right, #0d9488, #14b8a6, #84cc16, #eab308); filter: drop-shadow(0 2px 8px rgba(20,184,166,0.25));">
+                            SIPANDA
+                        </span>
+                    </div>
+
                     <h1
                         class="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-gray-900 leading-[1.15]">
                         Kelola Agenda Pimpinan dengan <span
