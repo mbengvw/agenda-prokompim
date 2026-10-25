@@ -67,7 +67,7 @@
                                 class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span>
                             <span class="relative inline-flex rounded-full h-2 w-2 bg-primary-500"></span>
                         </span>
-                        Leadership Agenda & Integration Tool
+                        Sistem Informasi Agenda Pimpinan Daerah
                     </div>
 
                     <div class="w-fit mx-auto lg:mx-0">
