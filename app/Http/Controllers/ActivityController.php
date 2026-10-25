@@ -182,7 +182,7 @@ class ActivityController extends Controller
                 ->join(', ')
                 : null;
 
-            $rows[] = "*{$prefix}{$timeStr}*";
+            $rows[] = "{$prefix}{$timeStr}";
             $rows[] = "*{$activity->title}*";
             $rows[] = "Lokasi: {$location}";
             $rows[] = "Penyelenggara: {$organizer}";
@@ -217,7 +217,7 @@ class ActivityController extends Controller
 
         $lines = [];
         $lines[] = '*AGENDA KEGIATAN ' . strtoupper($leader->position) . '*';
-        $lines[] = '_' . $dateFormatted . '_';
+        $lines[] = $dateFormatted;
         // $lines[] = str_repeat('━', 30);
 
         if ($dihadiri->isNotEmpty()) {
