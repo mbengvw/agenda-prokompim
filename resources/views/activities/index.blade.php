@@ -116,7 +116,8 @@
                 requestController: null,
 
                 filterForm() {
-                    return this.$el.querySelector('[data-filter-form]');
+                    // $el di dalam method menunjuk ke elemen pemicu event, gunakan $root untuk komponen.
+                    return this.$root.querySelector('[data-filter-form]');
                 },
 
                 buildFilterUrl() {
@@ -240,7 +241,7 @@
                 setViewMode(mode) {
                     this.viewMode = mode;
 
-                    const viewInput = this.$el.querySelector('#view_input');
+                    const viewInput = this.$root.querySelector('#view_input');
                     if (viewInput) {
                         viewInput.value = mode;
                     }
