@@ -16,7 +16,13 @@
         <meta name="apple-mobile-web-app-title" content="SIM Pimpinan">
 
         <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
+        <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
+        <link rel="preload" as="font" type="font/woff2" crossorigin
+            href="https://fonts.bunny.net/figtree/files/figtree-latin-400-normal.woff2">
+        <link rel="preload" as="font" type="font/woff2" crossorigin
+            href="https://fonts.bunny.net/figtree/files/figtree-latin-500-normal.woff2">
+        <link rel="preload" as="font" type="font/woff2" crossorigin
+            href="https://fonts.bunny.net/figtree/files/figtree-latin-600-normal.woff2">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
         <!-- Scripts -->

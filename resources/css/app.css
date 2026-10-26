@@ -1,3 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Hindari flash konten Alpine sebelum framework selesai diinisialisasi. */
+[x-cloak] {
+    display: none !important;
+}

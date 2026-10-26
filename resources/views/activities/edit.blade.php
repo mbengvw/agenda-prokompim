@@ -64,7 +64,7 @@
                                 </label>
                             </div>
 
-                            <div class="grid grid-cols-2 gap-4" x-show="!isTentative" x-transition>
+                            <div class="grid grid-cols-2 gap-4" x-show="!isTentative" x-transition x-cloak>
                                 <div>
                                     <x-input-label value="Mulai" />
                                     <div class="mt-2 flex items-center gap-1.5">
@@ -210,7 +210,7 @@
                                     <div @click="open = !open; $refs.searchInput.focus()" @click.away="open = false" class="min-h-[42px] p-2 w-full border border-gray-300 rounded-md shadow-sm bg-white cursor-text flex flex-col justify-center focus-within:ring-1 focus-within:ring-primary-500 focus-within:border-primary-500 transition-all duration-200">
                                         
                                         <!-- Selected Badges -->
-                                        <div x-show="selected.length > 0" class="flex flex-wrap gap-1 mb-1.5">
+                                        <div x-show="selected.length > 0" x-cloak class="flex flex-wrap gap-1 mb-1.5">
                                             <template x-for="(val, index) in selected" :key="index">
                                                 <span class="inline-flex items-center px-2 py-1 rounded bg-secondary-100 text-primary-900 text-xs font-bold border border-secondary-200 shadow-sm">
                                                     <span x-text="getOptionText(val)"></span>

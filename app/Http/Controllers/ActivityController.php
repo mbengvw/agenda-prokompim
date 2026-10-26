@@ -66,7 +66,7 @@ class ActivityController extends Controller
 
         $pdf = Pdf::loadView('activities.pdf', compact('dihadiri', 'didisposisi', 'leader', 'dateFormatted'));
 
-        $fileName = 'Agenda_' . str_replace(' ', '_', $leader->short_name ?: $leader->name) . "_{$dateFilter}.pdf";
+        $fileName = 'Agenda_'.str_replace(' ', '_', $leader->short_name ?: $leader->name)."_{$dateFilter}.pdf";
 
         return $pdf->download($fileName);
     }
@@ -101,7 +101,7 @@ class ActivityController extends Controller
         $pdf = Pdf::loadView('activities.pdf-table', compact('activities', 'leader', 'dateFormatted'))
             ->setPaper('a4', 'landscape');
 
-        $fileName = 'Tabel_Agenda_' . str_replace(' ', '_', $leader->short_name ?: $leader->name) . "_{$dateFilter}.pdf";
+        $fileName = 'Tabel_Agenda_'.str_replace(' ', '_', $leader->short_name ?: $leader->name)."_{$dateFilter}.pdf";
 
         return $pdf->download($fileName);
     }
@@ -163,8 +163,8 @@ class ActivityController extends Controller
                 $start = Carbon::parse($activity->start_time);
                 $end = $activity->end_time ? Carbon::parse($activity->end_time) : null;
                 $dur = $end ? $start->diffInMinutes($end) : null;
-                $tStr = 'Pkl. ' . $start->format('H.i');
-                $tStr .= $end ? '-' . $end->format('H.i') . ' WIB' : ' WIB';
+                $tStr = 'Pkl. '.$start->format('H.i');
+                $tStr .= $end ? '-'.$end->format('H.i').' WIB' : ' WIB';
                 $tStr .= $dur ? " ({$dur}')" : '';
                 $timeStr = $tStr;
             }
@@ -178,8 +178,8 @@ class ActivityController extends Controller
                 : ($activity->organizer_text ?: '-');
             $companions = $activity->companions->count() > 0
                 ? $activity->companions->pluck('position')
-                ->map(fn($p) => Str::title($p))
-                ->join(', ')
+                    ->map(fn ($p) => Str::title($p))
+                    ->join(', ')
                 : null;
 
             $rows[] = "{$prefix}{$timeStr}";
@@ -216,7 +216,7 @@ class ActivityController extends Controller
         };
 
         $lines = [];
-        $lines[] = '*AGENDA KEGIATAN ' . strtoupper($leader->position) . '*';
+        $lines[] = '*AGENDA KEGIATAN '.strtoupper($leader->position).'*';
         $lines[] = $dateFormatted;
         // $lines[] = str_repeat('━', 30);
 
@@ -242,7 +242,7 @@ class ActivityController extends Controller
                 $dispRows = $formatActivity($activity, $i + 1, $didisposisi->count());
                 $lines[] = $dispRows[0]; // waktu
                 $lines[] = $dispRows[1]; // judul
-                $lines[] = '↩ Disposisi ke: ' . ($activity->leader?->position ?? '-');
+                $lines[] = '↩ Disposisi ke: '.($activity->leader?->position ?? '-');
                 foreach (array_slice($dispRows, 2) as $row) {
                     $lines[] = $row;
                 }
@@ -262,7 +262,7 @@ class ActivityController extends Controller
 
         $lines[] = '';
         // $lines[] = str_repeat('━', 30);
-        $lines[] = 'Adc: ' . ($adcNames ?: '-');
+        $lines[] = 'Adc: '.($adcNames ?: '-');
         $lines[] = '';
         $lines[] = 'Demikian Disampaikan';
         $lines[] = 'Hatur Nuhun';
@@ -295,7 +295,18 @@ class ActivityController extends Controller
         $organizations = Organization::orderBy('name')->get();
         $protocolOfficers = ProtocolOfficer::where('is_active', true)->orderBy('name')->get();
 
-        return view('activities.index', compact('activities', 'timelineData', 'search', 'leaderFilter', 'dateFilter', 'statusFilter', 'leaders', 'locations', 'organizations', 'protocolOfficers'));
+        $initialView = $request->input('view', 'table');
+        if (! in_array($initialView, ['table', 'card', 'timeline'], true)) {
+            $initialView = 'table';
+        }
+
+        $viewData = compact('activities', 'timelineData', 'search', 'leaderFilter', 'dateFilter', 'statusFilter', 'leaders', 'locations', 'organizations', 'protocolOfficers', 'initialView');
+
+        if ($request->ajax()) {
+            return response()->view('activities._content', $viewData);
+        }
+
+        return view('activities.index', $viewData);
     }
 
     public function create(Request $request)
@@ -318,7 +329,7 @@ class ActivityController extends Controller
         if ($user->leader_id) {
             $defaultLeaderId = $user->leader_id;
         } elseif ($leaderFilter) {
-            $matched = $mainLeaders->first(fn($l) => strtolower($l->position) === strtolower($leaderFilter));
+            $matched = $mainLeaders->first(fn ($l) => strtolower($l->position) === strtolower($leaderFilter));
             if ($matched) {
                 $defaultLeaderId = $matched->id;
             }
@@ -511,9 +522,9 @@ class ActivityController extends Controller
 
         $this->service->updateStatus($activity, $validated['status'], $validated['revision_notes'] ?? null);
 
-        $message = 'Status agenda diubah menjadi ' . ucfirst($validated['status']);
+        $message = 'Status agenda diubah menjadi '.ucfirst($validated['status']);
         if ($validated['status'] === 'revision') {
-            $message .= ' dengan catatan: ' . $validated['revision_notes'];
+            $message .= ' dengan catatan: '.$validated['revision_notes'];
         }
 
         activity()
@@ -558,7 +569,7 @@ class ActivityController extends Controller
         activity()
             ->performedOn($activity)
             ->causedBy(auth()->user())
-            ->log('Mendisposisikan agenda ini kepada: ' . $leader->name . ' (' . $leader->position . ')');
+            ->log('Mendisposisikan agenda ini kepada: '.$leader->name.' ('.$leader->position.')');
 
         return redirect()->back()->with('success', 'Agenda berhasil didisposisikan.');
     }
