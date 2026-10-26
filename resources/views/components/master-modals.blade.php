@@ -119,15 +119,11 @@
             const data = await response.json();
             
             if (response.ok) {
-                // Tambahkan ke datalist
-                const datalist = document.getElementById('organizers_list');
-                const option = document.createElement('option');
-                option.value = data.data.name;
-                datalist.appendChild(option);
-                
-                // Isi input form utama
-                document.querySelector('input[name="organizer_input"]').value = data.data.name;
-                
+                // Pilih penyelenggara yang baru dibuat pada dropdown form utama
+                window.dispatchEvent(new CustomEvent('master-option-created', {
+                    detail: { field: 'organizer_input', value: data.data.name }
+                }));
+
                 // Tutup modal
                 window.dispatchEvent(new CustomEvent('close-modal', { detail: 'create-organization' }));
                 
@@ -175,15 +171,11 @@
             const data = await response.json();
             
             if (response.ok) {
-                // Tambahkan ke datalist
-                const datalist = document.getElementById('locations_list');
-                const option = document.createElement('option');
-                option.value = data.data.name;
-                datalist.appendChild(option);
-                
-                // Isi input form utama
-                document.querySelector('input[name="location_input"]').value = data.data.name;
-                
+                // Pilih lokasi yang baru dibuat pada dropdown form utama
+                window.dispatchEvent(new CustomEvent('master-option-created', {
+                    detail: { field: 'location_input', value: data.data.name }
+                }));
+
                 // Tutup modal
                 window.dispatchEvent(new CustomEvent('close-modal', { detail: 'create-location' }));
                 

@@ -76,7 +76,14 @@
                         <div class="col-span-full">
                             <x-input-label value="Penyelenggara" />
                             <div class="flex gap-2">
-                                <x-text-input name="organizer_input" list="organizers_list" type="text" class="mt-2 block w-full" placeholder="Ketik nama penyelenggara..." />
+                                <x-searchable-select
+                                    class="flex-1"
+                                    name="organizer_input"
+                                    placeholder="-- Pilih Penyelenggara --"
+                                    search-placeholder="Cari penyelenggara..."
+                                    empty-text="Penyelenggara tidak ditemukan."
+                                    :options="$organizations->pluck('name')"
+                                />
                                 <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'create-organization')" class="mt-2 shrink-0 inline-flex items-center justify-center w-10 h-10 bg-primary-50 text-primary-600 rounded-md hover:bg-primary-100 border border-primary-200 transition-colors" title="Tambah Penyelenggara Baru">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                                 </button>
@@ -86,7 +93,14 @@
                         <div class="col-span-full">
                             <x-input-label value="Lokasi" />
                             <div class="flex gap-2">
-                                <x-text-input name="location_input" list="locations_list" type="text" class="mt-2 block w-full" placeholder="Ketik nama lokasi..." />
+                                <x-searchable-select
+                                    class="flex-1"
+                                    name="location_input"
+                                    placeholder="-- Pilih Lokasi --"
+                                    search-placeholder="Cari lokasi..."
+                                    empty-text="Lokasi tidak ditemukan."
+                                    :options="$locations->pluck('name')"
+                                />
                                 <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'create-location')" class="mt-2 shrink-0 inline-flex items-center justify-center w-10 h-10 bg-primary-50 text-primary-600 rounded-md hover:bg-primary-100 border border-primary-200 transition-colors" title="Tambah Lokasi Baru">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                                 </button>
@@ -268,19 +282,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Datalists for Autocomplete -->
-    <datalist id="locations_list">
-        @foreach($locations as $loc)
-            <option value="{{ $loc->name }}">
-        @endforeach
-    </datalist>
-
-    <datalist id="organizers_list">
-        @foreach($organizations as $org)
-            <option value="{{ $org->name }}">
-        @endforeach
-    </datalist>
 
     <x-master-modals />
 </x-app-layout>
