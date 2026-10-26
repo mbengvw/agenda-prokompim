@@ -32,14 +32,7 @@
         </div>
 
         <nav
-            class="relative z-10 w-full px-6 py-5 md:px-12 lg:px-24 flex justify-between items-center backdrop-blur-md bg-white/60 border-b border-gray-100/50 sticky top-0">
-            <div class="flex items-center gap-3 group cursor-pointer">
-                <img src="{{ asset('images/logo.png') }}" alt="Logo"
-                    class="w-24 h-24 object-contain group-hover:scale-105 transition-transform duration-300">
-                {{-- <span class="font-bold text-xl tracking-tight text-gray-800">LEAD <span
-                        class="text-primary-600">IT</span></span> --}}
-            </div>
-
+            class="relative z-10 w-full px-6 py-5 md:px-12 lg:px-24 flex justify-end items-center backdrop-blur-md bg-white/60 border-b border-gray-100/50 sticky top-0">
             @if (Route::has('login'))
                 <div class="flex items-center gap-4">
                     @auth

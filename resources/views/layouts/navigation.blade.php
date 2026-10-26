@@ -16,8 +16,8 @@
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}" class="flex flex-col justify-center items-start">
-                        <x-application-logo class="block h-8 w-auto fill-current text-white" />
-                        <span class="text-[0.55rem] text-primary-100 font-bold tracking-wider mt-1.5 uppercase leading-none">Leadership Agenda & Integration Tools</span>
+                        <span class="text-2xl font-extrabold tracking-widest bg-gradient-to-r from-teal-300 via-green-300 to-yellow-300 bg-clip-text text-transparent drop-shadow-sm">SIPANDA</span>
+                        <span class="text-[0.55rem] text-primary-100 font-bold tracking-wider mt-1.5 uppercase leading-none">Sistem Informasi Agenda Pimpinan Daerah</span>
                     </a>
                 </div>
 
