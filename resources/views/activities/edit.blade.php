@@ -14,7 +14,10 @@
     <div class="py-6 sm:py-12">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-white sm:rounded-2xl shadow-xl border border-primary-100 overflow-hidden">
-                <form method="post" action="{{ route('activities.update', ['activity' => $activity->id, 'redirect_to' => request('redirect_to'), 'date' => request('date'), 'leader' => request('leader')]) }}" class="p-5 sm:p-8">
+                <form method="post" action="{{ route('activities.update', ['activity' => $activity->id, 'redirect_to' => request('redirect_to'), 'date' => request('date'), 'leader' => request('leader')]) }}" class="p-5 sm:p-8"
+                      x-data="{ formTimeError: false }"
+                      @time-error-changed-edit.window="formTimeError = $event.detail.hasError"
+                      @submit="if (formTimeError) { $event.preventDefault(); }">
                     @csrf
                     @method('PUT')
                     
@@ -29,7 +32,30 @@
                             <x-text-input name="activity_date" type="date" class="mt-2 block w-full" :value="old('activity_date', $activity->activity_date?->format('Y-m-d'))" required />
                         </div>
                         
-                        <div x-data="{ isTentative: {{ old('is_tentative', $activity->is_tentative) ? 'true' : 'false' }} }">
+                        @php
+                            $startTime = old('start_time', $activity->start_time?->format('H:i'));
+                            $startH = $startTime ? \Illuminate\Support\Str::before($startTime, ':') : '';
+                            $startM = $startTime ? \Illuminate\Support\Str::after($startTime, ':') : '';
+                            $endTime = old('end_time', $activity->end_time?->format('H:i'));
+                            $endH = $endTime ? \Illuminate\Support\Str::before($endTime, ':') : '';
+                            $endM = $endTime ? \Illuminate\Support\Str::after($endTime, ':') : '';
+                        @endphp
+                        <div x-data="{
+                            isTentative: {{ old('is_tentative', $activity->is_tentative) ? 'true' : 'false' }},
+                            startH: '{{ $startH }}',
+                            startM: '{{ $startM }}',
+                            endH: '{{ $endH }}',
+                            endM: '{{ $endM }}',
+                            get startVal() { return this.startH !== '' && this.startM !== '' ? this.startH + ':' + this.startM : ''; },
+                            get endVal() { return this.endH !== '' && this.endM !== '' ? this.endH + ':' + this.endM : ''; },
+                            get timeError() {
+                                if (this.isTentative || !this.startVal || !this.endVal) return false;
+                                return this.endVal <= this.startVal;
+                            },
+                            notifyTimeError() {
+                                this.$nextTick(() => this.$dispatch('time-error-changed-edit', { hasError: this.timeError }));
+                            }
+                        }">
                             <div class="flex items-center justify-between mb-2">
                                 <x-input-label value="Waktu Pelaksanaan" />
                                 <label class="inline-flex items-center cursor-pointer">
@@ -37,22 +63,13 @@
                                     <span class="ml-2 text-xs text-gray-600 font-medium">Waktu belum ditentukan (Tentatif)</span>
                                 </label>
                             </div>
-                            
+
                             <div class="grid grid-cols-2 gap-4" x-show="!isTentative" x-transition>
                                 <div>
                                     <x-input-label value="Mulai" />
-                                    @php
-                                        $startTime = old('start_time', $activity->start_time?->format('H:i'));
-                                        $startH = $startTime ? \Illuminate\Support\Str::before($startTime, ':') : '';
-                                        $startM = $startTime ? \Illuminate\Support\Str::after($startTime, ':') : '';
-                                    @endphp
-                                    <div class="mt-2 flex items-center gap-1.5"
-                                         x-data="{
-                                             h: '{{ $startH }}',
-                                             m: '{{ $startM }}',
-                                             get val() { return this.h !== '' && this.m !== '' ? this.h + ':' + this.m : ''; }
-                                         }">
-                                        <select x-model="h" x-bind:disabled="isTentative"
+                                    <div class="mt-2 flex items-center gap-1.5">
+                                        <select x-model="startH" x-bind:disabled="isTentative"
+                                                @change="notifyTimeError()"
                                                 class="block w-full border-gray-300 focus:border-primary-500 focus:ring-primary-500 rounded-lg shadow-sm transition-colors text-sm py-2">
                                             <option value="">Jam</option>
                                             @for ($i = 0; $i < 24; $i++)
@@ -60,47 +77,47 @@
                                             @endfor
                                         </select>
                                         <span class="font-bold text-gray-500">:</span>
-                                        <select x-model="m" x-bind:disabled="isTentative"
+                                        <select x-model="startM" x-bind:disabled="isTentative"
+                                                @change="notifyTimeError()"
                                                 class="block w-full border-gray-300 focus:border-primary-500 focus:ring-primary-500 rounded-lg shadow-sm transition-colors text-sm py-2">
                                             <option value="">Mnt</option>
                                             @for ($i = 0; $i < 60; $i += 5)
                                                 <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}">{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}</option>
                                             @endfor
                                         </select>
-                                        <input type="hidden" name="start_time" :value="val" x-bind:required="!isTentative" />
+                                        <input type="hidden" name="start_time" :value="startVal" x-bind:required="!isTentative" />
                                     </div>
                                 </div>
                                 <div>
                                     <x-input-label value="Selesai" />
-                                    @php
-                                        $endTime = old('end_time', $activity->end_time?->format('H:i'));
-                                        $endH = $endTime ? \Illuminate\Support\Str::before($endTime, ':') : '';
-                                        $endM = $endTime ? \Illuminate\Support\Str::after($endTime, ':') : '';
-                                    @endphp
-                                    <div class="mt-2 flex items-center gap-1.5"
-                                         x-data="{
-                                             h: '{{ $endH }}',
-                                             m: '{{ $endM }}',
-                                             get val() { return this.h !== '' && this.m !== '' ? this.h + ':' + this.m : ''; }
-                                         }">
-                                        <select x-model="h" x-bind:disabled="isTentative"
-                                                class="block w-full border-gray-300 focus:border-primary-500 focus:ring-primary-500 rounded-lg shadow-sm transition-colors text-sm py-2">
+                                    <div class="mt-2 flex items-center gap-1.5">
+                                        <select x-model="endH" x-bind:disabled="isTentative"
+                                                @change="notifyTimeError()"
+                                                :class="timeError ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300'"
+                                                class="block w-full focus:border-primary-500 focus:ring-primary-500 rounded-lg shadow-sm transition-colors text-sm py-2">
                                             <option value="">Jam</option>
                                             @for ($i = 0; $i < 24; $i++)
                                                 <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}">{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}</option>
                                             @endfor
                                         </select>
                                         <span class="font-bold text-gray-500">:</span>
-                                        <select x-model="m" x-bind:disabled="isTentative"
-                                                class="block w-full border-gray-300 focus:border-primary-500 focus:ring-primary-500 rounded-lg shadow-sm transition-colors text-sm py-2">
+                                        <select x-model="endM" x-bind:disabled="isTentative"
+                                                @change="notifyTimeError()"
+                                                :class="timeError ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300'"
+                                                class="block w-full focus:border-primary-500 focus:ring-primary-500 rounded-lg shadow-sm transition-colors text-sm py-2">
                                             <option value="">Mnt</option>
                                             @for ($i = 0; $i < 60; $i += 5)
                                                 <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}">{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}</option>
                                             @endfor
                                         </select>
-                                        <input type="hidden" name="end_time" :value="val" />
+                                        <input type="hidden" name="end_time" :value="endVal" />
                                     </div>
                                 </div>
+                            </div>
+                            <div x-show="!isTentative && timeError" x-transition style="display: none;"
+                                 class="mt-2 flex items-center gap-2 text-sm text-red-700 bg-red-50 p-2.5 rounded-lg border border-red-300">
+                                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                                <span>Waktu selesai harus lebih besar dari waktu mulai.</span>
                             </div>
                             <div x-show="isTentative" style="display: none;" class="mt-2 text-sm text-amber-600 bg-amber-50 p-2.5 rounded border border-amber-200">
                                 Waktu kegiatan ini bersifat tentatif (belum pasti).
@@ -279,7 +296,10 @@
                     
                     <div class="mt-8 flex justify-end gap-3 pt-6 border-t border-gray-100">
                         <a href="{{ request('redirect_to', route('activities.index', array_filter(['date' => $dateFilter ?? request('date'), 'leader' => $leaderFilter ?? request('leader')]))) }}" class="px-6 py-2.5 bg-gray-200 text-gray-800 rounded-md font-semibold text-xs uppercase hover:bg-gray-300 transition-colors">Batal</a>
-                        <button type="submit" class="px-6 py-2.5 bg-secondary-500 text-primary-900 rounded-md font-bold text-xs uppercase hover:bg-secondary-600 transition-colors shadow-sm">Simpan Perubahan</button>
+                        <button type="submit"
+                                :disabled="formTimeError"
+                                :class="formTimeError ? 'opacity-50 cursor-not-allowed' : 'hover:bg-secondary-600'"
+                                class="px-6 py-2.5 bg-secondary-500 text-primary-900 rounded-md font-bold text-xs uppercase transition-colors shadow-sm">Simpan Perubahan</button>
                     </div>
                 </form>
             </div>

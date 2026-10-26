@@ -40,4 +40,16 @@ class UpdateActivityRequest extends FormRequest
             'info' => ['nullable', 'string'],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'title.required' => 'Nama kegiatan wajib diisi.',
+            'activity_date.required' => 'Tanggal kegiatan wajib diisi.',
+            'start_time.required_if' => 'Waktu mulai wajib diisi jika kegiatan tidak bersifat tentatif.',
+            'start_time.date_format' => 'Format waktu mulai tidak valid.',
+            'end_time.date_format' => 'Format waktu selesai tidak valid.',
+            'end_time.after' => 'Waktu selesai harus lebih besar dari waktu mulai.',
+        ];
+    }
 }
