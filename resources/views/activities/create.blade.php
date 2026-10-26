@@ -33,12 +33,8 @@
                         
                         <div x-data="{
                             isTentative: {{ old('is_tentative') ? 'true' : 'false' }},
-                            startH: '{{ old('start_time') ? \Illuminate\Support\Str::before(old('start_time'), ':') : '' }}',
-                            startM: '{{ old('start_time') ? \Illuminate\Support\Str::after(old('start_time'), ':') : '' }}',
-                            endH: '{{ old('end_time') ? \Illuminate\Support\Str::before(old('end_time'), ':') : '' }}',
-                            endM: '{{ old('end_time') ? \Illuminate\Support\Str::after(old('end_time'), ':') : '' }}',
-                            get startVal() { return this.startH !== '' && this.startM !== '' ? this.startH + ':' + this.startM : ''; },
-                            get endVal() { return this.endH !== '' && this.endM !== '' ? this.endH + ':' + this.endM : ''; },
+                            startVal: @js(old('start_time', '')),
+                            endVal: @js(old('end_time', '')),
                             get timeError() {
                                 if (this.isTentative || !this.startVal || !this.endVal) return false;
                                 return this.endVal <= this.startVal;
@@ -46,7 +42,7 @@
                             notifyTimeError() {
                                 this.$nextTick(() => this.$dispatch('time-error-changed', { hasError: this.timeError }));
                             }
-                        }">
+                        }" x-init="$watch('startVal', () => notifyTimeError()); $watch('endVal', () => notifyTimeError())">
                             <div class="flex items-center justify-between mb-2">
                                 <x-input-label value="Waktu Pelaksanaan" />
                                 <label class="inline-flex items-center cursor-pointer">
@@ -55,54 +51,16 @@
                                 </label>
                             </div>
                             
-                            <div class="grid grid-cols-2 gap-4" x-show="!isTentative" x-transition x-cloak>
+                            <div class="grid grid-cols-2 gap-3 sm:gap-4" x-show="!isTentative" x-transition x-cloak>
                                 <div>
                                     <x-input-label value="Mulai" />
-                                    <div class="mt-2 flex items-center gap-1.5">
-                                        <select x-model="startH" x-bind:disabled="isTentative"
-                                                @change="notifyTimeError()"
-                                                class="block w-full border-gray-300 focus:border-primary-500 focus:ring-primary-500 rounded-lg shadow-sm transition-colors text-sm py-2">
-                                            <option value="">Jam</option>
-                                            @for ($i = 0; $i < 24; $i++)
-                                                <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}">{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}</option>
-                                            @endfor
-                                        </select>
-                                        <span class="font-bold text-gray-500">:</span>
-                                        <select x-model="startM" x-bind:disabled="isTentative"
-                                                @change="notifyTimeError()"
-                                                class="block w-full border-gray-300 focus:border-primary-500 focus:ring-primary-500 rounded-lg shadow-sm transition-colors text-sm py-2">
-                                            <option value="">Mnt</option>
-                                            @for ($i = 0; $i < 60; $i += 5)
-                                                <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}">{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}</option>
-                                            @endfor
-                                        </select>
-                                        <input type="hidden" name="start_time" :value="startVal" x-bind:required="!isTentative" />
-                                    </div>
+                                    <x-time-picker x-model="startVal" label="Mulai" />
+                                    <input type="hidden" name="start_time" :value="startVal" x-bind:required="!isTentative" />
                                 </div>
                                 <div>
                                     <x-input-label value="Selesai" />
-                                    <div class="mt-2 flex items-center gap-1.5">
-                                        <select x-model="endH" x-bind:disabled="isTentative"
-                                                @change="notifyTimeError()"
-                                                :class="timeError ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300'"
-                                                class="block w-full focus:border-primary-500 focus:ring-primary-500 rounded-lg shadow-sm transition-colors text-sm py-2">
-                                            <option value="">Jam</option>
-                                            @for ($i = 0; $i < 24; $i++)
-                                                <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}">{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}</option>
-                                            @endfor
-                                        </select>
-                                        <span class="font-bold text-gray-500">:</span>
-                                        <select x-model="endM" x-bind:disabled="isTentative"
-                                                @change="notifyTimeError()"
-                                                :class="timeError ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300'"
-                                                class="block w-full focus:border-primary-500 focus:ring-primary-500 rounded-lg shadow-sm transition-colors text-sm py-2">
-                                            <option value="">Mnt</option>
-                                            @for ($i = 0; $i < 60; $i += 5)
-                                                <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}">{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}</option>
-                                            @endfor
-                                        </select>
-                                        <input type="hidden" name="end_time" :value="endVal" />
-                                    </div>
+                                    <x-time-picker x-model="endVal" label="Selesai" x-bind:class="timeError ? 'ring-2 ring-red-400 rounded-lg' : ''" />
+                                    <input type="hidden" name="end_time" :value="endVal" />
                                 </div>
                             </div>
                             <div x-show="!isTentative && timeError" x-transition style="display: none;"
