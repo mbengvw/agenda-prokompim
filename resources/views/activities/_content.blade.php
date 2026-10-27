@@ -902,21 +902,136 @@
             </div>
         </div>
 
-        {{-- Floating Button: Export PDF Tabel (Semua Agenda) --}}
-        <a href="{{ route('activities.export-pdf-table', ['date' => $dateFilter ?? \Carbon\Carbon::today()->toDateString(), 'leader_id' => $exportLeaderId]) }}"
-            target="_blank"
-            class="fixed bottom-24 right-6 z-50 bg-blue-600 text-white p-3.5 rounded-full shadow-lg hover:bg-blue-700 hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center justify-center group"
-            title="Export Tabel PDF (Semua Agenda)">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M3 10h18M3 14h18M10 4v16M6 4h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2z" />
-            </svg>
-            <span
-                class="max-w-0 overflow-hidden whitespace-nowrap opacity-0 group-hover:max-w-xs group-hover:opacity-100 group-hover:ml-2 group-hover:mr-1 transition-all duration-300 ease-in-out font-bold text-sm">
-                Tabel PDF
-            </span>
-        </a>
+        {{-- Floating Button + Modal: Export PDF Tabel (pilihan periode) --}}
+        @php
+            $pdfPeriodOptions = [
+                ['value' => 'harian', 'label' => 'Harian', 'desc' => 'Satu hari'],
+                ['value' => 'mingguan', 'label' => 'Mingguan', 'desc' => 'Senin - Minggu'],
+                ['value' => 'bulanan', 'label' => 'Bulanan', 'desc' => 'Satu bulan penuh'],
+                ['value' => 'tahunan', 'label' => 'Tahunan', 'desc' => 'Satu tahun penuh'],
+            ];
+        @endphp
+        <div
+            x-data="{
+                open: false,
+                period: 'harian',
+                date: '{{ $dateFilter ?? \Carbon\Carbon::today()->toDateString() }}',
+                leaderId: '{{ $exportLeaderId }}',
+                get printUrl() {
+                    const url = new URL('{{ route('activities.export-pdf-table') }}', window.location.origin);
+                    url.searchParams.set('date', this.date);
+                    url.searchParams.set('leader_id', this.leaderId);
+                    url.searchParams.set('period', this.period);
+                    return url.toString();
+                },
+                print() {
+                    window.open(this.printUrl, '_blank');
+                    this.open = false;
+                }
+            }"
+            @keydown.escape.window="open = false">
+
+            <button @click="open = true"
+                class="fixed bottom-24 right-6 z-50 bg-blue-600 text-white p-3.5 rounded-full shadow-lg hover:bg-blue-700 hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center justify-center group"
+                title="Export Tabel PDF (pilih periode)">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 10h18M3 14h18M10 4v16M6 4h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2z" />
+                </svg>
+                <span
+                    class="max-w-0 overflow-hidden whitespace-nowrap opacity-0 group-hover:max-w-xs group-hover:opacity-100 group-hover:ml-2 group-hover:mr-1 transition-all duration-300 ease-in-out font-bold text-sm">
+                    Tabel PDF
+                </span>
+            </button>
+
+            {{-- Modal Pilihan Periode --}}
+            <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                class="fixed inset-0 z-[70] bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-4"
+                @click.self="open = false">
+
+                <div x-show="open" x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                    x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                    x-transition:leave="transition ease-in duration-150"
+                    x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                    x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                    class="bg-white rounded-2xl shadow-2xl w-full max-w-md flex flex-col overflow-hidden max-h-[90vh]">
+
+                    <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center shrink-0">
+                                <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 10h18M3 14h18M10 4v16M6 4h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900 text-sm leading-tight">Cetak Tabel PDF</h3>
+                                <p class="text-xs text-gray-500">Pilih periode laporan</p>
+                            </div>
+                        </div>
+                        <button @click="open = false"
+                            class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="flex-1 overflow-y-auto px-5 py-4">
+                        <p class="text-xs text-gray-500 mb-3">
+                            Periode dihitung dari tanggal yang dipilih:
+                            <strong
+                                class="text-gray-700">{{ \Carbon\Carbon::parse($dateFilter ?? \Carbon\Carbon::today()->toDateString())->translatedFormat('l, j F Y') }}</strong>
+                        </p>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            @foreach ($pdfPeriodOptions as $option)
+                                <label
+                                    class="flex items-center gap-3 p-3 border rounded-xl cursor-pointer transition-all"
+                                    :class="period === '{{ $option['value'] }}' ?
+                                        'border-blue-600 bg-blue-50 ring-1 ring-blue-600' :
+                                        'border-gray-200 hover:bg-gray-50'">
+                                    <input type="radio" name="pdf_period" value="{{ $option['value'] }}"
+                                        x-model="period" class="sr-only">
+                                    <span
+                                        class="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0"
+                                        :class="period === '{{ $option['value'] }}' ? 'border-blue-600' : 'border-gray-300'">
+                                        <span class="w-2 h-2 rounded-full bg-blue-600"
+                                            x-show="period === '{{ $option['value'] }}'"></span>
+                                    </span>
+                                    <span class="flex-1">
+                                        <span class="block text-sm font-bold text-gray-800">{{ $option['label'] }}</span>
+                                        <span class="block text-xs text-gray-500">{{ $option['desc'] }}</span>
+                                    </span>
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <div class="px-5 py-4 border-t border-gray-100 shrink-0 flex items-center justify-between gap-3">
+                        <button @click="open = false"
+                            class="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+                            Batal
+                        </button>
+                        <button @click="print()"
+                            class="flex items-center gap-2 px-5 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-all">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            Cetak PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         {{-- Floating Button: Export PDF Agenda (dengan filter kehadiran) --}}
         <a href="{{ route('activities.export-pdf', ['date' => $dateFilter ?? \Carbon\Carbon::today()->toDateString(), 'leader_id' => $exportLeaderId]) }}"

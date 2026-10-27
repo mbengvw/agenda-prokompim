@@ -44,6 +44,19 @@ test('ajax filter request keeps the selected date', function () {
         ->assertSee('name="date" value="2026-10-20"', false);
 });
 
+test('ajax filter request renders table pdf period options', function () {
+    $this->actingAs($this->user)
+        ->get(route('activities.index', ['leader' => 'bupati', 'date' => '2026-10-27']), [
+            'X-Requested-With' => 'XMLHttpRequest',
+        ])
+        ->assertOk()
+        ->assertSee('Cetak Tabel PDF')
+        ->assertSee('Harian')
+        ->assertSee('Mingguan')
+        ->assertSee('Bulanan')
+        ->assertSee('Tahunan');
+});
+
 test('invalid view parameter falls back to table view', function () {
     $this->actingAs($this->user)
         ->get(route('activities.index', ['leader' => 'bupati', 'view' => 'unknown']))

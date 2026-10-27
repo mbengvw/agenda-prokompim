@@ -72,38 +72,83 @@ class ActivityController extends Controller
     }
 
     /**
-     * Export semua agenda pada tanggal tertentu dalam format tabel (tanpa filter kehadiran).
+     * Export semua agenda dalam format tabel untuk periode harian, mingguan, bulanan, atau tahunan.
      */
     public function exportPdfTable(Request $request)
     {
-        $dateFilter = $request->input('date', Carbon::today()->toDateString());
+        $dateFilter = Carbon::parse($request->input('date', Carbon::today()->toDateString()));
         $leaderId = $request->input('leader_id');
+        $periodFilter = (string) $request->input('period', 'harian');
 
         if (! $leaderId) {
             return redirect()->back()->withErrors('Pimpinan harus dipilih untuk mencetak PDF.');
         }
 
+        if (! in_array($periodFilter, ['harian', 'mingguan', 'bulanan', 'tahunan'], true)) {
+            $periodFilter = 'harian';
+        }
+
         $leader = Leader::findOrFail($leaderId);
+        $period = $this->resolvePrintPeriod($dateFilter, $periodFilter);
 
         $activities = Activity::with(['leader', 'location', 'organization', 'protocolOfficer', 'companions'])
-            ->whereDate('activity_date', $dateFilter)
+            ->whereDate('activity_date', '>=', $period['start']->toDateString())
+            ->whereDate('activity_date', '<=', $period['end']->toDateString())
             ->whereIn('status', ['approved', 'submitted', 'draft', 'revision'])
             ->where(function ($q) use ($leaderId) {
                 // Agenda yang dimiliki leader, atau agenda di mana leader pernah terlibat sebagai original leader
                 $q->where('leader_id', $leaderId)
                     ->orWhere('original_leader_id', $leaderId);
             })
+            ->orderBy('activity_date')
             ->orderBy('start_time')
             ->get();
 
-        $dateFormatted = Carbon::parse($dateFilter)->locale('id')->translatedFormat('l, j F Y');
+        $pdf = Pdf::loadView('activities.pdf-table', [
+            'activities' => $activities,
+            'leader' => $leader,
+            'dateFormatted' => $period['label'],
+            'period' => $period['period'],
+        ])->setPaper('a4', 'landscape');
 
-        $pdf = Pdf::loadView('activities.pdf-table', compact('activities', 'leader', 'dateFormatted'))
-            ->setPaper('a4', 'landscape');
-
-        $fileName = 'Tabel_Agenda_'.str_replace(' ', '_', $leader->short_name ?: $leader->name)."_{$dateFilter}.pdf";
+        $fileName = 'Tabel_Agenda_'.str_replace(' ', '_', $leader->short_name ?: $leader->name)
+            ."_{$period['period']}_{$dateFilter->toDateString()}.pdf";
 
         return $pdf->download($fileName);
+    }
+
+    /**
+     * Menentukan rentang tanggal cetak berdasarkan periode yang dipilih.
+     *
+     * @return array{period: string, start: Carbon, end: Carbon, label: string}
+     */
+    private function resolvePrintPeriod(Carbon $date, string $period): array
+    {
+        if ($period === 'mingguan') {
+            $start = $date->copy()->startOfWeek(Carbon::MONDAY);
+            $end = $date->copy()->endOfWeek(Carbon::SUNDAY);
+            $label = $start->translatedFormat('j F Y').' s.d. '.$end->translatedFormat('j F Y');
+        } elseif ($period === 'bulanan') {
+            $start = $date->copy()->startOfMonth();
+            $end = $date->copy()->endOfMonth();
+            $label = $start->translatedFormat('F Y');
+        } elseif ($period === 'tahunan') {
+            $start = $date->copy()->startOfYear();
+            $end = $date->copy()->endOfYear();
+            $label = 'Tahun '.$start->translatedFormat('Y');
+        } else {
+            $period = 'harian';
+            $start = $date->copy()->startOfDay();
+            $end = $date->copy()->endOfDay();
+            $label = $date->translatedFormat('l, j F Y');
+        }
+
+        return [
+            'period' => $period,
+            'start' => $start,
+            'end' => $end,
+            'label' => $label,
+        ];
     }
 
     /**

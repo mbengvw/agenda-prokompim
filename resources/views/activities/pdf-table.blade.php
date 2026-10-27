@@ -63,6 +63,7 @@
         }
 
         .no-col     { width: 3%; text-align: center; }
+        .date-col   { width: 8%; }
         .time-col   { width: 10%; }
         .title-col  { width: 18%; }
         .info-col   { width: 15%; }
@@ -85,6 +86,8 @@
         .badge-draft     { background: #f3f4f6; color: #374151; border: 1px solid #9ca3af; }
         .badge-revision  { background: #ffedd5; color: #9a3412; border: 1px solid #fdba74; }
         .badge-rejected  { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+
+        .period-label { font-weight: bold; color: #1a3a6b; }
 
         .time-main  { font-weight: bold; color: #b91c1c; }
         .time-dur   { font-size: 9px; color: #555; }
@@ -117,7 +120,7 @@
 
     <div class="header">
         <h1>Tabel Agenda Kegiatan &mdash; {{ strtoupper($leader->position) }}</h1>
-        <p>{{ $dateFormatted }}</p>
+        <p class="period-label">Periode {{ ucfirst($period) }}: {{ $dateFormatted }}</p>
         <hr class="divider">
     </div>
 
@@ -125,6 +128,9 @@
         <thead>
             <tr>
                 <th class="no-col">No</th>
+                @if ($period !== 'harian')
+                    <th class="date-col">Tanggal</th>
+                @endif
                 <th class="time-col">Waktu</th>
                 <th class="title-col">Kegiatan</th>
                 <th class="info-col">Informasi</th>
@@ -178,6 +184,10 @@
                 @endphp
                 <tr>
                     <td class="no-col">{{ $index + 1 }}</td>
+                    @if ($period !== 'harian')
+                        <td class="date-col">
+                            {{ \Carbon\Carbon::parse($activity->activity_date)->translatedFormat('d M Y') }}</td>
+                    @endif
                     <td class="time-col">{!! $timeHtml !!}</td>
                     <td class="title-col">{{ $activity->title }}</td>
                     <td class="info-col">{{ $activity->info ?: '-' }}</td>
@@ -211,7 +221,7 @@
                 </tr>
             @empty
                 <tr class="empty-row">
-                    <td colspan="9">Tidak ada agenda kegiatan pada tanggal ini.</td>
+                    <td colspan="{{ $period === 'harian' ? 9 : 10 }}">Tidak ada agenda kegiatan pada periode ini.</td>
                 </tr>
             @endforelse
         </tbody>
@@ -219,6 +229,7 @@
 
     <div class="summary-row">
         Total agenda: <strong>{{ $activities->count() }}</strong>
+        &nbsp;|&nbsp; Periode: <strong>{{ ucfirst($period) }}</strong> ({{ $dateFormatted }})
     </div>
 
     <div class="footer">
