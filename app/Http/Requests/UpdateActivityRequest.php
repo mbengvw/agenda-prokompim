@@ -15,7 +15,7 @@ class UpdateActivityRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => ['required', 'string', 'max:255'],
+            'title' => ['required', 'string', 'max:5000'],
             'description' => ['nullable', 'string'],
             'activity_date' => ['required', 'date'],
             'is_tentative' => ['boolean'],
@@ -50,6 +50,7 @@ class UpdateActivityRequest extends FormRequest
     {
         return [
             'title.required' => 'Nama kegiatan wajib diisi.',
+            'title.max' => 'Nama kegiatan maksimal 5000 karakter.',
             'activity_date.required' => 'Tanggal kegiatan wajib diisi.',
             'start_time.required' => 'Waktu mulai wajib diisi jika kegiatan tidak bersifat tentatif.',
             'start_time.date_format' => 'Format waktu mulai tidak valid.',

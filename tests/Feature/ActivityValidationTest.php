@@ -76,6 +76,21 @@ test('activity can be saved without end time', function () {
     ]);
 });
 
+test('activity can be saved with a long title', function () {
+    $user = User::factory()->create();
+    $title = rtrim(str_repeat('Rapat koordinasi pembangunan daerah ', 12));
+
+    $this->actingAs($user)
+        ->post(route('activities.store'), [
+            'title' => $title,
+            'activity_date' => '2026-10-28',
+            'start_time' => '09:00',
+        ])
+        ->assertSessionHasNoErrors();
+
+    expect(Activity::where('title', $title)->exists())->toBeTrue();
+});
+
 test('expired session is redirected back with a friendly message', function () {
     $user = User::factory()->create();
 
