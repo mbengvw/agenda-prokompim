@@ -19,6 +19,7 @@
                       @time-error-changed.window="formTimeError = $event.detail.hasError"
                       @submit="if (formTimeError) { $event.preventDefault(); }">
                     @csrf
+                    <x-form-errors class="mb-6" title="Agenda belum bisa disimpan. Periksa kembali isian berikut:" />
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="col-span-full">
@@ -58,11 +59,14 @@
                                     <input type="hidden" name="start_time" :value="startVal" x-bind:required="!isTentative" />
                                 </div>
                                 <div>
-                                    <x-input-label value="Selesai" />
+                                    <x-input-label value="Selesai (opsional)" />
                                     <x-time-picker x-model="endVal" label="Selesai" x-bind:class="timeError ? 'ring-2 ring-red-400 rounded-lg' : ''" />
                                     <input type="hidden" name="end_time" :value="endVal" />
                                 </div>
                             </div>
+                            <p x-show="!isTentative" x-cloak class="mt-2 text-xs text-gray-500">
+                                Kosongkan waktu selesai jika agenda berlangsung sampai selesai.
+                            </p>
                             <div x-show="!isTentative && timeError" x-transition style="display: none;"
                                  class="mt-2 flex items-center gap-2 text-sm text-red-700 bg-red-50 p-2.5 rounded-lg border border-red-300">
                                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
@@ -228,11 +232,11 @@
                         
                         <div>
                             <x-input-label value="Narahubung (Nama)" />
-                            <x-text-input name="contact_person_name" type="text" class="mt-2 block w-full" />
+                            <x-text-input name="contact_person_name" type="text" class="mt-2 block w-full" :value="old('contact_person_name')" />
                         </div>
                         <div>
                             <x-input-label value="Narahubung (No. HP)" />
-                            <x-text-input name="contact_person_phone" type="text" class="mt-2 block w-full" />
+                            <x-text-input name="contact_person_phone" type="text" class="mt-2 block w-full" :value="old('contact_person_phone')" />
                         </div>
                         
                         <div x-data="{ 
@@ -253,7 +257,7 @@
                         </div>
                         <div>
                             <x-input-label value="Ajudan (ADC)" />
-                            <x-text-input name="adc" type="text" class="mt-2 block w-full" />
+                            <x-text-input name="adc" type="text" class="mt-2 block w-full" :value="old('adc')" />
                         </div>
                         
                         <div class="col-span-full">

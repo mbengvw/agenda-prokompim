@@ -10,6 +10,8 @@
 
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="/manifest.json">
+    <meta name="app-version" content="{{ config('app.version') }}">
+    <meta name="app-build" content="{{ Vite::manifestHash() ?? 'dev' }}">
     <meta name="theme-color" content="#0ea5e9">
     <link rel="apple-touch-icon" href="/images/logo.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -55,6 +57,12 @@
 
             {{-- Content layer --}}
             <div class="relative px-6 sm:px-8 py-10">
+                @if (session('error'))
+                    <div class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
+                        {{ session('error') }}
+                    </div>
+                @endif
+
                 {{ $slot }}
             </div>
         </div>
@@ -65,6 +73,7 @@
     </div>
 
     <x-ios-pwa-prompt />
+    <x-pwa-update-guard />
 </body>
 
 </html>

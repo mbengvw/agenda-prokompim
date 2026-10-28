@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreActivityRequest extends FormRequest
 {
@@ -18,7 +19,11 @@ class StoreActivityRequest extends FormRequest
             'description' => ['nullable', 'string'],
             'activity_date' => ['required', 'date'],
             'is_tentative' => ['boolean'],
-            'start_time' => ['nullable', 'required_if:is_tentative,false', 'date_format:H:i'],
+            'start_time' => [
+                'nullable',
+                Rule::requiredIf(fn () => ! $this->boolean('is_tentative')),
+                'date_format:H:i',
+            ],
             'end_time' => ['nullable', 'date_format:H:i', 'after:start_time'],
             'location_input' => ['nullable', 'string', 'max:255'],
             'location_id' => ['nullable', 'exists:locations,id'],
@@ -46,7 +51,7 @@ class StoreActivityRequest extends FormRequest
         return [
             'title.required' => 'Nama kegiatan wajib diisi.',
             'activity_date.required' => 'Tanggal kegiatan wajib diisi.',
-            'start_time.required_if' => 'Waktu mulai wajib diisi jika kegiatan tidak bersifat tentatif.',
+            'start_time.required' => 'Waktu mulai wajib diisi jika kegiatan tidak bersifat tentatif.',
             'start_time.date_format' => 'Format waktu mulai tidak valid.',
             'end_time.date_format' => 'Format waktu selesai tidak valid.',
             'end_time.after' => 'Waktu selesai harus lebih besar dari waktu mulai.',

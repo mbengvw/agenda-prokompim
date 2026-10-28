@@ -8,6 +8,8 @@
 
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="/manifest.json">
+    <meta name="app-version" content="{{ config('app.version') }}">
+    <meta name="app-build" content="{{ Vite::manifestHash() ?? 'dev' }}">
     <meta name="theme-color" content="#0ea5e9">
     <link rel="apple-touch-icon" href="/images/logo.png">
 
@@ -232,6 +234,8 @@
             installBtn.style.display = 'none';
         });
     </script>
+
+    <x-pwa-update-guard />
 </body>
 
 </html>

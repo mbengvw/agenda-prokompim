@@ -17,6 +17,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Application Version
+    |--------------------------------------------------------------------------
+    |
+    | "version" adalah versi rilis aplikasi (semver) yang dibandingkan dengan
+    | "min_client_version" untuk memblokir client yang sudah tidak didukung.
+    | Naikkan version dan set min_client_version setiap ada perubahan breaking.
+    |
+    */
+
+    'version' => env('APP_VERSION', '1.0.0'),
+
+    'min_client_version' => env('APP_MIN_CLIENT_VERSION', '1.0.0'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Environment
     |--------------------------------------------------------------------------
     |

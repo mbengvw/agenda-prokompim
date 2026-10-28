@@ -13,6 +13,17 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Models\Activity;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Vite;
+
+Route::get('/version.json', function () {
+    return response()
+        ->json([
+            'version' => config('app.version'),
+            'min_version' => config('app.min_client_version'),
+            'build' => Vite::manifestHash() ?? 'dev',
+        ])
+        ->header('Cache-Control', 'no-store, max-age=0');
+})->name('app.version');
 
 Route::get('/', function () {
     return view('welcome');

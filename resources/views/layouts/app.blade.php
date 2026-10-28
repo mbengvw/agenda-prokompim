@@ -9,6 +9,8 @@
 
         <!-- PWA Meta Tags -->
         <link rel="manifest" href="/manifest.json">
+        <meta name="app-version" content="{{ config('app.version') }}">
+        <meta name="app-build" content="{{ Vite::manifestHash() ?? 'dev' }}">
         <meta name="theme-color" content="#0ea5e9">
         <link rel="apple-touch-icon" href="/images/logo.png">
         <meta name="apple-mobile-web-app-capable" content="yes">
@@ -32,6 +34,14 @@
         <div class="min-h-screen bg-primary-50/30">
             @include('layouts.navigation')
 
+            @if (session('error'))
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+                    <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
+                        {{ session('error') }}
+                    </div>
+                </div>
+            @endif
+
             <!-- Page Heading -->
             @isset($header)
                 <header class="bg-gradient-to-r from-white via-white to-secondary-100">
@@ -48,5 +58,6 @@
         </div>
 
         <x-ios-pwa-prompt />
+        <x-pwa-update-guard />
     </body>
 </html>
