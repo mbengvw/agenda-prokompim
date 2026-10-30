@@ -166,7 +166,7 @@ class ActivityController extends Controller
 
         $leader = Leader::findOrFail($leaderId);
 
-        $dihadiri = Activity::with(['leader', 'location', 'organization', 'protocolOfficer', 'companions'])
+        $dihadiri = Activity::with(['leader', 'location', 'organization', 'protocolOfficer', 'companions', 'parentActivity:id,title,leader_id', 'parentActivity.leader:id,position'])
             ->whereDate('activity_date', $dateFilter)
             ->whereIn('status', ['approved', 'submitted', 'draft', 'revision'])
             ->where('leader_id', $leaderId)
@@ -176,7 +176,7 @@ class ActivityController extends Controller
             ->orderBy('start_time')
             ->get();
 
-        $didisposisi = Activity::with(['leader', 'location', 'organization', 'protocolOfficer', 'companions'])
+        $didisposisi = Activity::with(['leader', 'location', 'organization', 'protocolOfficer', 'companions', 'parentActivity:id,title,leader_id', 'parentActivity.leader:id,position'])
             ->whereDate('activity_date', $dateFilter)
             ->whereIn('status', ['approved', 'submitted'])
             ->where('leader_id', '!=', $leaderId)
@@ -228,7 +228,9 @@ class ActivityController extends Controller
                 : null;
 
             $rows[] = "{$prefix}{$timeStr}";
-            $rows[] = "*{$activity->title}*";
+            $rows[] = '*'.($activity->parent_activity_id
+                ? ($activity->parentActivity?->title ?? $activity->title)
+                : $activity->title).'*';
             $rows[] = "Lokasi: {$location}";
             $rows[] = "Penyelenggara: {$organizer}";
 
@@ -255,6 +257,10 @@ class ActivityController extends Controller
                     // $prot .= " ({$activity->protocolOfficer->phone})";
                     $rows[] = "No. HP: {$activity->protocolOfficer->phone}";
                 }
+            }
+
+            if ($activity->parent_activity_id) {
+                $rows[] = '*Mendampingi '.Str::title($activity->parentActivity?->leader?->position ?? '-').'*';
             }
 
             return $rows;

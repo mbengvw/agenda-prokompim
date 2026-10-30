@@ -264,3 +264,31 @@ test('kabag_protokol can cancel approval on an approved activity and status retu
     expect($parent->status)->toBe('submitted');
     expect($child->status)->toBe('submitted');
 });
+
+test('whatsapp export uses parent title for companion activities and marks them as disposition', function () {
+    $this->actingAs($this->user);
+
+    $this->post(route('activities.store'), [
+        'title' => 'Rapat Paripurna DPRD',
+        'activity_date' => '2026-10-15',
+        'is_tentative' => 0,
+        'start_time' => '09:00',
+        'end_time' => '11:00',
+        'leader_id' => $this->bupati->id,
+        'companion_ids' => [$this->wabup->id],
+    ]);
+
+    $response = $this->getJson(route('activities.export-whatsapp', [
+        'leader_id' => $this->wabup->id,
+        'date' => '2026-10-15',
+    ]));
+
+    $response->assertOk();
+
+    $text = $response->json('text');
+
+    expect($text)
+        ->toContain('*Rapat Paripurna DPRD*')
+        ->not->toContain('*Mendampingi bupati dalam kegiatan Rapat Paripurna DPRD*')
+        ->toContain('Mendampingi Bupati');
+});
