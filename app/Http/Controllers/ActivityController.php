@@ -433,15 +433,15 @@ class ActivityController extends Controller
         $user = auth()->user();
         $data['created_by'] = $user?->id;
 
-        if ($user && str_contains($user->roles->first()?->name ?? '', 'ajudan_')) {
-            $data['status'] = 'submitted';
-        } else {
-            $data['status'] = 'draft';
-        }
+        $roleName = $user?->roles->first()?->name ?? '';
+        $isAjudan = str_contains($roleName, 'ajudan_');
+        $isSekpri = str_contains($roleName, 'sekpri_');
+
+        $data['status'] = ($isAjudan || $isSekpri) ? 'submitted' : 'draft';
 
         $activity = $this->service->createActivity($data);
 
-        if ($user && str_contains($user->roles->first()?->name ?? '', 'ajudan_')) {
+        if ($isAjudan) {
             if ($activity->leader_id) {
                 app(ActivityDispositionService::class)->handleDisposition(
                     $activity,
