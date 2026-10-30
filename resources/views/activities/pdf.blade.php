@@ -17,6 +17,26 @@
             margin-bottom: 25px;
         }
 
+        .brand {
+            text-align: center;
+            margin-bottom: 14px;
+        }
+
+        .brand-title {
+            font-size: 26px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            color: #1a3a6b;
+            line-height: 1.1;
+        }
+
+        .brand-subtitle {
+            margin-top: 2px;
+            font-size: 8.5px;
+            letter-spacing: 1px;
+            color: #555;
+        }
+
         .header h1 {
             font-size: 16px;
             font-weight: bold;
@@ -96,6 +116,10 @@
 <body>
 
     <div class="header">
+        <div class="brand">
+            <div class="brand-title">SIPANDA</div>
+            <div class="brand-subtitle">LEAD-IT | Leadership Agenda Integration Tool</div>
+        </div>
         <h1>AGENDA KEGIATAN {{ strtoupper($leader->position) }}</h1>
         <p>{{ $dateFormatted }}</p>
         <hr>

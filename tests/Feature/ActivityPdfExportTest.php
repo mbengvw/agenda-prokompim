@@ -14,6 +14,16 @@ beforeEach(function () {
     ]);
 });
 
+test('agenda pdf export renders successfully', function () {
+    $this->actingAs($this->user)
+        ->get(route('activities.export-pdf', [
+            'leader_id' => $this->bupati->id,
+            'date' => '2026-10-27',
+        ]))
+        ->assertOk()
+        ->assertDownload('Agenda_Bupati_Test_2026-10-27.pdf');
+});
+
 test('table pdf export supports daily period', function () {
     $this->actingAs($this->user)
         ->get(route('activities.export-pdf-table', [
